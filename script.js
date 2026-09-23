@@ -577,3 +577,63 @@ document.addEventListener('keydown', function(event) {
         playRound();
     }
 });
+// ==========================================
+// YOUR EXISTING GAME CODE & EVENT LISTENERS
+// ==========================================
+
+team1PlusBtn.addEventListener('click', () => {
+    team1Score++;
+    updateScoreDisplay();
+    playSlideUp(); // Swooshes UP
+});
+
+team1MinusBtn.addEventListener('click', () => {
+    if (team1Score > 0) team1Score--;
+    updateScoreDisplay();
+    playSlideDown(); // Swooshes DOWN
+});
+
+// (rest of your existing game logic...)
+
+
+// ==========================================
+// SLIDE WHISTLE SOUND FUNCTIONS (PASTE HERE)
+// ==========================================
+
+function playSlideUp() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.25);
+
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+}
+
+function playSlideDown() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.25);
+
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+}
