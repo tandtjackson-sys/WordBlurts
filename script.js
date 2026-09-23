@@ -577,29 +577,42 @@ document.addEventListener('keydown', function(event) {
         playRound();
     }
 });
-// ==========================================
-// YOUR EXISTING GAME CODE & EVENT LISTENERS
-// ==========================================
 
-team1PlusBtn.addEventListener('click', () => {
-    team1Score++;
-    updateScoreDisplay();
-    playSlideUp(); // Swooshes UP
-});
+// --- SCOREBOARD ENGINE & SOUND EFFECTS ---
+function adjustScore(team, delta) {
+    const el = document.getElementById(team + "Score");
+    if (el) {
+        let current = parseInt(el.innerText, 10) || 0;
+        const newScore = Math.max(0, current + delta);
+        el.innerText = newScore;
+        
+        // Trigger whistle sound based on score direction
+        if (delta > 0) {
+            playSlideUp();
+        } else if (delta < 0 && current > 0) {
+            playSlideDown();
+        }
+    }
+}
 
-team1MinusBtn.addEventListener('click', () => {
-    if (team1Score > 0) team1Score--;
-    updateScoreDisplay();
-    playSlideDown(); // Swooshes DOWN
-});
+function resetScores() {
+    const t1 = document.getElementById('team1Score');
+    const t2 = document.getElementById('team2Score');
+    if (t1) t1.innerText = '0';
+    if (t2) t2.innerText = '0';
+    triggerInterstitialAd();
+}
 
-// (rest of your existing game logic...)
+function triggerInterstitialAd() {
+    console.log("Score reset triggered: Showing interstitial ad break.");
+    if (window.googletag && googletag.apiReady) {
+        googletag.cmd.push(function() {
+            googletag.display('interstitial-ad-slot'); 
+        });
+    }
+}
 
-
-// ==========================================
-// SLIDE WHISTLE SOUND FUNCTIONS (PASTE HERE)
-// ==========================================
-
+// --- SLIDE WHISTLE SOUND SYNTHESIZERS ---
 function playSlideUp() {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = audioCtx.createOscillator();
