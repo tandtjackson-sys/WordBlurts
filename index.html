@@ -79,7 +79,7 @@
             justify-content: center;
             padding: 5px 0;
         }
-       .logo-3d {
+        .logo-3d {
             width: 100%;
             max-width: 520px;
             height: auto;
@@ -172,8 +172,13 @@
             font-size: 4rem;
             font-weight: 900;
             color: #ef4444;
-            height: 70px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-shadow: 0 0 30px rgba(239, 68, 68, 0.85), 0 4px 12px rgba(0, 0, 0, 0.95);
+            white-space: nowrap;
+            max-width: 100%;
         }
         .play-btn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -307,6 +312,9 @@
         }
 
         @media (max-width: 480px) {
+            .timer {
+                font-size: 2.6rem; /* Prevents text overflow on small mobile screens */
+            }
             .btn-score {
                 min-width: 44px;
                 min-height: 44px;
