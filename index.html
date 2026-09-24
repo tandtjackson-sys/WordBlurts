@@ -70,11 +70,30 @@
             z-index: 10;
         }
         /* New CSS */
+/* Sidebar Columns - Transparent Background */
 .side-column {
     display: none;
     width: 160px;
-    min-height: 600px;
-    background-color: #f0f0f0;
+    background-color: transparent; /* Fixes the solid white box issue */
+    margin: 10px;
+}
+
+/* Vertical Ad Placeholder - Space Theme Matching */
+.ad-placeholder-vertical {
+    width: 160px;
+    height: 600px;
+    background-color: rgba(15, 23, 42, 0.5); /* Semi-transparent dark blue/slate */
+    border: 1px dashed rgba(100, 116, 139, 0.6); /* Dashed border matching top banner */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    padding: 10px;
 }
 
 @media (min-width: 960px) {
