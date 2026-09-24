@@ -5,58 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Blurts!</title>
     <style>
-        /* SEO Info Section Styling */
-        .seo-info-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 25px;
-            width: 100%;
-            text-align: left;
-            color: var(--text-color);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .seo-info-card h2 {
-            color: var(--accent-yellow);
-            font-size: 1.4rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 6px;
-        }
-        .seo-info-card h3 {
-            color: #ffffff;
-            font-size: 1.1rem;
-            margin-top: 8px;
-        }
-        .seo-info-card p, .seo-info-card li {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #cbd5e1;
-        }
-        .seo-info-card ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        .seo-info-card li {
-            margin-bottom: 6px;
-        }
-        .faq-item {
-            background: rgba(255, 255, 255, 0.04);
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .faq-item strong {
-            color: var(--accent-yellow);
-            display: block;
-            margin-bottom: 4px;
-        }
         :root {
             --primary-green: #10b981;
             --primary-green-hover: #059669;
-            /* Ultra-transparent card background so stars pass directly through */
             --card-bg: rgba(10, 15, 30, 0.25);
             --card-border: rgba(255, 255, 255, 0.35);
             --accent-yellow: #f59e0b;
@@ -82,7 +33,6 @@
             overflow-x: hidden;
             position: relative;
         }
-        /* Starfield Canvas Background */
         #starfield {
             position: fixed;
             top: 0;
@@ -108,6 +58,43 @@
             border-radius: 8px;
             margin: 10px 0;
             letter-spacing: 0.5px;
+        }
+        .page-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        .side-ad {
+            display: none;
+            width: 160px;
+            position: sticky;
+            top: 20px;
+            margin: 10px;
+        }
+        .ad-placeholder-vertical {
+            width: 160px;
+            height: 600px;
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px dashed rgba(100, 116, 139, 0.6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+        @media (min-width: 960px) {
+            .side-ad {
+                display: block;
+            }
         }
         .main-container {
             position: relative;
@@ -135,7 +122,6 @@
             margin-left: 24px;
         }
 
-        /* Collapsible Rules Styling */
         .rules-toggle-btn {
             background: rgba(255, 255, 255, 0.1);
             color: var(--accent-yellow);
@@ -166,7 +152,7 @@
             border: 1px solid var(--card-border);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-            display: none; /* Hidden by default */
+            display: none;
             width: 100%;
             animation: fadeIn 0.3s ease;
         }
@@ -255,7 +241,6 @@
             outline: none;
         }
 
-        /* Responsive Scoreboard Card */
         .scoreboard-container {
             width: 100%;
             display: flex;
@@ -359,9 +344,57 @@
             color: #ffffff;
         }
 
+        .seo-info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            text-align: left;
+            color: var(--text-color);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .seo-info-card h2 {
+            color: var(--accent-yellow);
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 6px;
+        }
+        .seo-info-card h3 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+        .seo-info-card p, .seo-info-card li {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        .seo-info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .seo-info-card li {
+            margin-bottom: 6px;
+        }
+        .faq-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .faq-item strong {
+            color: var(--accent-yellow);
+            display: block;
+            margin-bottom: 4px;
+        }
+
         @media (max-width: 480px) {
             .timer {
-                font-size: 2.6rem; /* Prevents text overflow on small mobile screens */
+                font-size: 2.6rem;
             }
             .btn-score {
                 min-width: 44px;
@@ -382,161 +415,173 @@
     <div class="ad-banner">
         <span>Advertisement (Top Banner)</span>
     </div>
-    <div class="main-container">
-        <header>
-            <svg class="logo-3d" viewBox="0 0 550 155" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="yellowFront" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="#fef08a"/>
-                        <stop offset="40%" stop-color="#f59e0b"/>
-                        <stop offset="100%" stop-color="#b45309"/>
-                    </linearGradient>
-                    <linearGradient id="yellowSide" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#b45309"/>
-                        <stop offset="100%" stop-color="#451a03"/>
-                    </linearGradient>
-                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="6" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                </defs>
-                <g filter="url(#glow)">
-                    <g transform="translate(138, 5)">
-                        <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">W</text>
-                    </g>
-                    <g transform="translate(205, 5)">
-                        <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">O</text>
-                    </g>
-                    <g transform="translate(272, 5)">
-                        <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">R</text>
-                    </g>
-                    <g transform="translate(339, 5)">
-                        <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">D</text>
-                    </g>
-                    <g transform="translate(18, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">B</text>
-                    </g>
-                    <g transform="translate(87, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">L</text>
-                    </g>
-                    <g transform="translate(156, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">U</text>
-                    </g>
-                    <g transform="translate(225, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">R</text>
-                    </g>
-                    <g transform="translate(294, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">T</text>
-                    </g>
-                    <g transform="translate(363, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">S</text>
-                    </g>
-                    <g transform="translate(432, 75)">
-                        <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
-                        <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
-                        <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">!</text>
-                    </g>
-                </g>
-            </svg>
-        </header>
 
-        <!-- Toggleable Rules Section -->
-        <button class="rules-toggle-btn" onclick="toggleRules()">
-            <span>❓ How to Play</span>
-        </button>
-        <section class="rules-card" id="rulesCard">
-            <strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. On a laptop, hold down the Function (Fn) key while pressing F11 to play in full screen mode.  Players must first agree on how many points to play to before a winner is declared.  You can score a maximum of one point per letter.  After the announcer says "Blurt it out," you have 10 seconds to blurt out a matching answer before time runs out! Here's a sneaky trick:  blurting out more than one correct answer doesn't give you extra points, but it does keep your opponent from using those same answers to score!  After each round, adjust your scores below...
-        </section>
+    <!-- Page Layout Wrapper with Side Banners -->
+    <div class="page-layout">
 
-        <main class="game-card">
-            <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
-            <div class="letter-display" id="letterDisplay">-</div>
-            <div class="timer" id="timerDisplay">10</div>
-            <button class="play-btn" id="playBtn" onclick="playRound()">PLAY</button>
-        </main>
+        <!-- Left Skyscraper Banner -->
+        <aside class="side-ad side-ad-left">
+            <div class="ad-placeholder-vertical">
+                <span>Advertisement<br>(Left Skyscraper 160x600)</span>
+            </div>
+        </aside>
 
-        <!-- Scoreboard Container -->
-        <div class="scoreboard-container">
-            <section class="scoreboard">
-                <!-- Player / Team 1 -->
-                <div class="team-score-card">
-                    <span class="team-label">Player / Team 1</span>
-                    <div class="score-display" id="team1Score">0</div>
-                    <div class="score-controls">
-                        <button class="btn-score btn-minus" onclick="adjustScore('team1', -1)" aria-label="Decrease score">−</button>
-                        <button class="btn-score btn-plus" onclick="adjustScore('team1', 1)" aria-label="Increase score">+</button>
+        <!-- Main Game Container -->
+        <div class="main-container">
+            <header>
+                <svg class="logo-3d" viewBox="0 0 550 155" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="yellowFront" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="40%" stop-color="#f59e0b"/>
+                            <stop offset="100%" stop-color="#b45309"/>
+                        </linearGradient>
+                        <linearGradient id="yellowSide" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#b45309"/>
+                            <stop offset="100%" stop-color="#451a03"/>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="6" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    <g filter="url(#glow)">
+                        <g transform="translate(138, 5)">
+                            <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">W</text>
+                        </g>
+                        <g transform="translate(205, 5)">
+                            <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">O</text>
+                        </g>
+                        <g transform="translate(272, 5)">
+                            <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">R</text>
+                        </g>
+                        <g transform="translate(339, 5)">
+                            <rect x="6" y="6" width="55" height="55" rx="10" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="55" height="55" rx="10" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="27.5" y="42" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">D</text>
+                        </g>
+                        <g transform="translate(18, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">B</text>
+                        </g>
+                        <g transform="translate(87, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">L</text>
+                        </g>
+                        <g transform="translate(156, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">U</text>
+                        </g>
+                        <g transform="translate(225, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">R</text>
+                        </g>
+                        <g transform="translate(294, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">T</text>
+                        </g>
+                        <g transform="translate(363, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">S</text>
+                        </g>
+                        <g transform="translate(432, 75)">
+                            <rect x="6" y="6" width="58" height="58" rx="12" fill="url(#yellowSide)" />
+                            <rect x="0" y="0" width="58" height="58" rx="12" fill="url(#yellowFront)" stroke="#fff" stroke-width="2" />
+                            <text x="29" y="44" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="44" fill="#1e1b4b" text-anchor="middle">!</text>
+                        </g>
+                    </g>
+                </svg>
+            </header>
+
+            <button class="rules-toggle-btn" onclick="toggleRules()">
+                <span>❓ How to Play</span>
+            </button>
+            <section class="rules-card" id="rulesCard">
+                <strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. On a laptop, hold down the Function (Fn) key while pressing F11 to play in full screen mode. Players must first agree on how many points to play to before a winner is declared. You can score a maximum of one point per letter. After the announcer says "Blurt it out," you have 10 seconds to blurt out a matching answer before time runs out! Here's a sneaky trick: blurting out more than one correct answer doesn't give you extra points, but it does keep your opponent from using those same answers to score! After each round, adjust your scores below...
+            </section>
+
+            <main class="game-card">
+                <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
+                <div class="letter-display" id="letterDisplay">-</div>
+                <div class="timer" id="timerDisplay">10</div>
+                <button class="play-btn" id="playBtn" onclick="playRound()">PLAY</button>
+            </main>
+
+            <div class="scoreboard-container">
+                <section class="scoreboard">
+                    <div class="team-score-card">
+                        <span class="team-label">Player / Team 1</span>
+                        <div class="score-display" id="team1Score">0</div>
+                        <div class="score-controls">
+                            <button class="btn-score btn-minus" onclick="adjustScore('team1', -1)" aria-label="Decrease score">−</button>
+                            <button class="btn-score btn-plus" onclick="adjustScore('team1', 1)" aria-label="Increase score">+</button>
+                        </div>
                     </div>
+
+                    <div class="team-score-card">
+                        <span class="team-label">Player / Team 2</span>
+                        <div class="score-display" id="team2Score">0</div>
+                        <div class="score-controls">
+                            <button class="btn-score btn-minus" onclick="adjustScore('team2', -1)" aria-label="Decrease score">−</button>
+                            <button class="btn-score btn-plus" onclick="adjustScore('team2', 1)" aria-label="Increase score">+</button>
+                        </div>
+                    </div>
+                </section>
+                <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
+            </div>
+
+            <!-- SEO & Info Section -->
+            <section class="seo-info-card">
+                <h2>About Word Blurts!</h2>
+                <p><strong>Word Blurts!</strong> is a fast-paced, free online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+                
+                <h3>How It Works</h3>
+                <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 10-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+
+                <h3>Key Features</h3>
+                <ul>
+                    <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
+                    <li>⏱️ <strong>Dynamic 10-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
+                    <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
+                    <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
+                </ul>
+
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-item">
+                    <strong>Q: Is Word Blurts! free to play?</strong>
+                    <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
                 </div>
-
-                <!-- Player / Team 2 -->
-                <div class="team-score-card">
-                    <span class="team-label">Player / Team 2</span>
-                    <div class="score-display" id="team2Score">0</div>
-                    <div class="score-controls">
-                        <button class="btn-score btn-minus" onclick="adjustScore('team2', -1)" aria-label="Decrease score">−</button>
-                        <button class="btn-score btn-plus" onclick="adjustScore('team2', 1)" aria-label="Increase score">+</button>
-                    </div>
+                <div class="faq-item">
+                    <strong>Q: How many players can play?</strong>
+                    <p>Word Blurts! works great for 2 individual players or large groups split into Team 1 and Team 2.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Can I play on my phone?</strong>
+                    <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
                 </div>
             </section>
-            <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
-        </div><!-- end of scoreboard-container -->
+        </div>
 
-        <!-- SEO & Info Section for Search Crawlers -->
-        <section class="seo-info-card">
-            <h2>About Word Blurts!</h2>
-            <p><strong>Word Blurts!</strong> is a fast-paced, free online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
-            
-            <h3>How It Works</h3>
-            <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 10-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+        <!-- Right Skyscraper Banner -->
+        <aside class="side-ad side-ad-right">
+            <div class="ad-placeholder-vertical">
+                <span>Advertisement<br>(Right Skyscraper 160x600)</span>
+            </div>
+        </aside>
 
-            <h3>Key Features</h3>
-            <ul>
-                <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
-                <li>⏱️ <strong>Dynamic 10-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
-                <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
-                <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
-            </ul>
-
-            <h3>Frequently Asked Questions</h3>
-            <div class="faq-item">
-                <strong>Q: Is Word Blurts! free to play?</strong>
-                <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: How many players can play?</strong>
-                <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: Can I play on my phone?</strong>
-                <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: Are the rules strict?</strong>
-                <p>Absolutely not! The game was created for everyone's maximum enjoyment!  For example, if you want to count multiple correct answers as more than just one point, go for it!  Just make sure everyone agrees to the modified rules before beginning to play.</p>           
-            </div>
-        </section>
-
-    </div><!-- end of main-container -->
+    </div>
 
     <div class="ad-banner">
         <span>Advertisement (Bottom Banner)</span>
