@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Blurts!</title>
     <style>
+        /* SEO Info Section Styling */
+        .seo-info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            text-align: left;
+            color: var(--text-color);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .seo-info-card h2 {
+            color: var(--accent-yellow);
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 6px;
+        }
+        .seo-info-card h3 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+        .seo-info-card p, .seo-info-card li {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        .seo-info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .seo-info-card li {
+            margin-bottom: 6px;
+        }
+        .faq-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .faq-item strong {
+            color: var(--accent-yellow);
+            display: block;
+            margin-bottom: 4px;
+        }
         :root {
             --primary-green: #10b981;
             --primary-green-hover: #059669;
@@ -451,8 +499,41 @@
                 </div>
             </section>
             <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
-        </div>
-    </div>
+        </div><!-- end of scoreboard-container -->
+
+        <!-- SEO & Info Section for Search Crawlers -->
+        <section class="seo-info-card">
+            <h2>About Word Blurts!</h2>
+            <p><strong>Word Blurts!</strong> is a fast-paced, free online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+            
+            <h3>How It Works</h3>
+            <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 10-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
+                <li>⏱️ <strong>Dynamic 10-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
+                <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
+                <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <strong>Q: Is Word Blurts! free to play?</strong>
+                <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Q: How many players can play?</strong>
+                <p>Word Blurts! works great for 2 individual players or large groups split into Team 1 and Team 2.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Q: Can I play on my phone?</strong>
+                <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
+            </div>
+        </section>
+
+    </div><!-- end of main-container -->
+
     <div class="ad-banner">
         <span>Advertisement (Bottom Banner)</span>
     </div>
