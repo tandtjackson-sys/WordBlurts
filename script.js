@@ -434,7 +434,7 @@ const topicsMaster = [
             "A word with double letters", "Something that uses electricity", "A piece of clothing",
             "A holiday or celebration", "Something cold", "Something hot",
             "Something hairy", "Something sharp", "An item in a bakery",
-            "A famous landmark", "Something found in an attic", "A hobby",
+            "A famous landmark", "Something found in an attic", "A daily activity",
             "Something you throw away", "A nickname", "Something sticky",
             "A type of flower or plant", "Something you see at an amusement park", "A reason to celebrate",
             "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
@@ -442,7 +442,7 @@ const topicsMaster = [
             "A snack food", "A bird", "Something made of wood",
             "Something made of metal", "A dog breed", "Something you buy at a gas station",
             "A song title", "A famous musician", "Something you plug in",
-            "An ocean creature", "Something you do in winter", "Something you do in summer",
+            "Something in an ocean", "Something you do in winter", "Something you do in summer",
             "A villain or bad guy", "Something that smells good", "Something that smells bad",
             "A place you go on a date", "Something with wheels", "Something a mechanic uses",
             "Something soft", "Something heavy"
