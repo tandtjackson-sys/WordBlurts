@@ -163,7 +163,7 @@
             width: 100%;
             animation: fadeIn 0.3s ease;
         }
-        @keyframes fadeIn {
+@keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -399,6 +399,64 @@
             margin-bottom: 4px;
         }
 
+        /* --- PAGE LAYOUT & RESPONSIVE SIDEBAR ADS --- */
+        
+        /* Base (Mobile Phones): Hide side columns completely */
+        .side-column {
+            display: none;
+        }
+
+        .page-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 0 auto;
+        }
+
+        /* Desktop & iPad (768px and up): Pin skyscraper ads to outer left and right margins */
+        @media screen and (min-width: 768px) {
+            .side-column {
+                display: block;
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 100;
+            }
+
+            .side-column-left {
+                left: 15px;
+            }
+
+            .side-column-right {
+                right: 15px;
+            }
+
+            .ad-placeholder-vertical {
+                width: 160px;
+                height: 600px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px dashed rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                color: #94a3b8;
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+        }
+
         @media (max-width: 480px) {
             .timer {
                 font-size: 2.6rem;
@@ -485,6 +543,7 @@
 </head>
 <body>
     <canvas id="starfield"></canvas>
+    
     <div class="ad-banner">
         <span>Advertisement (Top Banner)</span>
     </div>
@@ -500,6 +559,25 @@
         </aside>
 
         <!-- Main Game Container -->
+        <div class="game-container">
+            
+            <!-- PASTE YOUR WORD BLURTS GAME ELEMENTS HERE (canvas, buttons, timers, etc.) -->
+            
+        </div><!-- End of .game-container -->
+
+        <!-- Right Skyscraper Banner -->
+        <aside class="side-column side-column-right">
+            <div class="ad-placeholder-vertical">
+                <span>Advertisement<br>(Right Skyscraper 160x600)</span>
+            </div>
+        </aside>
+
+    </div><!-- End of .page-layout -->
+
+    <!-- Bottom Banner -->
+    <div class="ad-banner">
+        <span>Advertisement (Bottom Banner)</span>
+    </div>
 
         <!-- Main Game Container -->
         <div class="main-container">
