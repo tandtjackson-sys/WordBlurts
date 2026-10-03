@@ -37,7 +37,6 @@ if (canvas) {
             const sx = (this.x / this.z) * canvas.width + cx;
             const sy = (this.y / this.z) * canvas.height + cy;
             
-            // --- 30% LARGER STARS (2.8 -> 3.64) ---
             const r = (1 - this.z / canvas.width) * 8;
             
             const px = (this.x / this.pz) * canvas.width + cx;
@@ -83,7 +82,6 @@ function adjustScore(team, delta) {
         const newScore = Math.max(0, current + delta);
         el.innerText = newScore;
         
-        // Trigger slide whistle sound based on score direction
         if (delta > 0) {
             playSlideUp();
         } else if (delta < 0 && current > 0) {
@@ -134,7 +132,7 @@ function refreshAds() {
 }
 
 // ==========================================
-// 4. SYNTHESIZED AUDIO ENGINE
+// 4. SYNTHESIZED AUDIO ENGINE & SLIDE WHISTLES
 // ==========================================
 const D1 = 36.71, D2 = 73.42, A2 = 110, D3 = 146.83, F3 = 174.61, GS3 = 207.65, A3 = 220, C4 = 261.63, D4 = 293.66, F4 = 349.23, A4 = 440, D5 = 587.33;
 
@@ -431,45 +429,52 @@ class GameAudioEngine {
         track({ stop: (when = ctx.currentTime) => { try { oscA.stop(when); oscB.stop(when); } catch (e) {} } });
     }
 }
+
 const gameAudio = new GameAudioEngine();
 
-// --- SLIDE WHISTLE SOUND SYNTHESIZERS ---
+// --- SLIDE WHISTLE SOUND SYNTHESIZERS (REUSING MAIN AUDIO CONTEXT) ---
 function playSlideUp() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    gameAudio.unlock();
+    const ctx = gameAudio.ctx;
+    const dest = gameAudio.sfx || ctx.destination;
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.25);
+    osc.frequency.setValueAtTime(400, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.25);
 
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(dest);
 
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.25);
+    osc.stop(ctx.currentTime + 0.25);
 }
 
 function playSlideDown() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    gameAudio.unlock();
+    const ctx = gameAudio.ctx;
+    const dest = gameAudio.sfx || ctx.destination;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.25);
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.25);
 
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(dest);
 
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.25);
+    osc.stop(ctx.currentTime + 0.25);
 }
 
 // ==========================================
@@ -549,7 +554,6 @@ function startCountdown() {
             const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
             if (timerEl) timerEl.innerText = "TIME'S UP!";
             
-            // --- TRIPLE RED FLASH ---
             const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
             if (mainCard) {
                 mainCard.style.transition = 'all 0.1s ease';
@@ -565,7 +569,7 @@ function startCountdown() {
                     }
                     
                     flashCount++;
-                    if (flashCount >= 6) { // 3 flashes on/off = 6 toggles
+                    if (flashCount >= 6) {
                         clearInterval(flashInterval);
                         mainCard.style.boxShadow = '';
                         mainCard.style.borderColor = '';
@@ -574,6 +578,10 @@ function startCountdown() {
             }
             
             gameAudio.playSting();
+            
+            if (isDailyMode) {
+                recordDailyResult('red');
+            }
         }
     }, 1000);
 }
@@ -602,7 +610,15 @@ function drawNextCombo() {
 }
 
 function playRound() {
-    // --- CLEAR FLASH EFFECT ---
+    if (isDailyMode) {
+        const status = getDailyStatus();
+        if (status.isCompletedToday) {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
+            showDailyResults(data.score || 0, 10, data.timeSeconds || 0, status.streak, data.resultsArray || Array(10).fill('red'));
+            return;
+        }
+    }
+
     const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
     if (mainCard) {
         mainCard.style.boxShadow = '';
@@ -616,7 +632,19 @@ function playRound() {
     const btn = document.getElementById('playBtn');
     if (btn) btn.innerText = "NEXT";
     
-    const nextCard = drawNextCombo();
+    let nextCard;
+    if (isDailyMode) {
+        if (dailyCurrentIndex >= dailyDeckPrompts.length) {
+            finishDailyGame();
+            return;
+        }
+        nextCard = {
+            topic: dailyDeckPrompts[dailyCurrentIndex].category,
+            letter: dailyDeckPrompts[dailyCurrentIndex].letter
+        };
+    } else {
+        nextCard = drawNextCombo();
+    }
     
     const promptEl = document.getElementById('promptDisplay');
     const letterEl = document.getElementById('letterDisplay');
@@ -655,9 +683,12 @@ const STORAGE_KEYS = {
   COMPLETED_DATA: "wb_daily_last_score"
 };
 
-/**
- * Calculates a pseudo-random integer seed based on YYYY-MM-DD.
- */
+let isDailyMode = false;
+let dailyDeckPrompts = [];
+let dailyCurrentIndex = 0;
+let dailyResultsArray = [];
+let dailyStartTime = 0;
+
 function getDaySeed() {
   const now = new Date();
   const year = now.getFullYear();
@@ -672,9 +703,6 @@ function getDaySeed() {
   return { seed: Math.abs(hash), dateStr };
 }
 
-/**
- * Returns array of 10 category + letter prompts for today.
- */
 function getDailyPrompts() {
   const { seed, dateStr } = getDaySeed();
   const prompts = [];
@@ -698,6 +726,38 @@ function getDailyPrompts() {
   return { prompts, dateStr };
 }
 
+function initDailyMode() {
+    isDailyMode = true;
+    const { prompts } = getDailyPrompts();
+    dailyDeckPrompts = prompts;
+    dailyCurrentIndex = 0;
+    dailyResultsArray = [];
+    dailyStartTime = Date.now();
+    
+    const dailyBtn = document.getElementById('dailyModeBtn');
+    if (dailyBtn) dailyBtn.classList.add('active');
+}
+
+function recordDailyResult(result) {
+    if (!isDailyMode) return;
+    
+    dailyResultsArray.push(result);
+    dailyCurrentIndex++;
+    
+    if (dailyCurrentIndex >= dailyDeckPrompts.length) {
+        finishDailyGame();
+    }
+}
+
+function finishDailyGame() {
+    stopEverything();
+    const elapsedSeconds = Math.round((Date.now() - dailyStartTime) / 1000);
+    const score = dailyResultsArray.filter(r => r === 'green').length;
+    
+    const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
+    showDailyResults(score, 10, elapsedSeconds, newStreak, dailyResultsArray);
+}
+
 // ==========================================
 // 7. STREAK & LOCKOUT STORAGE SYSTEM
 // ==========================================
@@ -713,11 +773,11 @@ function getDailyStatus() {
   };
 }
 
-function saveDailyResults(score, timeSeconds) {
+function saveDailyResults(score, timeSeconds, resultsArray) {
   const { dateStr } = getDaySeed();
   const status = getDailyStatus();
 
-  if (status.isCompletedToday) return;
+  if (status.isCompletedToday) return status.streak;
 
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -731,7 +791,7 @@ function saveDailyResults(score, timeSeconds) {
 
   localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
   localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
-  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, timeSeconds }));
+  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, timeSeconds, resultsArray }));
 
   return newStreak;
 }
@@ -739,16 +799,16 @@ function saveDailyResults(score, timeSeconds) {
 // ==========================================
 // 8. DAILY RESULTS & SHARING MODAL
 // ==========================================
-function generateShareText(score, timeSeconds) {
+function generateShareText(score, timeSeconds, resultsArray) {
   const { dateStr } = getDaySeed();
   const streak = localStorage.getItem(STORAGE_KEYS.STREAK) || "1";
   
   let blocks = "";
-  for (let i = 0; i < 10; i++) {
-    if (i < score) {
-      blocks += "🟩";
-    } else {
-      blocks += "🟥";
+  if (resultsArray && resultsArray.length > 0) {
+    blocks = resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('');
+  } else {
+    for (let i = 0; i < 10; i++) {
+      blocks += i < score ? "🟩" : "🟥";
     }
   }
 
@@ -756,42 +816,23 @@ function generateShareText(score, timeSeconds) {
          `Score: ${score}/10 | Time: ${timeSeconds}s\n` +
          `Streak: 🔥 ${streak} Days\n` +
          `${blocks}\n` +
-         `Play today's blurt at wordblurts.com`;
-}
-
-function copyResultsToClipboard(score, timeSeconds) {
-  const shareText = generateShareText(score, timeSeconds);
-  
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(shareText).then(() => {
-      alert("Results copied to clipboard! Ready to paste into chat or social media.");
-    }).catch(() => {
-      fallbackCopyText(shareText);
-    });
-  } else {
-    fallbackCopyText(shareText);
-  }
-}
-
-function fallbackCopyText(text) {
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  document.body.appendChild(textArea);
-  textArea.select();
-  document.execCommand("copy");
-  document.body.removeChild(textArea);
-  alert("Results copied to clipboard!");
+         `https://wordblurts.com`;
 }
 
 function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray) {
-    document.getElementById('res-score').textContent = `${score}/${totalCards}`;
-    document.getElementById('res-time').textContent = `${timeInSeconds}s`;
-    document.getElementById('res-streak').textContent = `🔥 ${streak}`;
+    const resScore = document.getElementById('res-score');
+    const resTime = document.getElementById('res-time');
+    const resStreak = document.getElementById('res-streak');
+    const emojiGrid = document.getElementById('emoji-grid-display');
 
-    const emojiGrid = resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('');
-    document.getElementById('emoji-grid-display').textContent = emojiGrid;
+    if (resScore) resScore.textContent = `${score}/${totalCards}`;
+    if (resTime) resTime.textContent = `${timeInSeconds}s`;
+    if (resStreak) resStreak.textContent = `🔥 ${streak}`;
 
-    const shareText = `Word Blurts! Daily\nScore: ${score}/${totalCards}\nTime: ${timeInSeconds}s\nStreak: ${streak} 🔥\n${emojiGrid}\nhttps://wordblurts.com`;
+    const gridString = resultsArray ? resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('') : '';
+    if (emojiGrid) emojiGrid.textContent = gridString;
+
+    const shareText = generateShareText(score, timeInSeconds, resultsArray);
     const shareBtn = document.getElementById('share-results-btn');
     if (shareBtn) {
         shareBtn.dataset.sharePayload = shareText;
@@ -803,14 +844,27 @@ function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray
     }
 }
 
-// Attach event listener to the Share button
+// ==========================================
+// 9. INITIALIZATION & LISTENERS
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    const dailyStatus = getDailyStatus();
+    if (dailyStatus.isCompletedToday) {
+        const storedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
+        showDailyResults(
+            storedData.score || 0,
+            10,
+            storedData.timeSeconds || 0,
+            dailyStatus.streak,
+            storedData.resultsArray || Array(10).fill('red')
+        );
+    }
+
     const shareBtn = document.getElementById('share-results-btn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const payload = shareBtn.dataset.sharePayload || '';
 
-            // Use Web Share API if available (Mobile browsers)
             if (navigator.share) {
                 try {
                     await navigator.share({
@@ -819,11 +873,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     return;
                 } catch (err) {
-                    // Fallback to clipboard if user canceled share drawer
+                    // Fallback to clipboard if share drawer is canceled
                 }
             }
 
-            // Clipboard fallback for desktop browsers
             try {
                 await navigator.clipboard.writeText(payload);
                 const originalText = shareBtn.textContent;
