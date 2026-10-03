@@ -1,4 +1,6 @@
-// --- STARFIELD BACKGROUND ENGINE ---
+// ==========================================
+// 1. STARFIELD BACKGROUND ENGINE
+// ==========================================
 const canvas = document.getElementById('starfield');
 if (canvas) {
     const ctx = canvas.getContext('2d');
@@ -49,8 +51,6 @@ if (canvas) {
                 ctx.lineWidth = r;
                 ctx.stroke();
             }
-        
-    
         }
     }
     for (let i = 0; i < numStars; i++) { stars.push(new Star()); }
@@ -66,7 +66,9 @@ if (canvas) {
     animateStars();
 }
 
-// --- RULES TOGGLE FUNCTION ---
+// ==========================================
+// 2. UI TOGGLES & SCOREBOARD ENGINE
+// ==========================================
 function toggleRules() {
     const card = document.getElementById('rulesCard');
     if (card) {
@@ -74,12 +76,19 @@ function toggleRules() {
     }
 }
 
-// --- SCOREBOARD ENGINE & AD INTERSTITIAL TRIGGER ---
 function adjustScore(team, delta) {
     const el = document.getElementById(team + "Score");
     if (el) {
         let current = parseInt(el.innerText, 10) || 0;
-        el.innerText = Math.max(0, current + delta);
+        const newScore = Math.max(0, current + delta);
+        el.innerText = newScore;
+        
+        // Trigger slide whistle sound based on score direction
+        if (delta > 0) {
+            playSlideUp();
+        } else if (delta < 0 && current > 0) {
+            playSlideDown();
+        }
     }
 }
 
@@ -91,6 +100,9 @@ function resetScores() {
     triggerInterstitialAd();
 }
 
+// ==========================================
+// 3. AD MANAGEMENT ENGINE
+// ==========================================
 function triggerInterstitialAd() {
     console.log("Score reset triggered: Showing interstitial ad break.");
     if (window.googletag && googletag.apiReady) {
@@ -100,7 +112,6 @@ function triggerInterstitialAd() {
     }
 }
 
-// --- SMART AD REFRESH CONFIGURATION ---
 let lastAdRefreshTime = 0;
 const AD_REFRESH_INTERVAL = 35000;
 
@@ -122,9 +133,13 @@ function refreshAds() {
     }
 }
 
-// --- AUDIO Engine ---
+// ==========================================
+// 4. SYNTHESIZED AUDIO ENGINE
+// ==========================================
 const D1 = 36.71, D2 = 73.42, A2 = 110, D3 = 146.83, F3 = 174.61, GS3 = 207.65, A3 = 220, C4 = 261.63, D4 = 293.66, F4 = 349.23, A4 = 440, D5 = 587.33;
+
 function clampGain(v) { return Math.max(0.0001, v); }
+
 function makeNoise(audioCtx, seconds) {
     const length = Math.max(1, Math.floor(audioCtx.sampleRate * seconds));
     const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
@@ -132,6 +147,7 @@ function makeNoise(audioCtx, seconds) {
     for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
     return buffer;
 }
+
 class GameAudioEngine {
     constructor() {
         this.ctx = null;
@@ -417,37 +433,78 @@ class GameAudioEngine {
 }
 const gameAudio = new GameAudioEngine();
 
-// --- GAME TOPICS & ENGINE ---
-const topicsMaster = [
-     "A famous actor", "An item in a refrigerator", "An item found in most offices",
-            "A fast food chain", "A superhero", "Something you find in a bathroom",
-            "A part of a car", "Something that makes noise", "A title of a TV show",
-            "A movie title", "A breakfast food", "Something in a hardware store",
-            "A musical instrument", "A sport or game", "A state in the U.S.A.",
-            "An animal found at a zoo", "A pizza topping", "A brand of car",
-            "Something you pack for a vacation", "A Halloween costume", "Something found in a garage",
-            "A board game", "A profession or job", "A country",
-            "A flavor of ice cream", "Something found in a classroom", "A candy",
-            "A part of the human body", "Something in the night sky", "A vegetable",
-            "A fruit", "Something you find at a beach", "A restaurant chain",
-            "Something found in a purse or wallet", "A household chore", "A liquid you drink",
-            "A word with double letters", "Something that uses electricity", "A piece of clothing",
-            "A holiday or celebration", "Something cold", "Something hot",
-            "Something hairy", "Something sharp", "An item in a bakery",
-            "A famous landmark", "Something found in an attic", "A daily activity",
-            "Something found in a kitchen", "A nickname", "Something sticky",
-            "A type of flower or plant", "Something you see at an amusement park", "A reason to celebrate",
-            "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
-            "Something round", "An item in a grocery store", "Something you find in nature",
-            "A snack food", "A land animal", "Something made of wood",
-            "Something made of metal", "A dog breed", "Something you buy at a gas station",
-            "A song title", "A famous musician", "Something you plug in",
-            "Something in an ocean", "Something you do in winter", "Something you do in summer",
-            "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
-            "A place you go on a date", "Something with wheels", "Something a mechanic uses",
-            "Something soft", "Something heavy"
+// --- SLIDE WHISTLE SOUND SYNTHESIZERS ---
+function playSlideUp() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.25);
+
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+}
+
+function playSlideDown() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.25);
+
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+}
+
+// ==========================================
+// 5. PARTY GAME CORE ENGINE
+// ==========================================
+const topicsMaster = [
+    "A famous actor", "An item in a refrigerator", "An item found in most offices",
+    "A fast food chain", "A superhero", "Something you find in a bathroom",
+    "A part of a car", "Something that makes noise", "A title of a TV show",
+    "A movie title", "A breakfast food", "Something in a hardware store",
+    "A musical instrument", "A sport or game", "A state in the U.S.A.",
+    "An animal found at a zoo", "A pizza topping", "A brand of car",
+    "Something you pack for a vacation", "A Halloween costume", "Something found in a garage",
+    "A board game", "A profession or job", "A country",
+    "A flavor of ice cream", "Something found in a classroom", "A candy",
+    "A part of the human body", "Something in the night sky", "A vegetable",
+    "A fruit", "Something you find at a beach", "A restaurant chain",
+    "Something found in a purse or wallet", "A household chore", "A liquid you drink",
+    "A word with double letters", "Something that uses electricity", "A piece of clothing",
+    "A holiday or celebration", "Something cold", "Something hot",
+    "Something hairy", "Something sharp", "An item in a bakery",
+    "A famous landmark", "Something found in an attic", "A daily activity",
+    "Something found in a kitchen", "A nickname", "Something sticky",
+    "A type of flower or plant", "Something you see at an amusement park", "A reason to celebrate",
+    "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
+    "Something round", "An item in a grocery store", "Something you find in nature",
+    "A snack food", "A land animal", "Something made of wood",
+    "Something made of metal", "A dog breed", "Something you buy at a gas station",
+    "A song title", "A famous musician", "Something you plug in",
+    "Something in an ocean", "Something you do in winter", "Something you do in summer",
+    "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
+    "A place you go on a date", "Something with wheels", "Something a mechanic uses",
+    "Something soft", "Something heavy"
 ];
+
 const lettersMaster = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","U","V","W"];
 
 function generateDeck() {
@@ -459,6 +516,7 @@ function generateDeck() {
     }
     return deck;
 }
+
 let comboDeck = generateDeck();
 let countdownInterval = null;
 
@@ -512,7 +570,7 @@ function startCountdown() {
                         mainCard.style.boxShadow = '';
                         mainCard.style.borderColor = '';
                     }
-                }, 150); // Speed of each pulse (150ms)
+                }, 150);
             }
             
             gameAudio.playSting();
@@ -571,6 +629,7 @@ function playRound() {
     speakPrompt(nextCard.topic, nextCard.letter);
     refreshAds();
 }
+
 document.addEventListener('keydown', function(event) {
     if ((event.code === 'Space' || event.code === 'Enter') && !event.repeat) {
         event.preventDefault();
@@ -578,80 +637,8 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// --- SCOREBOARD ENGINE & SOUND EFFECTS ---
-function adjustScore(team, delta) {
-    const el = document.getElementById(team + "Score");
-    if (el) {
-        let current = parseInt(el.innerText, 10) || 0;
-        const newScore = Math.max(0, current + delta);
-        el.innerText = newScore;
-        
-        // Trigger whistle sound based on score direction
-        if (delta > 0) {
-            playSlideUp();
-        } else if (delta < 0 && current > 0) {
-            playSlideDown();
-        }
-    }
-}
-
-function resetScores() {
-    const t1 = document.getElementById('team1Score');
-    const t2 = document.getElementById('team2Score');
-    if (t1) t1.innerText = '0';
-    if (t2) t2.innerText = '0';
-    triggerInterstitialAd();
-}
-
-function triggerInterstitialAd() {
-    console.log("Score reset triggered: Showing interstitial ad break.");
-    if (window.googletag && googletag.apiReady) {
-        googletag.cmd.push(function() {
-            googletag.display('interstitial-ad-slot'); 
-        });
-    }
-}
-
-// --- SLIDE WHISTLE SOUND SYNTHESIZERS ---
-function playSlideUp() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.25);
-
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.25);
-}
-
-function playSlideDown() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.25);
-
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.25);
-}
 // ==========================================
-// 1. CATEGORY & LETTER POOLS
+// 6. DAILY BLURT MODE & SEED GENERATOR
 // ==========================================
 const CATEGORIES = [
   "Things in Space", "Car Models", "Types of Cheese", "Movie Titles",
@@ -668,12 +655,8 @@ const STORAGE_KEYS = {
   COMPLETED_DATA: "wb_daily_last_score"
 };
 
-// ==========================================
-// 2. SEED MATH & 10 DAILY PROMPTS GENERATOR
-// ==========================================
 /**
  * Calculates a pseudo-random integer seed based on YYYY-MM-DD.
- * Ensures identical prompt order for all players on the same day.
  */
 function getDaySeed() {
   const now = new Date();
@@ -696,7 +679,6 @@ function getDailyPrompts() {
   const { seed, dateStr } = getDaySeed();
   const prompts = [];
   
-  // Linear Congruential Generator (LCG) for deterministic randomness
   let currentSeed = seed;
   function nextRandom() {
     currentSeed = (currentSeed * 9301 + 49297) % 233280;
@@ -717,7 +699,7 @@ function getDailyPrompts() {
 }
 
 // ==========================================
-// 3. STREAK & LOCKOUT STORAGE SYSTEM
+// 7. STREAK & LOCKOUT STORAGE SYSTEM
 // ==========================================
 function getDailyStatus() {
   const { dateStr } = getDaySeed();
@@ -735,9 +717,8 @@ function saveDailyResults(score, timeSeconds) {
   const { dateStr } = getDaySeed();
   const status = getDailyStatus();
 
-  if (status.isCompletedToday) return; // Prevent duplicate submissions
+  if (status.isCompletedToday) return;
 
-  // Check if yesterday was completed to preserve streak
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().split('T')[0];
@@ -756,16 +737,12 @@ function saveDailyResults(score, timeSeconds) {
 }
 
 // ==========================================
-// 4. DAILY RESULTS SHARE CARD GENERATOR
+// 8. DAILY RESULTS & SHARING MODAL
 // ==========================================
-/**
- * Generates formatted emoji summary text for clipboard sharing.
- */
 function generateShareText(score, timeSeconds) {
   const { dateStr } = getDaySeed();
   const streak = localStorage.getItem(STORAGE_KEYS.STREAK) || "1";
   
-  // Format visual score blocks (e.g. 🟩🟩🟩🟩🟩🟨🟨🟥)
   let blocks = "";
   for (let i = 0; i < 10; i++) {
     if (i < score) {
@@ -805,36 +782,25 @@ function fallbackCopyText(text) {
   document.body.removeChild(textArea);
   alert("Results copied to clipboard!");
 }
-// ==========================================
-// DAILY RESULTS MODAL & SHARE FUNCTIONS
-// ==========================================
 
-/**
- * Call this function when the 10-card game or Daily Blurt round finishes.
- * @param {number} score - Number of correct cards (e.g., 8)
- * @param {number} totalCards - Total cards played (e.g., 10)
- * @param {number} timeInSeconds - Total time taken (e.g., 24)
- * @param {number} streak - Current streak count
- * @param {string[]} resultsArray - Array of "green" or "red" strings for each card
- */
 function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray) {
-    // 1. Update text values in the DOM
     document.getElementById('res-score').textContent = `${score}/${totalCards}`;
     document.getElementById('res-time').textContent = `${timeInSeconds}s`;
     document.getElementById('res-streak').textContent = `🔥 ${streak}`;
 
-    // 2. Generate the emoji string grid (e.g., 🟩🟩🟥🟩🟩)
     const emojiGrid = resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('');
     document.getElementById('emoji-grid-display').textContent = emojiGrid;
 
-    // 3. Store share text on the button element for easy retrieval
     const shareText = `Word Blurts! Daily\nScore: ${score}/${totalCards}\nTime: ${timeInSeconds}s\nStreak: ${streak} 🔥\n${emojiGrid}\nhttps://wordblurts.com`;
     const shareBtn = document.getElementById('share-results-btn');
-    shareBtn.dataset.sharePayload = shareText;
+    if (shareBtn) {
+        shareBtn.dataset.sharePayload = shareText;
+    }
 
-    // 4. Reveal the modal overlay
     const modal = document.getElementById('results-modal');
-    modal.style.display = 'flex';
+    if (modal) {
+        modal.style.display = 'flex';
+    }
 }
 
 // Attach event listener to the Share button
