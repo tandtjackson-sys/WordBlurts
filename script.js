@@ -3,7 +3,7 @@ const canvas = document.getElementById('starfield');
 if (canvas) {
     const ctx = canvas.getContext('2d');
     let stars = [];
-    const numStars = 450;
+    const numStars = 1000;
     let speed = 2.5;
 
     function resizeCanvas() {
