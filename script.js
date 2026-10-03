@@ -805,3 +805,69 @@ function fallbackCopyText(text) {
   document.body.removeChild(textArea);
   alert("Results copied to clipboard!");
 }
+// ==========================================
+// DAILY RESULTS MODAL & SHARE FUNCTIONS
+// ==========================================
+
+/**
+ * Call this function when the 10-card game or Daily Blurt round finishes.
+ * @param {number} score - Number of correct cards (e.g., 8)
+ * @param {number} totalCards - Total cards played (e.g., 10)
+ * @param {number} timeInSeconds - Total time taken (e.g., 24)
+ * @param {number} streak - Current streak count
+ * @param {string[]} resultsArray - Array of "green" or "red" strings for each card
+ */
+function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray) {
+    // 1. Update text values in the DOM
+    document.getElementById('res-score').textContent = `${score}/${totalCards}`;
+    document.getElementById('res-time').textContent = `${timeInSeconds}s`;
+    document.getElementById('res-streak').textContent = `🔥 ${streak}`;
+
+    // 2. Generate the emoji string grid (e.g., 🟩🟩🟥🟩🟩)
+    const emojiGrid = resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('');
+    document.getElementById('emoji-grid-display').textContent = emojiGrid;
+
+    // 3. Store share text on the button element for easy retrieval
+    const shareText = `Word Blurts! Daily\nScore: ${score}/${totalCards}\nTime: ${timeInSeconds}s\nStreak: ${streak} 🔥\n${emojiGrid}\nhttps://wordblurts.com`;
+    const shareBtn = document.getElementById('share-results-btn');
+    shareBtn.dataset.sharePayload = shareText;
+
+    // 4. Reveal the modal overlay
+    const modal = document.getElementById('results-modal');
+    modal.style.display = 'flex';
+}
+
+// Attach event listener to the Share button
+document.addEventListener('DOMContentLoaded', () => {
+    const shareBtn = document.getElementById('share-results-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const payload = shareBtn.dataset.sharePayload || '';
+
+            // Use Web Share API if available (Mobile browsers)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Word Blurts! Results',
+                        text: payload
+                    });
+                    return;
+                } catch (err) {
+                    // Fallback to clipboard if user canceled share drawer
+                }
+            }
+
+            // Clipboard fallback for desktop browsers
+            try {
+                await navigator.clipboard.writeText(payload);
+                const originalText = shareBtn.textContent;
+                shareBtn.textContent = '✅ Copied to Clipboard!';
+                setTimeout(() => {
+                    shareBtn.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy results:', err);
+            }
+        });
+    }
+});
