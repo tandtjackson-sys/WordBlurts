@@ -650,3 +650,158 @@ function playSlideDown() {
     osc.start();
     osc.stop(audioCtx.currentTime + 0.25);
 }
+// ==========================================
+// 1. CATEGORY & LETTER POOLS
+// ==========================================
+const CATEGORIES = [
+  "Things in Space", "Car Models", "Types of Cheese", "Movie Titles",
+  "Capital Cities", "Things in a Kitchen", "Dog Breeds", "Superheroes",
+  "Pizza Toppings", "Occupations", "Breakfast Foods", "Olympic Sports",
+  "Things at the Beach", "Fictional Characters", "Brands/Logos"
+];
+
+const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "S", "T"];
+
+const STORAGE_KEYS = {
+  STREAK: "wb_daily_streak",
+  LAST_DATE: "wb_daily_last_date",
+  COMPLETED_DATA: "wb_daily_last_score"
+};
+
+// ==========================================
+// 2. SEED MATH & 10 DAILY PROMPTS GENERATOR
+// ==========================================
+/**
+ * Calculates a pseudo-random integer seed based on YYYY-MM-DD.
+ * Ensures identical prompt order for all players on the same day.
+ */
+function getDaySeed() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return { seed: Math.abs(hash), dateStr };
+}
+
+/**
+ * Returns array of 10 category + letter prompts for today.
+ */
+function getDailyPrompts() {
+  const { seed, dateStr } = getDaySeed();
+  const prompts = [];
+  
+  // Linear Congruential Generator (LCG) for deterministic randomness
+  let currentSeed = seed;
+  function nextRandom() {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    return currentSeed / 233280;
+  }
+
+  for (let i = 0; i < 10; i++) {
+    const catIndex = Math.floor(nextRandom() * CATEGORIES.length);
+    const letterIndex = Math.floor(nextRandom() * LETTERS.length);
+    prompts.push({
+      round: i + 1,
+      category: CATEGORIES[catIndex],
+      letter: LETTERS[letterIndex]
+    });
+  }
+
+  return { prompts, dateStr };
+}
+
+// ==========================================
+// 3. STREAK & LOCKOUT STORAGE SYSTEM
+// ==========================================
+function getDailyStatus() {
+  const { dateStr } = getDaySeed();
+  const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
+  const currentStreak = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || "0", 10);
+  
+  return {
+    isCompletedToday: lastCompletedDate === dateStr,
+    streak: currentStreak,
+    todayDate: dateStr
+  };
+}
+
+function saveDailyResults(score, timeSeconds) {
+  const { dateStr } = getDaySeed();
+  const status = getDailyStatus();
+
+  if (status.isCompletedToday) return; // Prevent duplicate submissions
+
+  // Check if yesterday was completed to preserve streak
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  let newStreak = 1;
+  const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
+  if (lastCompletedDate === yesterdayStr) {
+    newStreak = status.streak + 1;
+  }
+
+  localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
+  localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
+  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, timeSeconds }));
+
+  return newStreak;
+}
+
+// ==========================================
+// 4. DAILY RESULTS SHARE CARD GENERATOR
+// ==========================================
+/**
+ * Generates formatted emoji summary text for clipboard sharing.
+ */
+function generateShareText(score, timeSeconds) {
+  const { dateStr } = getDaySeed();
+  const streak = localStorage.getItem(STORAGE_KEYS.STREAK) || "1";
+  
+  // Format visual score blocks (e.g. 🟩🟩🟩🟩🟩🟨🟨🟥)
+  let blocks = "";
+  for (let i = 0; i < 10; i++) {
+    if (i < score) {
+      blocks += "🟩";
+    } else {
+      blocks += "🟥";
+    }
+  }
+
+  return `Word Blurts! Daily (${dateStr})\n` +
+         `Score: ${score}/10 | Time: ${timeSeconds}s\n` +
+         `Streak: 🔥 ${streak} Days\n` +
+         `${blocks}\n` +
+         `Play today's blurt at wordblurts.com`;
+}
+
+function copyResultsToClipboard(score, timeSeconds) {
+  const shareText = generateShareText(score, timeSeconds);
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      alert("Results copied to clipboard! Ready to paste into chat or social media.");
+    }).catch(() => {
+      fallbackCopyText(shareText);
+    });
+  } else {
+    fallbackCopyText(shareText);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textArea);
+  alert("Results copied to clipboard!");
+}
