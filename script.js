@@ -889,4 +889,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- About Modal Event Listeners ---
+    const openAboutBtn = document.getElementById('open-about-btn');
+    const closeAboutBtn = document.getElementById('close-about-btn');
+    const aboutModal = document.getElementById('about-modal');
+
+    if (openAboutBtn && aboutModal) {
+        openAboutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            aboutModal.style.display = 'flex';
+        });
+    }
+
+    if (closeAboutBtn && aboutModal) {
+        closeAboutBtn.addEventListener('click', () => {
+            aboutModal.style.display = 'none';
+        });
+    }
+
+    // Optional: Close About modal when clicking outside the card content
+    if (aboutModal) {
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                aboutModal.style.display = 'none';
+            }
+        });
+    }
 });
