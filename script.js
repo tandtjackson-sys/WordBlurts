@@ -962,7 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay');
 
-            if (promptDisplay) promptDisplay.textContent = 'Press PLAY or hit Spacebar to start!';
+            if (promptDisplay) promptDisplay.textContent = 'Classic Mode:  Press PLAY or hit Spacebar to start!';
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
