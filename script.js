@@ -981,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay');
 
-            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is ready! Press PLAY when set.";
+            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready.";
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
