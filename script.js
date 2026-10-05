@@ -688,7 +688,39 @@ let dailyDeckPrompts = [];
 let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
 let dailyStartTime = 0;
+// ==========================================
+// SEEDED GAME & CHALLENGE PARAMETERS
+// ==========================================
 
+// 1. Read 'seed' from URL search parameters (e.g., wordblurts.com/?seed=8492)
+function getURLSeed() {
+    const params = new URLSearchParams(window.location.search);
+    const seedParam = params.get('seed');
+    return seedParam ? parseInt(seedParam, 10) : null;
+}
+
+// 2. Generate prompts based on a specific seed number
+function getSeededPrompts(customSeed) {
+    const prompts = [];
+    let currentSeed = customSeed;
+
+    function nextRandom() {
+        currentSeed = (currentSeed * 9301 + 49297) % 233280;
+        return currentSeed / 233280;
+    }
+
+    for (let i = 0; i < 10; i++) {
+        const catIndex = Math.floor(nextRandom() * CATEGORIES.length);
+        const letterIndex = Math.floor(nextRandom() * LETTERS.length);
+        prompts.push({
+            round: i + 1,
+            category: CATEGORIES[catIndex],
+            letter: LETTERS[letterIndex]
+        });
+    }
+
+    return prompts;
+}
 function getDaySeed() {
   const now = new Date();
   const year = now.getFullYear();
