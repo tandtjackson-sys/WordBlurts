@@ -1124,14 +1124,14 @@ const pwaBanner = document.getElementById('pwaInstallBanner');
 const pwaInstallBtn = document.getElementById('pwaInstallBtn');
 const pwaDismissBtn = document.getElementById('pwaDismissBtn');
 
-// Listen for browser install prompt trigger
+// 1. Android & Chrome Automatic Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
     // Prevent standard automatic browser banner
     e.preventDefault();
     deferredPrompt = e;
 
     // Show banner if not previously dismissed
-    if (!localStorage.getItem('pwaPromptDismissed')) {
+    if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
         pwaBanner.classList.remove('hidden');
     }
 });
@@ -1141,7 +1141,7 @@ if (pwaInstallBtn) {
     pwaInstallBtn.addEventListener('click', async () => {
         if (!deferredPrompt) return;
 
-        pwaBanner.classList.add('hidden');
+        if (pwaBanner) pwaBanner.classList.add('hidden');
         deferredPrompt.prompt();
 
         const { outcome } = await deferredPrompt.userChoice;
@@ -1154,7 +1154,7 @@ if (pwaInstallBtn) {
 // Handle Close / Dismiss click
 if (pwaDismissBtn) {
     pwaDismissBtn.addEventListener('click', () => {
-        pwaBanner.classList.add('hidden');
+        if (pwaBanner) pwaBanner.classList.add('hidden');
         // Don't show again in this session
         localStorage.setItem('pwaPromptDismissed', Date.now());
     });
@@ -1162,7 +1162,23 @@ if (pwaDismissBtn) {
 
 // Hide banner if successfully installed
 window.addEventListener('appinstalled', () => {
-    pwaBanner.classList.add('hidden');
+    if (pwaBanner) pwaBanner.classList.add('hidden');
     deferredPrompt = null;
     console.log('Word Blurts PWA installed successfully.');
 });
+
+// 2. iOS Safari Custom Detection (Since Apple blocks beforeinstallprompt)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
+    if (pwaBanner) {
+        const bannerText = pwaBanner.querySelector('p') || pwaBanner;
+        bannerText.innerHTML = 'Tap the <strong>Share</strong> button <span style="font-size:1.2em;">⎋</span> and select <strong>"Add to Home Screen"</strong> to install Word Blurts!';
+        
+        // Hide the "Install" button on iPhone since Safari requires manual install
+        if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+        
+        pwaBanner.classList.remove('hidden');
+    }
+}
