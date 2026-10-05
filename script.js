@@ -757,7 +757,6 @@ function finishDailyGame() {
     const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
     showDailyResults(score, 10, elapsedSeconds, newStreak, dailyResultsArray);
 }
-
 // ==========================================
 // 7. STREAK & LOCKOUT STORAGE SYSTEM
 // ==========================================
@@ -779,9 +778,13 @@ function saveDailyResults(score, timeSeconds, resultsArray) {
 
   if (status.isCompletedToday) return status.streak;
 
+  // Calculate local date for yesterday (matches getDaySeed format)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yYear = yesterday.getFullYear();
+  const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+  const yDay = String(yesterday.getDate()).padStart(2, '0');
+  const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
 
   let newStreak = 1;
   const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
