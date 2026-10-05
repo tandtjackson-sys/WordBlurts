@@ -132,7 +132,7 @@ function refreshAds() {
 }
 
 // ==========================================
-// 4. SYNTHESIZED AUDIO ENGINE & SLIDE WHISTLES
+// 4. SYNTHESIZED AUDIO ENGINE & GAME LOOP LOGIC
 // ==========================================
 const D1 = 36.71, D2 = 73.42, A2 = 110, D3 = 146.83, F3 = 174.61, GS3 = 207.65, A3 = 220, C4 = 261.63, D4 = 293.66, F4 = 349.23, A4 = 440, D5 = 587.33;
 
@@ -475,6 +475,54 @@ function playSlideDown() {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.25);
+}
+
+// --- GAME LOOP & ROUND LOGIC ---
+function playRound() {
+    // 1. Reset or clear existing timer if active
+    if (typeof resetTimer === 'function') resetTimer();
+
+    // 2. Load prompt & letter based on active mode
+    if (typeof isDailyMode !== 'undefined' && isDailyMode) {
+        // Load the deterministic prompt deck for today's Daily Blurt
+        loadDailyBlurtPrompt(); 
+    } else {
+        // Pick a completely random prompt from master prompt array
+        loadRandomPrompt(); 
+    }
+
+    // 3. Start the round countdown
+    if (typeof startTimer === 'function') startTimer();
+}
+
+// Generates a random prompt for Classic Mode
+function loadRandomPrompt() {
+    const promptDisplay = document.getElementById('promptDisplay');
+    const letterDisplay = document.getElementById('letterDisplay');
+
+    if (typeof ALL_PROMPTS !== 'undefined' && ALL_PROMPTS.length > 0) {
+        const randomPrompt = ALL_PROMPTS[Math.floor(Math.random() * ALL_PROMPTS.length)];
+        if (promptDisplay) promptDisplay.textContent = randomPrompt;
+    }
+
+    if (typeof getRandomLetter === 'function' && letterDisplay) {
+        letterDisplay.textContent = getRandomLetter();
+    }
+}
+
+// Loads the daily prompt from your seeded daily array
+function loadDailyBlurtPrompt() {
+    const promptDisplay = document.getElementById('promptDisplay');
+    const letterDisplay = document.getElementById('letterDisplay');
+
+    if (typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts.length > 0) {
+        const roundIdx = typeof currentRoundIndex !== 'undefined' ? currentRoundIndex : 0;
+        const currentDaily = dailyDeckPrompts[roundIdx];
+        if (currentDaily) {
+            if (promptDisplay) promptDisplay.textContent = currentDaily.prompt || currentDaily;
+            if (letterDisplay) letterDisplay.textContent = currentDaily.letter || '-';
+        }
+    }
 }
 
 // ==========================================
