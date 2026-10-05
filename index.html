@@ -761,8 +761,19 @@
                 <strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. On a laptop, hold down the Function (Fn) key while pressing F11 to play in full screen mode. Players must first agree on how many points to play to before a winner is declared. After the announcer says "Blurt it out," you have 10 seconds to Blurt out a matching answer(s) before time runs out! Multiple answers are allowed per letter/round, and every correct answer earns a point. Here's a helpful tip: being first to Blurt out a correct answer not only gives you extra points, but it keeps your opponent from using those same answers to score! After each round, adjust your scores below...
             </section>
 
-            <!-- GAME CARD -->
+           <!-- GAME CARD -->
             <main class="game-card">
+
+                <!-- 📍 PASTE THE MODE TOGGLE BUTTONS RIGHT HERE 📍 -->
+                <div class="mode-toggle-container" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                    <button id="randomModeBtn" class="mode-btn active" style="padding: 10px 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer;">
+                        🎲 Classic
+                    </button>
+                    <button id="dailyModeBtn" class="mode-btn" style="padding: 10px 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; background: #7b2cbf; color: #fff;">
+                        📅 Daily Blurt
+                    </button>
+                </div>
+
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
                 <div class="letter-display" id="letterDisplay">-</div>
                 <div class="timer" id="timerDisplay">10</div>
