@@ -1119,3 +1119,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+/* ==========================================
+   PWA INSTALL PROMPT CONTROLLER
+   ========================================== */
+let deferredPrompt = null;
+
+const pwaBanner = document.getElementById('pwaInstallBanner');
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const pwaDismissBtn = document.getElementById('pwaDismissBtn');
+
+// Listen for browser install prompt trigger
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent standard automatic browser banner
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Show banner if not previously dismissed
+    if (!localStorage.getItem('pwaPromptDismissed')) {
+        pwaBanner.classList.remove('hidden');
+    }
+});
+
+// Handle "Install" button click
+if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+
+        pwaBanner.classList.add('hidden');
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+
+        deferredPrompt = null;
+    });
+}
+
+// Handle Close / Dismiss click
+if (pwaDismissBtn) {
+    pwaDismissBtn.addEventListener('click', () => {
+        pwaBanner.classList.add('hidden');
+        // Don't show again in this session
+        localStorage.setItem('pwaPromptDismissed', Date.now());
+    });
+}
+
+// Hide banner if successfully installed
+window.addEventListener('appinstalled', () => {
+    pwaBanner.classList.add('hidden');
+    deferredPrompt = null;
+    console.log('Word Blurts PWA installed successfully.');
+});
