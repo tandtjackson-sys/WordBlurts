@@ -901,7 +901,16 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
         console.log(`Loaded custom challenge seed: ${urlSeed}`);
     }
-
+// ==========================================
+// PWA SERVICE WORKER REGISTRATION
+// ==========================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered successfully.', reg))
+            .catch(err => console.log('Service Worker registration failed:', err));
+    });
+}
     // 2. Check if daily game was already completed today
     const dailyStatus = getDailyStatus();
     if (dailyStatus.isCompletedToday && !urlSeed) {
