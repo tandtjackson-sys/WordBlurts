@@ -859,6 +859,7 @@ function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray
     const resTime = document.getElementById('res-time');
     const resStreak = document.getElementById('res-streak');
     const emojiGrid = document.getElementById('emoji-grid-display');
+// ==========================================
 
     if (resScore) resScore.textContent = `${score}/${totalCards}`;
     if (resTime) resTime.textContent = `${timeInSeconds}s`;
@@ -883,8 +884,17 @@ function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray
 // 9. INITIALIZATION & LISTENERS
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Check if player arrived via a friend's challenge link (?seed=XXXX)
+    const urlSeed = getURLSeed();
+    if (urlSeed) {
+        isDailyMode = false;
+        dailyDeckPrompts = getSeededPrompts(urlSeed);
+        console.log(`Loaded custom challenge seed: ${urlSeed}`);
+    }
+
+    // 2. Check if daily game was already completed today
     const dailyStatus = getDailyStatus();
-    if (dailyStatus.isCompletedToday) {
+    if (dailyStatus.isCompletedToday && !urlSeed) {
         const storedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
         showDailyResults(
             storedData.score || 0,
@@ -895,6 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    // 3. Share Results Button Listener
     const shareBtn = document.getElementById('share-results-btn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
@@ -925,7 +936,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- About Modal Event Listeners ---
+    // 4. Challenge Friend Button Listener
+    const challengeBtn = document.getElementById('challenge-friend-btn');
+    if (challengeBtn) {
+        challengeBtn.addEventListener('click', async () => {
+            const { seed } = getDaySeed();
+            const challengeURL = `https://wordblurts.com/?seed=${seed}`;
+            const challengeMessage = `Can you beat my Word Blurts! score? Play the exact same letter set here:\n${challengeURL}`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Word Blurts! Challenge',
+                        text: challengeMessage
+                    });
+                    return;
+                } catch (err) {
+                    // Fallback to clipboard if share drawer is canceled
+                }
+            }
+
+            try {
+                await navigator.clipboard.writeText(challengeMessage);
+                const originalText = challengeBtn.textContent;
+                challengeBtn.textContent = '🔗 Link Copied to Clipboard!';
+                setTimeout(() => {
+                    challengeBtn.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy challenge link:', err);
+            }
+        });
+    }
+
+    // 5. Results Modal Overlay Click Listener (Close on outside tap)
+    const resultsModal = document.getElementById('results-modal');
+    if (resultsModal) {
+        resultsModal.addEventListener('click', (e) => {
+            if (e.target === resultsModal) {
+                resultsModal.style.display = 'none';
+            }
+        });
+    }
+
+    // 6. About Modal Event Listeners
     const openAboutBtn = document.getElementById('open-about-btn');
     const closeAboutBtn = document.getElementById('close-about-btn');
     const aboutModal = document.getElementById('about-modal');
@@ -943,7 +997,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Optional: Close About modal when clicking outside the card content
     if (aboutModal) {
         aboutModal.addEventListener('click', (e) => {
             if (e.target === aboutModal) {
