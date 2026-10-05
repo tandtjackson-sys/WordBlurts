@@ -688,6 +688,7 @@ let dailyDeckPrompts = [];
 let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
 let dailyStartTime = 0;
+
 // ==========================================
 // SEEDED GAME & CHALLENGE PARAMETERS
 // ==========================================
@@ -721,6 +722,7 @@ function getSeededPrompts(customSeed) {
 
     return prompts;
 }
+
 function getDaySeed() {
   const now = new Date();
   const year = now.getFullYear();
@@ -760,8 +762,16 @@ function getDailyPrompts() {
 
 function initDailyMode() {
     isDailyMode = true;
-    const { prompts } = getDailyPrompts();
-    dailyDeckPrompts = prompts;
+    
+    // Check if the player arrived from a Challenge Link (?seed=XXXX)
+    const urlSeed = getURLSeed();
+    if (urlSeed) {
+        dailyDeckPrompts = getSeededPrompts(urlSeed);
+    } else {
+        const { prompts } = getDailyPrompts();
+        dailyDeckPrompts = prompts;
+    }
+
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
     dailyStartTime = Date.now();
