@@ -894,6 +894,53 @@ function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray
 // 9. INITIALIZATION & LISTENERS
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ------------------------------------------
+    // MODE TOGGLE WIRE-UP (Classic vs. Daily)
+    // ------------------------------------------
+    const randomModeBtn = document.getElementById('randomModeBtn');
+    const dailyModeBtn = document.getElementById('dailyModeBtn');
+
+    if (randomModeBtn && dailyModeBtn) {
+        randomModeBtn.addEventListener('click', () => {
+            if (!isDailyMode) return; // Already in classic mode
+
+            isDailyMode = false;
+            randomModeBtn.classList.add('active');
+            dailyModeBtn.classList.remove('active');
+
+            // Reset game board for Classic mode
+            const promptDisplay = document.getElementById('promptDisplay');
+            const letterDisplay = document.getElementById('letterDisplay');
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            if (promptDisplay) promptDisplay.textContent = 'Press PLAY or hit Spacebar to start!';
+            if (letterDisplay) letterDisplay.textContent = '-';
+            if (timerDisplay) timerDisplay.textContent = '10';
+
+            if (typeof resetTimer === 'function') resetTimer();
+        });
+
+        dailyModeBtn.addEventListener('click', () => {
+            if (isDailyMode) return; // Already in daily mode
+
+            isDailyMode = true;
+            dailyModeBtn.classList.add('active');
+            randomModeBtn.classList.remove('active');
+
+            // Reset game board for Daily mode
+            const promptDisplay = document.getElementById('promptDisplay');
+            const letterDisplay = document.getElementById('letterDisplay');
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is ready! Press PLAY when set.";
+            if (letterDisplay) letterDisplay.textContent = '-';
+            if (timerDisplay) timerDisplay.textContent = '10';
+
+            if (typeof resetTimer === 'function') resetTimer();
+        });
+    }
+
     // 1. Check if player arrived via a friend's challenge link (?seed=XXXX)
     const urlSeed = getURLSeed();
     if (urlSeed) {
@@ -901,16 +948,16 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
         console.log(`Loaded custom challenge seed: ${urlSeed}`);
     }
-// ==========================================
-// PWA SERVICE WORKER REGISTRATION
-// ==========================================
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered successfully.', reg))
-            .catch(err => console.log('Service Worker registration failed:', err));
-    });
-}
+
+    // PWA SERVICE WORKER REGISTRATION
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered successfully.', reg))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        });
+    }
+
     // 2. Check if daily game was already completed today
     const dailyStatus = getDailyStatus();
     if (dailyStatus.isCompletedToday && !urlSeed) {
