@@ -716,14 +716,10 @@ document.addEventListener('keydown', function(event) {
 // ==========================================
 // 6. DAILY BLURT MODE & SEED GENERATOR
 // ==========================================
-const CATEGORIES = [
-  "Things in Space", "Car Models", "Types of Cheese", "Movie Titles",
-  "Capital Cities", "Things in a Kitchen", "Dog Breeds", "Superheroes",
-  "Pizza Toppings", "Occupations", "Breakfast Foods", "Olympic Sports",
-  "Things at the Beach", "Fictional Characters", "Brands/Logos"
-];
 
-const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "S", "T"];
+// Pull directly from Classic lists to avoid duplicate code
+const CATEGORIES = topicsMaster;
+const LETTERS = lettersMaster;
 
 const STORAGE_KEYS = {
   STREAK: "wb_daily_streak",
