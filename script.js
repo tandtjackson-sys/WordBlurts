@@ -658,38 +658,52 @@ function drawNextCombo() {
 }
 
 function playRound() {
-    if (isDailyMode) {
-        const status = getDailyStatus();
-        
-        // If the user already finished today's Daily Blurt, show their saved results
-        if (status.isCompletedToday) {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
-            // Ensure timeSeconds defaults to 0 if missing from localStorage
-            const savedTime = typeof data.timeSeconds === 'number' ? data.timeSeconds : 0;
+    try {
+        if (isDailyMode) {
+            const status = typeof getDailyStatus === 'function' ? getDailyStatus() : { isCompletedToday: false, streak: 0 };
             
-            showDailyResults(
-                data.score || 0, 
-                10, 
-                savedTime, 
-                status.streak, 
-                data.resultsArray || Array(10).fill('red')
-            );
-            return;
+            // If completed today, show saved results
+            if (status && status.isCompletedToday) {
+                const rawData = localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA);
+                const data = rawData ? JSON.parse(rawData) : {};
+                const savedTime = typeof data.timeSeconds === 'number' ? data.timeSeconds : 0;
+                
+                if (typeof showDailyResults === 'function') {
+                    showDailyResults(
+                        data.score || 0, 
+                        10, 
+                        savedTime, 
+                        status.streak || 0, 
+                        data.resultsArray || Array(10).fill('red')
+                    );
+                }
+                return;
+            }
+            
+            // Fresh round: set start time if not already set
+            if (!window.dailyStartTime) {
+                window.dailyStartTime = Date.now();
+            }
         }
-        
-        // Start the timer only if a round isn't already active
-        if (!window.dailyStartTime) {
-            window.dailyStartTime = Date.now();
+
+        // Safety check: ensure card deck exists before drawing
+        if (typeof comboDeck === 'undefined' || !comboDeck || comboDeck.length === 0) {
+            if (typeof generateDeck === 'function') {
+                comboDeck = generateDeck();
+            }
         }
-    }
 
-    // Reset card UI styles for the active round
-    const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
-    if (mainCard) {
-        mainCard.style.boxShadow = '';
-        mainCard.style.borderColor = '';
+        // Reset UI styles on card
+        const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
+        if (mainCard) {
+            mainCard.style.boxShadow = '';
+            mainCard.style.borderColor = '';
+        }
+    } catch (err) {
+        console.error("Error in playRound:", err);
+        // Fallback: clear stale session flags if something fails
+        window.dailyStartTime = Date.now();
     }
-
 }
     
     gameAudio.unlock();
