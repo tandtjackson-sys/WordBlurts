@@ -660,18 +660,37 @@ function drawNextCombo() {
 function playRound() {
     if (isDailyMode) {
         const status = getDailyStatus();
+        
+        // If the user already finished today's Daily Blurt, show their saved results
         if (status.isCompletedToday) {
             const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
-            showDailyResults(data.score || 0, 10, data.timeSeconds || 0, status.streak, data.resultsArray || Array(10).fill('red'));
+            // Ensure timeSeconds defaults to 0 if missing from localStorage
+            const savedTime = typeof data.timeSeconds === 'number' ? data.timeSeconds : 0;
+            
+            showDailyResults(
+                data.score || 0, 
+                10, 
+                savedTime, 
+                status.streak, 
+                data.resultsArray || Array(10).fill('red')
+            );
             return;
+        }
+        
+        // Start the timer only if a round isn't already active
+        if (!window.dailyStartTime) {
+            window.dailyStartTime = Date.now();
         }
     }
 
+    // Reset card UI styles for the active round
     const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
     if (mainCard) {
         mainCard.style.boxShadow = '';
         mainCard.style.borderColor = '';
     }
+
+}
     
     gameAudio.unlock();
     stopEverything();
