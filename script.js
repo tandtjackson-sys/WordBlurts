@@ -667,7 +667,10 @@ function playRound() {
         }
     } catch (err) {
         console.error("Error in playRound:", err);
-        // Fallback: clear stale session flags if something fails
+    }
+
+    // Set start time on the first card if it's not already set
+    if (isDailyMode && !window.dailyStartTime) {
         window.dailyStartTime = Date.now();
     }
 
@@ -814,9 +817,15 @@ function initDailyMode() {
         dailyDeckPrompts = prompts;
     }
 
-    dailyCurrentIndex = 0;
+   dailyCurrentIndex = 0;
     dailyResultsArray = [];
+    
+    // Set dailyStartTime in both global variable and window scope
     dailyStartTime = Date.now();
+    window.dailyStartTime = dailyStartTime;
+    
+    // Clear any stale completed state so the game doesn't auto-finish
+    localStorage.removeItem('dailyCompleted');
     
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
@@ -835,7 +844,16 @@ function recordDailyResult(result) {
 
 function finishDailyGame() {
     stopEverything();
-    const elapsedSeconds = Math.round((Date.now() - dailyStartTime) / 1000);
+    
+    // Check window.dailyStartTime or dailyStartTime with a fallback to current time
+    const startTime = (typeof dailyStartTime !== 'undefined' && dailyStartTime) 
+                      ? dailyStartTime 
+                      : (window.dailyStartTime || Date.now());
+
+    // Calculate seconds safely and prevent negative/crazy numbers
+    const elapsedMs = Date.now() - startTime;
+    const elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+
     const score = dailyResultsArray.filter(r => r === 'green').length;
     
     const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
