@@ -829,15 +829,14 @@ function recordDailyResult(result) {
 function finishDailyGame() {
     stopEverything();
     
-    const startTime = (typeof dailyStartTime !== 'undefined' && dailyStartTime) 
-                      ? dailyStartTime 
-                      : (window.dailyStartTime || Date.now());
-
-    const elapsedMs = Date.now() - startTime;
-    const elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+    // Safety Guard: Default to 0 elapsed seconds if window.dailyStartTime isn't set yet
+    let elapsedSeconds = 0;
+    if (window.dailyStartTime && window.dailyStartTime > 0) {
+        const elapsedMs = Date.now() - window.dailyStartTime;
+        elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+    }
 
     const score = dailyResultsArray.filter(r => r === 'green').length;
-    
     const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
     
     if (typeof showDailyResults === 'function') {
