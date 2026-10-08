@@ -477,57 +477,10 @@ function playSlideDown() {
     osc.stop(ctx.currentTime + 0.25);
 }
 
-// --- GAME LOOP & ROUND LOGIC ---
-function playRound() {
-    // 1. Reset or clear existing timer if active
-    if (typeof resetTimer === 'function') resetTimer();
-
-    // 2. Load prompt & letter based on active mode
-    if (typeof isDailyMode !== 'undefined' && isDailyMode) {
-        // Load the deterministic prompt deck for today's Daily Blurt
-        loadDailyBlurtPrompt(); 
-    } else {
-        // Pick a completely random prompt from master prompt array
-        loadRandomPrompt(); 
-    }
-
-    // 3. Start the round countdown
-    if (typeof startTimer === 'function') startTimer();
-}
-
-// Generates a random prompt for Classic Mode
-function loadRandomPrompt() {
-    const promptDisplay = document.getElementById('promptDisplay');
-    const letterDisplay = document.getElementById('letterDisplay');
-
-    if (typeof ALL_PROMPTS !== 'undefined' && ALL_PROMPTS.length > 0) {
-        const randomPrompt = ALL_PROMPTS[Math.floor(Math.random() * ALL_PROMPTS.length)];
-        if (promptDisplay) promptDisplay.textContent = randomPrompt;
-    }
-
-    if (typeof getRandomLetter === 'function' && letterDisplay) {
-        letterDisplay.textContent = getRandomLetter();
-    }
-}
-
-// Loads the daily prompt from your seeded daily array
-function loadDailyBlurtPrompt() {
-    const promptDisplay = document.getElementById('promptDisplay');
-    const letterDisplay = document.getElementById('letterDisplay');
-
-    if (typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts.length > 0) {
-        const roundIdx = typeof currentRoundIndex !== 'undefined' ? currentRoundIndex : 0;
-        const currentDaily = dailyDeckPrompts[roundIdx];
-        if (currentDaily) {
-            if (promptDisplay) promptDisplay.textContent = currentDaily.prompt || currentDaily;
-            if (letterDisplay) letterDisplay.textContent = currentDaily.letter || '-';
-        }
-    }
-}
-
 // ==========================================
-// 5. PARTY GAME CORE ENGINE
+// GAME CORE ENGINE & SETUP
 // ==========================================
+
 const topicsMaster = [
     "A famous actor", "An item in a refrigerator", "An item found in most offices",
     "A fast food chain", "A superhero", "Something you find in a bathroom",
@@ -581,13 +534,17 @@ function stopEverything() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
     }
-    gameAudio.stopAll();
+    if (typeof gameAudio !== 'undefined' && gameAudio.stopAll) {
+        gameAudio.stopAll();
+    }
     speed = 2.5;
 }
 
 function startCountdown() {
     stopEverything();
-    gameAudio.playCountdown(10);
+    if (typeof gameAudio !== 'undefined' && gameAudio.playCountdown) {
+        gameAudio.playCountdown(10);
+    }
     speed = 8.0;
     let timeLeft = 10;
     const timerEl = document.getElementById('timerDisplay');
@@ -625,7 +582,9 @@ function startCountdown() {
                 }, 150);
             }
             
-            gameAudio.playSting();
+            if (typeof gameAudio !== 'undefined' && gameAudio.playSting) {
+                gameAudio.playSting();
+            }
             
             if (isDailyMode) {
                 recordDailyResult('red');
@@ -657,9 +616,9 @@ function drawNextCombo() {
     return comboDeck.splice(index, 1)[0];
 }
 
+// Main round trigger function
 function playRound() {
     try {
-        // Reset UI styles on card
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
         if (mainCard) {
             mainCard.style.boxShadow = '';
@@ -669,24 +628,42 @@ function playRound() {
         console.error("Error in playRound:", err);
     }
 
-    // Set start time on the first card if it's not already set
-    if (isDailyMode && !window.dailyStartTime) {
-        window.dailyStartTime = Date.now();
+    // Auto-initialize daily mode deck if entering daily mode for the first time
+    if (isDailyMode && (!dailyDeckPrompts || dailyDeckPrompts.length === 0)) {
+        const ready = initDailyMode();
+        if (!ready) return; // Halt if daily is already completed today
     }
 
-    gameAudio.unlock();
+    // Lock start time on the first active round
+    if (isDailyMode && !window.dailyStartTime) {
+        window.dailyStartTime = Date.now();
+        dailyStartTime = window.dailyStartTime;
+    }
+
+    if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
+        gameAudio.unlock();
+    }
     stopEverything();
-    gameAudio.playGo();
+    
+    if (typeof gameAudio !== 'undefined' && gameAudio.playGo) {
+        gameAudio.playGo();
+    }
     
     const btn = document.getElementById('playBtn');
     if (btn) btn.innerText = "NEXT";
     
     let nextCard;
     if (isDailyMode) {
+        // Prevent premature finish if deck isn't loaded properly
+        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
+            return;
+        }
+
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
             finishDailyGame();
             return;
         }
+
         nextCard = {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
@@ -704,7 +681,7 @@ function playRound() {
     if (timerEl) timerEl.innerText = 10;
     
     speakPrompt(nextCard.topic, nextCard.letter);
-    refreshAds();
+    if (typeof refreshAds === 'function') refreshAds();
 }
 
 document.addEventListener('keydown', function(event) {
@@ -715,10 +692,9 @@ document.addEventListener('keydown', function(event) {
 });
 
 // ==========================================
-// 6. DAILY BLURT MODE & SEED GENERATOR
+// DAILY BLURT MODE & SEED GENERATOR
 // ==========================================
 
-// Pull directly from Classic lists to avoid duplicate code
 const CATEGORIES = topicsMaster;
 const LETTERS = lettersMaster;
 
@@ -734,18 +710,12 @@ let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
 let dailyStartTime = 0;
 
-// ==========================================
-// SEEDED GAME & CHALLENGE PARAMETERS
-// ==========================================
-
-// 1. Read 'seed' from URL search parameters (e.g., wordblurts.com/?seed=8492)
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
     const seedParam = params.get('seed');
     return seedParam ? parseInt(seedParam, 10) : null;
 }
 
-// 2. Generate prompts based on a specific seed number
 function getSeededPrompts(customSeed) {
     const prompts = [];
     let currentSeed = customSeed;
@@ -808,7 +778,23 @@ function getDailyPrompts() {
 function initDailyMode() {
     isDailyMode = true;
     
-    // Check if the player arrived from a Challenge Link (?seed=XXXX)
+    // Check if player has already completed today's Daily Blurt
+    const status = getDailyStatus();
+    if (status.isCompletedToday && !getURLSeed()) {
+        const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
+        if (typeof showDailyResults === 'function') {
+            showDailyResults(
+                savedData.score || 0, 
+                10, 
+                savedData.timeSeconds || 0, 
+                status.streak || 0, 
+                savedData.resultsArray || []
+            );
+        }
+        return false;
+    }
+    
+    // Load prompts for today
     const urlSeed = getURLSeed();
     if (urlSeed) {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
@@ -817,18 +803,16 @@ function initDailyMode() {
         dailyDeckPrompts = prompts;
     }
 
-   dailyCurrentIndex = 0;
+    dailyCurrentIndex = 0;
     dailyResultsArray = [];
     
-    // Set dailyStartTime in both global variable and window scope
     dailyStartTime = Date.now();
     window.dailyStartTime = dailyStartTime;
     
-    // Clear any stale completed state so the game doesn't auto-finish
-    localStorage.removeItem('dailyCompleted');
-    
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
+
+    return true;
 }
 
 function recordDailyResult(result) {
@@ -845,23 +829,26 @@ function recordDailyResult(result) {
 function finishDailyGame() {
     stopEverything();
     
-    // Check window.dailyStartTime or dailyStartTime with a fallback to current time
     const startTime = (typeof dailyStartTime !== 'undefined' && dailyStartTime) 
                       ? dailyStartTime 
                       : (window.dailyStartTime || Date.now());
 
-    // Calculate seconds safely and prevent negative/crazy numbers
     const elapsedMs = Date.now() - startTime;
     const elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
 
     const score = dailyResultsArray.filter(r => r === 'green').length;
     
     const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
-    showDailyResults(score, 10, elapsedSeconds, newStreak, dailyResultsArray);
+    
+    if (typeof showDailyResults === 'function') {
+        showDailyResults(score, 10, elapsedSeconds, newStreak, dailyResultsArray);
+    }
 }
+
 // ==========================================
-// 7. STREAK & LOCKOUT STORAGE SYSTEM
+// STREAK & LOCKOUT STORAGE SYSTEM
 // ==========================================
+
 function getDailyStatus() {
   const { dateStr } = getDaySeed();
   const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
@@ -880,7 +867,6 @@ function saveDailyResults(score, timeSeconds, resultsArray) {
 
   if (status.isCompletedToday) return status.streak;
 
-  // Calculate local date for yesterday (matches getDaySeed format)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yYear = yesterday.getFullYear();
