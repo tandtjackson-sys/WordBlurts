@@ -704,7 +704,6 @@ function playRound() {
         // Fallback: clear stale session flags if something fails
         window.dailyStartTime = Date.now();
     }
-}
     
     gameAudio.unlock();
     stopEverything();
