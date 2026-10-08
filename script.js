@@ -659,40 +659,6 @@ function drawNextCombo() {
 
 function playRound() {
     try {
-        if (isDailyMode) {
-            const status = typeof getDailyStatus === 'function' ? getDailyStatus() : { isCompletedToday: false, streak: 0 };
-            
-            // If completed today, show saved results
-            if (status && status.isCompletedToday) {
-                const rawData = localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA);
-                const data = rawData ? JSON.parse(rawData) : {};
-                const savedTime = typeof data.timeSeconds === 'number' ? data.timeSeconds : 0;
-                
-                if (typeof showDailyResults === 'function') {
-                    showDailyResults(
-                        data.score || 0, 
-                        10, 
-                        savedTime, 
-                        status.streak || 0, 
-                        data.resultsArray || Array(10).fill('red')
-                    );
-                }
-                return;
-            }
-            
-            // Fresh round: set start time if not already set
-            if (!window.dailyStartTime) {
-                window.dailyStartTime = Date.now();
-            }
-        }
-
-        // Safety check: ensure card deck exists before drawing
-        if (typeof comboDeck === 'undefined' || !comboDeck || comboDeck.length === 0) {
-            if (typeof generateDeck === 'function') {
-                comboDeck = generateDeck();
-            }
-        }
-
         // Reset UI styles on card
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
         if (mainCard) {
@@ -704,7 +670,7 @@ function playRound() {
         // Fallback: clear stale session flags if something fails
         window.dailyStartTime = Date.now();
     }
-    
+
     gameAudio.unlock();
     stopEverything();
     gameAudio.playGo();
