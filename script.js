@@ -826,7 +826,7 @@ function initDailyMode() {
         dailyDeckPrompts = prompts;
     }
 
-    // Reset daily gameplay variables cleanly
+// Reset daily gameplay variables cleanly
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
     dailyStartTime = null;
