@@ -618,6 +618,7 @@ function drawNextCombo() {
 
 // Main round trigger function
 // Main round trigger function
+// Main round trigger function
 function playRound() {
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
@@ -629,10 +630,10 @@ function playRound() {
         console.error("Error in playRound:", err);
     }
 
-    // Auto-initialize daily mode deck only if daily deck is missing
+    // Auto-initialize daily deck if not yet initialized
     if (isDailyMode && (!dailyDeckPrompts || dailyDeckPrompts.length === 0)) {
         const ready = initDailyMode();
-        if (!ready) return; // Stop if daily is completed today
+        if (!ready) return; // Daily already completed today
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -651,18 +652,19 @@ function playRound() {
     if (isDailyMode) {
         if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
 
+        // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
             finishDailyGame();
             return;
         }
 
-        // Pull current round prompt
+        // Pull current prompt
         nextCard = {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
         };
 
-        // Increment for the NEXT round advance
+        // Advance index so the next press draws Card +1
         dailyCurrentIndex++;
     } else {
         nextCard = drawNextCombo();
@@ -676,7 +678,6 @@ function playRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
-    // Ensure speech synthesis triggers immediately on card draw
     if (typeof speakPrompt === 'function') {
         speakPrompt(nextCard.topic, nextCard.letter);
     }
@@ -985,12 +986,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (dailyModeBtn) {
+  if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
-            const readyToPlay = initDailyMode();
-            if (readyToPlay) {
-                playRound(); // Start Round 1 immediately
-            }
+            isDailyMode = true;
+            dailyModeBtn.classList.add('active');
+            if (randomModeBtn) randomModeBtn.classList.remove('active');
+
+            // Initialize daily deck (resets dailyCurrentIndex to 0)
+            initDailyMode();
+
+            // Prepare game board UI
+            const promptDisplay = document.getElementById('promptDisplay');
+            const letterDisplay = document.getElementById('letterDisplay');
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
+            if (letterDisplay) letterDisplay.textContent = '-';
+            if (timerDisplay) timerDisplay.textContent = '10';
+
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) playBtn.innerText = "PLAY";
         });
     }
 
