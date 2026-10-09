@@ -905,30 +905,20 @@ function generateShareText(score, timeSeconds, resultsArray) {
          `https://wordblurts.com`;
 }
 
-function showDailyResults(score, totalCards, timeInSeconds, streak, resultsArray) {
-    const resScore = document.getElementById('res-score');
-    const resTime = document.getElementById('res-time');
-    const resStreak = document.getElementById('res-streak');
-    const emojiGrid = document.getElementById('emoji-grid-display');
-// ==========================================
+function showDailyResults(score, totalRounds, streak, resultsArray) {
+    // 1. Set Score & Streak Text
+    const scoreEl = document.getElementById('dailyScoreDisplay');
+    const streakEl = document.getElementById('dailyStreakDisplay');
+    
+    if (scoreEl) scoreEl.innerText = `${score}/${totalRounds}`;
+    if (streakEl) streakEl.innerText = streak;
 
-    if (resScore) resScore.textContent = `${score}/${totalCards}`;
-    if (resTime) resTime.textContent = `${timeInSeconds}s`;
-    if (resStreak) resStreak.textContent = `🔥 ${streak}`;
+    // 2. Display Result Indicators (e.g. green/red dots or boxes)
+    renderResultDots(resultsArray);
 
-    const gridString = resultsArray ? resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('') : '';
-    if (emojiGrid) emojiGrid.textContent = gridString;
-
-    const shareText = generateShareText(score, timeInSeconds, resultsArray);
-    const shareBtn = document.getElementById('share-results-btn');
-    if (shareBtn) {
-        shareBtn.dataset.sharePayload = shareText;
-    }
-
-    const modal = document.getElementById('results-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    // 3. Unhide Results Box
+    const resultsModal = document.getElementById('dailyResultsModal');
+    if (resultsModal) resultsModal.style.display = 'block';
 }
 
 // ==========================================
