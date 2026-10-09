@@ -708,7 +708,6 @@ let isDailyMode = false;
 let dailyDeckPrompts = [];
 let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
-let dailyStartTime = 0;
 
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
@@ -785,8 +784,6 @@ function initDailyMode() {
         if (typeof showDailyResults === 'function') {
             showDailyResults(
                 savedData.score || 0, 
-                10, 
-                savedData.timeSeconds || 0, 
                 status.streak || 0, 
                 savedData.resultsArray || []
             );
@@ -805,9 +802,6 @@ function initDailyMode() {
 
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
-    
-    dailyStartTime = Date.now();
-    window.dailyStartTime = dailyStartTime;
     
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
@@ -829,14 +823,16 @@ function recordDailyResult(result) {
 function finishDailyGame() {
     stopEverything();
 
-    const score = dailyResultsArray.filter(r => r === 'green').length;
+    // Calculate total points earned (supports multiple points per round!)
+    const totalScore = dailyResultsArray.reduce((acc, current) => {
+        return acc + (typeof current === 'number' ? current : (current === 'green' ? 1 : 0));
+    }, 0);
     
-    // Save score and streak without passing time
-    const newStreak = saveDailyResults(score, dailyResultsArray);
+    // Save score and streak to local storage
+    const newStreak = saveDailyResults(totalScore, dailyResultsArray);
     
     if (typeof showDailyResults === 'function') {
-        // Pass score out of 10 and current streak
-        showDailyResults(score, 10, newStreak, dailyResultsArray);
+        showDailyResults(totalScore, newStreak, dailyResultsArray);
     }
 }
 
@@ -880,6 +876,43 @@ function saveDailyResults(score, resultsArray) {
   localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray }));
 
   return newStreak;
+}
+
+// ==========================================
+// SHARE RESULTS CLIPBOARD HELPER
+// ==========================================
+
+function copyDailyResults(totalScore, streak, resultsArray) {
+    // 1. Build the 2x5 emoji block grid
+    let grid = "";
+    resultsArray.forEach((res, index) => {
+        grid += (res > 0 || res === 'green') ? '🟩' : '🟥';
+        if (index === 4) grid += '\n'; // Line break after round 5
+    });
+
+    // 2. Format streak with "Day"
+    const streakText = `${streak} Day Streak`;
+
+    // 3. Construct your custom text payload
+    const shareText = `Today's Score: ${totalScore} points! 🔥 ${streakText}\n\n${grid}\n\nPlay Daily Blurts today! www.WordBlurts.com`;
+
+    // 4. Copy to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert("Results copied to clipboard!");
+        }).catch(err => {
+            console.error("Failed to copy results: ", err);
+        });
+    } else {
+        // Fallback for older mobile web views
+        const tempInput = document.createElement("textarea");
+        tempInput.value = shareText;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        alert("Results copied to clipboard!");
+    }
 }
 
 // ==========================================
