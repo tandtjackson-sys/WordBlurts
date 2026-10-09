@@ -639,7 +639,7 @@ function playRound() {
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
         gameAudio.unlock();
     }
-    stopEverything();
+    if (typeof stopEverything === 'function') stopEverything();
     
     if (typeof gameAudio !== 'undefined' && gameAudio.playGo) {
         gameAudio.playGo();
@@ -658,14 +658,19 @@ function playRound() {
             return;
         }
 
+        // Start session timer on Card #1
+        if (dailyCurrentIndex === 0 && !dailyStartTime) {
+            dailyStartTime = Date.now();
+        }
+
         // Pull current prompt
         nextCard = {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
         };
 
-        // Advance index so the next press draws Card +1
-        dailyCurrentIndex++;
+        // Note: Do NOT increment dailyCurrentIndex here!
+        // Index advancing is handled in recordDailyResult() when user scores each card.
     } else {
         nextCard = drawNextCombo();
     }
@@ -684,6 +689,7 @@ function playRound() {
     
     if (typeof refreshAds === 'function') refreshAds();
 }
+
 const CATEGORIES = topicsMaster;
 const LETTERS = lettersMaster;
 
@@ -697,6 +703,7 @@ let isDailyMode = false;
 let dailyDeckPrompts = [];
 let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
+let dailyStartTime = null;
 
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
@@ -767,14 +774,15 @@ function initDailyMode() {
     isDailyMode = true;
     
     // Check if player has already completed today's Daily Blurt
-    const status = getDailyStatus();
+    const status = typeof getDailyStatus === 'function' ? getDailyStatus() : { isCompletedToday: false };
     if (status.isCompletedToday && !getURLSeed()) {
         const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
         if (typeof showDailyResults === 'function') {
             showDailyResults(
                 savedData.score || 0, 
                 status.streak || 0, 
-                savedData.resultsArray || []
+                savedData.resultsArray || [],
+                savedData.timeSpent || 0
             );
         }
         return false;
@@ -792,8 +800,7 @@ function initDailyMode() {
     // Reset daily gameplay variables cleanly
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
-    if (typeof dailyStartTime !== 'undefined') dailyStartTime = null;
-    if (typeof dailyScore !== 'undefined') dailyScore = 0;
+    dailyStartTime = null;
     
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
@@ -809,22 +816,28 @@ function recordDailyResult(result) {
     
     if (dailyCurrentIndex >= dailyDeckPrompts.length) {
         finishDailyGame();
+    } else {
+        // Load next card automatically
+        playRound();
     }
 }
 
 function finishDailyGame() {
-    stopEverything();
+    if (typeof stopEverything === 'function') stopEverything();
 
-    // Calculate total points earned (supports multiple points per round!)
+    // Calculate total elapsed time cleanly in seconds
+    const elapsedSeconds = dailyStartTime ? Math.round((Date.now() - dailyStartTime) / 1000) : 0;
+
+    // Calculate total points earned
     const totalScore = dailyResultsArray.reduce((acc, current) => {
         return acc + (typeof current === 'number' ? current : (current === 'green' ? 1 : 0));
     }, 0);
     
     // Save score and streak to local storage
-    const newStreak = saveDailyResults(totalScore, dailyResultsArray);
+    const newStreak = typeof saveDailyResults === 'function' ? saveDailyResults(totalScore, dailyResultsArray, elapsedSeconds) : 1;
     
     if (typeof showDailyResults === 'function') {
-        showDailyResults(totalScore, newStreak, dailyResultsArray);
+        showDailyResults(totalScore, newStreak, dailyResultsArray, elapsedSeconds);
     }
 }
 
