@@ -958,9 +958,9 @@
                     <button id="randomModeBtn" class="mode-btn active" style="padding: 10px 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer;" onclick="isDailyMode = false; document.getElementById('randomModeBtn').classList.add('active'); document.getElementById('dailyModeBtn').classList.remove('active');">
                         🎲 Classic
                     </button>
-                    <button id="dailyModeBtn" class="mode-btn" style="padding: 10px 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; background: #7b2cbf; color: #fff;" onclick="if(initDailyMode()){ playRound(); }">
-                        📅 Daily Blurt
-                    </button>
+                    <button id="dailyModeBtn" class="mode-btn" style="padding: 10px 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; background: #7b2cbf; color: #fff;" onclick="if(!isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">
+    📅 Daily Blurt
+</button>
                 </div>
 
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
