@@ -617,6 +617,7 @@ function drawNextCombo() {
 }
 
 // Main round trigger function
+// Main round trigger function
 function playRound() {
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
@@ -628,10 +629,10 @@ function playRound() {
         console.error("Error in playRound:", err);
     }
 
-    // Auto-initialize daily mode deck if entering daily mode for the first time
+    // Auto-initialize daily mode deck only if daily deck is missing
     if (isDailyMode && (!dailyDeckPrompts || dailyDeckPrompts.length === 0)) {
         const ready = initDailyMode();
-        if (!ready) return; // Halt if daily is already completed today
+        if (!ready) return; // Stop if daily is completed today
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -648,24 +649,20 @@ function playRound() {
     
     let nextCard;
     if (isDailyMode) {
-        // Prevent premature finish if deck isn't loaded properly
-        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
-            return;
-        }
+        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
 
-        // End game if we've completed all 10 cards
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
             finishDailyGame();
             return;
         }
 
-        // Get the card for the CURRENT round index
+        // Pull current round prompt
         nextCard = {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
         };
 
-        // Advance index for the next round
+        // Increment for the NEXT round advance
         dailyCurrentIndex++;
     } else {
         nextCard = drawNextCombo();
@@ -679,7 +676,11 @@ function playRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
-    speakPrompt(nextCard.topic, nextCard.letter);
+    // Ensure speech synthesis triggers immediately on card draw
+    if (typeof speakPrompt === 'function') {
+        speakPrompt(nextCard.topic, nextCard.letter);
+    }
+    
     if (typeof refreshAds === 'function') refreshAds();
 }
 const CATEGORIES = topicsMaster;
