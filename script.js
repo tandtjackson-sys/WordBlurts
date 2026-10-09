@@ -978,43 +978,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
-    if (randomModeBtn && dailyModeBtn) {
+    if (randomModeBtn) {
         randomModeBtn.addEventListener('click', () => {
-            if (!isDailyMode) return; // Already in classic mode
-
             isDailyMode = false;
             randomModeBtn.classList.add('active');
-            dailyModeBtn.classList.remove('active');
+            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
 
-            // Reset game board for Classic mode
+            // Reset game board display for Classic mode
             const promptDisplay = document.getElementById('promptDisplay');
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay');
 
-            if (promptDisplay) promptDisplay.textContent = 'Classic Mode:  Press PLAY or hit Spacebar to start!';
+            if (promptDisplay) promptDisplay.textContent = 'Classic Mode: Press PLAY or hit Spacebar to start!';
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
             if (typeof resetTimer === 'function') resetTimer();
         });
+    }
 
+    if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
-            if (isDailyMode) return; // Already in daily mode
-
-            isDailyMode = true;
-            dailyModeBtn.classList.add('active');
-            randomModeBtn.classList.remove('active');
-
-            // Reset game board for Daily mode
-            const promptDisplay = document.getElementById('promptDisplay');
-            const letterDisplay = document.getElementById('letterDisplay');
-            const timerDisplay = document.getElementById('timerDisplay');
-
-            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
-            if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '10';
-
-            if (typeof resetTimer === 'function') resetTimer();
+            const readyToPlay = initDailyMode();
+            if (readyToPlay) {
+                playRound(); // Start Round 1 immediately
+            }
         });
     }
 
@@ -1039,35 +1027,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyStatus = getDailyStatus();
     if (dailyStatus.isCompletedToday && !urlSeed) {
         const storedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
-        showDailyResults(
-            storedData.score || 0,
-            10,
-            storedData.timeSeconds || 0,
-            dailyStatus.streak,
-            storedData.resultsArray || Array(10).fill('red')
-        );
+        if (typeof showDailyResults === 'function') {
+            showDailyResults(
+                storedData.score || 0,
+                dailyStatus.streak || 1,
+                storedData.resultsArray || []
+            );
+        }
     }
 
-    // 3. Share Results Button Listener
-    const shareBtn = document.getElementById('share-results-btn');
+    // 3. Share Results Button Listener (Native Share or Clipboard Fallback)
+    const shareBtn = document.getElementById('share-results-btn') || document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
-            const payload = shareBtn.dataset.sharePayload || '';
+            const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
+            const status = getDailyStatus();
+            
+            const totalScore = savedData.score || 0;
+            const streak = status.streak || 1;
+            const resultsArray = savedData.resultsArray || [];
 
+            // Build 2x5 Emoji Grid
+            let grid = "";
+            resultsArray.forEach((res, index) => {
+                grid += (res > 0 || res === 'green') ? '🟩' : '🟥';
+                if (index === 4) grid += '\n';
+            });
+
+            const shareText = `Today's Score: ${totalScore} points! 🔥 ${streak} Day Streak\n\n${grid}\n\nPlay Daily Blurts today! www.WordBlurts.com`;
+
+            // Mobile Native Share Drawer
             if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: 'Word Blurts! Results',
-                        text: payload
+                        title: 'Word Blurts! Daily Results',
+                        text: shareText
                     });
                     return;
                 } catch (err) {
-                    // Fallback to clipboard if share drawer is canceled
+                    // Fall back to clipboard copy if share prompt is dismissed
                 }
             }
 
+            // Clipboard Copy Fallback
             try {
-                await navigator.clipboard.writeText(payload);
+                await navigator.clipboard.writeText(shareText);
                 const originalText = shareBtn.textContent;
                 shareBtn.textContent = '✅ Copied to Clipboard!';
                 setTimeout(() => {
@@ -1113,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 5. Results Modal Overlay Click Listener (Close on outside tap)
-    const resultsModal = document.getElementById('results-modal');
+    const resultsModal = document.getElementById('results-modal') || document.getElementById('dailyResultsModal');
     if (resultsModal) {
         resultsModal.addEventListener('click', (e) => {
             if (e.target === resultsModal) {
