@@ -634,12 +634,6 @@ function playRound() {
         if (!ready) return; // Halt if daily is already completed today
     }
 
-    // Lock start time on the first active round
-    if (isDailyMode && !window.dailyStartTime) {
-        window.dailyStartTime = Date.now();
-        dailyStartTime = window.dailyStartTime;
-    }
-
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
         gameAudio.unlock();
     }
@@ -659,15 +653,20 @@ function playRound() {
             return;
         }
 
+        // End game if we've completed all 10 cards
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
             finishDailyGame();
             return;
         }
 
+        // Get the card for the CURRENT round index
         nextCard = {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
         };
+
+        // Advance index for the next round
+        dailyCurrentIndex++;
     } else {
         nextCard = drawNextCombo();
     }
@@ -683,18 +682,6 @@ function playRound() {
     speakPrompt(nextCard.topic, nextCard.letter);
     if (typeof refreshAds === 'function') refreshAds();
 }
-
-document.addEventListener('keydown', function(event) {
-    if ((event.code === 'Space' || event.code === 'Enter') && !event.repeat) {
-        event.preventDefault();
-        playRound();
-    }
-});
-
-// ==========================================
-// DAILY BLURT MODE & SEED GENERATOR
-// ==========================================
-
 const CATEGORIES = topicsMaster;
 const LETTERS = lettersMaster;
 
