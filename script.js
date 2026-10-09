@@ -789,8 +789,11 @@ function initDailyMode() {
         dailyDeckPrompts = prompts;
     }
 
+    // Reset daily gameplay variables cleanly
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
+    if (typeof dailyStartTime !== 'undefined') dailyStartTime = null;
+    if (typeof dailyScore !== 'undefined') dailyScore = 0;
     
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
