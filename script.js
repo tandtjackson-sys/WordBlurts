@@ -938,16 +938,15 @@ function generateShareText(score, timeSeconds, resultsArray) {
          `https://wordblurts.com`;
 }
 
-function showDailyResults(score, totalRounds, streak, resultsArray) {
+function showDailyResults(totalScore, streak, resultsArray) {
     // 1. Format Score Display
     const scoreEl = document.getElementById('dailyScoreDisplay');
-    if (scoreEl) scoreEl.innerText = `${score}/${totalRounds}`;
+    if (scoreEl) scoreEl.innerText = `${totalScore} pts`;
 
-    // 2. Format Streak Display with "Day" or "Days"
+    // 2. Format Streak Display with "Day" (e.g., "9 Day Streak")
     const streakEl = document.getElementById('dailyStreakDisplay');
     if (streakEl) {
-        const dayLabel = streak === 1 ? '1 Day' : `${streak} Days`;
-        streakEl.innerText = `🔥 ${dayLabel}`;
+        streakEl.innerText = `🔥 ${streak} Day Streak`;
     }
 
     // 3. Render result indicators/dots if applicable
@@ -955,7 +954,15 @@ function showDailyResults(score, totalRounds, streak, resultsArray) {
         renderResultDots(resultsArray);
     }
 
-    // 4. Show modal
+    // 4. Attach Share Button Click Handler
+    const shareBtn = document.getElementById('shareBtn') || document.getElementById('shareResultsBtn');
+    if (shareBtn) {
+        shareBtn.onclick = function() {
+            copyDailyResults(totalScore, streak, resultsArray);
+        };
+    }
+
+    // 5. Show modal
     const resultsModal = document.getElementById('dailyResultsModal') || document.getElementById('dailySummary');
     if (resultsModal) resultsModal.style.display = 'block';
 }
