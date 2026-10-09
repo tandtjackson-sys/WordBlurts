@@ -828,19 +828,15 @@ function recordDailyResult(result) {
 
 function finishDailyGame() {
     stopEverything();
-    
-    // Safety Guard: Default to 0 elapsed seconds if window.dailyStartTime isn't set yet
-    let elapsedSeconds = 0;
-    if (window.dailyStartTime && window.dailyStartTime > 0) {
-        const elapsedMs = Date.now() - window.dailyStartTime;
-        elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
-    }
 
     const score = dailyResultsArray.filter(r => r === 'green').length;
-    const newStreak = saveDailyResults(score, elapsedSeconds, dailyResultsArray);
+    
+    // Save score and streak without passing time
+    const newStreak = saveDailyResults(score, dailyResultsArray);
     
     if (typeof showDailyResults === 'function') {
-        showDailyResults(score, 10, elapsedSeconds, newStreak, dailyResultsArray);
+        // Pass score out of 10 and current streak
+        showDailyResults(score, 10, newStreak, dailyResultsArray);
     }
 }
 
@@ -860,7 +856,7 @@ function getDailyStatus() {
   };
 }
 
-function saveDailyResults(score, timeSeconds, resultsArray) {
+function saveDailyResults(score, resultsArray) {
   const { dateStr } = getDaySeed();
   const status = getDailyStatus();
 
@@ -881,7 +877,7 @@ function saveDailyResults(score, timeSeconds, resultsArray) {
 
   localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
   localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
-  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, timeSeconds, resultsArray }));
+  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray }));
 
   return newStreak;
 }
