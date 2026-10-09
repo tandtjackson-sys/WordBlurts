@@ -906,18 +906,24 @@ function generateShareText(score, timeSeconds, resultsArray) {
 }
 
 function showDailyResults(score, totalRounds, streak, resultsArray) {
-    // 1. Set Score & Streak Text
+    // 1. Format Score Display
     const scoreEl = document.getElementById('dailyScoreDisplay');
-    const streakEl = document.getElementById('dailyStreakDisplay');
-    
     if (scoreEl) scoreEl.innerText = `${score}/${totalRounds}`;
-    if (streakEl) streakEl.innerText = streak;
 
-    // 2. Display Result Indicators (e.g. green/red dots or boxes)
-    renderResultDots(resultsArray);
+    // 2. Format Streak Display with "Day" or "Days"
+    const streakEl = document.getElementById('dailyStreakDisplay');
+    if (streakEl) {
+        const dayLabel = streak === 1 ? '1 Day' : `${streak} Days`;
+        streakEl.innerText = `🔥 ${dayLabel}`;
+    }
 
-    // 3. Unhide Results Box
-    const resultsModal = document.getElementById('dailyResultsModal');
+    // 3. Render result indicators/dots if applicable
+    if (typeof renderResultDots === 'function') {
+        renderResultDots(resultsArray);
+    }
+
+    // 4. Show modal
+    const resultsModal = document.getElementById('dailyResultsModal') || document.getElementById('dailySummary');
     if (resultsModal) resultsModal.style.display = 'block';
 }
 
