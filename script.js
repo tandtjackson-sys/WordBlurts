@@ -751,6 +751,15 @@ function getDailyPrompts() {
   const { seed, dateStr } = getDaySeed();
   const prompts = [];
   
+  // Safely resolve category and letter lists regardless of scope/declaration order
+  const catList = (typeof topicsMaster !== 'undefined' && topicsMaster.length) ? topicsMaster : (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []);
+  const letList = (typeof lettersMaster !== 'undefined' && lettersMaster.length) ? lettersMaster : (typeof LETTERS !== 'undefined' ? LETTERS : []);
+
+  if (!catList.length || !letList.length) {
+      console.error("Critical Error: Categories or Letters list is missing/empty!", { catList, letList });
+      return { prompts: [], dateStr };
+  }
+
   let currentSeed = seed;
   function nextRandom() {
     currentSeed = (currentSeed * 9301 + 49297) % 233280;
@@ -758,12 +767,12 @@ function getDailyPrompts() {
   }
 
   for (let i = 0; i < 10; i++) {
-    const catIndex = Math.floor(nextRandom() * CATEGORIES.length);
-    const letterIndex = Math.floor(nextRandom() * LETTERS.length);
+    const catIndex = Math.floor(nextRandom() * catList.length);
+    const letterIndex = Math.floor(nextRandom() * letList.length);
     prompts.push({
       round: i + 1,
-      category: CATEGORIES[catIndex],
-      letter: LETTERS[letterIndex]
+      category: catList[catIndex],
+      letter: letList[letterIndex]
     });
   }
 
@@ -787,6 +796,26 @@ function initDailyMode() {
         }
         return false;
     }
+
+    // Load prompts for today
+    const urlSeed = getURLSeed();
+    if (urlSeed) {
+        dailyDeckPrompts = getSeededPrompts(urlSeed);
+    } else {
+        const { prompts } = getDailyPrompts();
+        dailyDeckPrompts = prompts;
+    }
+
+    // Reset daily gameplay variables cleanly
+    dailyCurrentIndex = 0;
+    dailyResultsArray = [];
+    dailyStartTime = null;
+    
+    const dailyBtn = document.getElementById('dailyModeBtn');
+    if (dailyBtn) dailyBtn.classList.add('active');
+
+    return true;
+}
     
     // Load prompts for today
     const urlSeed = getURLSeed();
