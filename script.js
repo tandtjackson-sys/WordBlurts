@@ -816,26 +816,6 @@ function initDailyMode() {
 
     return true;
 }
-    
-    // Load prompts for today
-    const urlSeed = getURLSeed();
-    if (urlSeed) {
-        dailyDeckPrompts = getSeededPrompts(urlSeed);
-    } else {
-        const { prompts } = getDailyPrompts();
-        dailyDeckPrompts = prompts;
-    }
-
-// Reset daily gameplay variables cleanly
-    dailyCurrentIndex = 0;
-    dailyResultsArray = [];
-    dailyStartTime = null;
-    
-    const dailyBtn = document.getElementById('dailyModeBtn');
-    if (dailyBtn) dailyBtn.classList.add('active');
-
-    return true;
-}
 
 function recordDailyResult(result) {
     if (!isDailyMode) return;
@@ -869,10 +849,6 @@ function finishDailyGame() {
         showDailyResults(totalScore, newStreak, dailyResultsArray, elapsedSeconds);
     }
 }
-
-// ==========================================
-// STREAK & LOCKOUT STORAGE SYSTEM
-// ==========================================
 
 function getDailyStatus() {
   const { dateStr } = getDaySeed();
