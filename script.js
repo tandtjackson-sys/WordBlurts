@@ -840,10 +840,9 @@ function recordDailyResult(result) {
     
     if (dailyCurrentIndex >= dailyDeckPrompts.length) {
         finishDailyGame();
-    } else {
-        // Load next card automatically
-        playRound();
     }
+    // Removed automatic playRound() call! 
+    // The player will now click NEXT / PLAY to trigger the next card.
 }
 
 function finishDailyGame() {
