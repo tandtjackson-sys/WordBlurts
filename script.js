@@ -619,7 +619,13 @@ function drawNextCombo() {
 // Main round trigger function
 // Main round trigger function
 // Main round trigger function
+let isRoundActive = false;
+
 function playRound() {
+    // Prevent double-triggering if a round is already actively firing
+    if (isRoundActive) return;
+    isRoundActive = true;
+
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
         if (mainCard) {
@@ -633,7 +639,10 @@ function playRound() {
     // Auto-initialize daily deck if not yet initialized
     if (isDailyMode && (!dailyDeckPrompts || dailyDeckPrompts.length === 0)) {
         const ready = initDailyMode();
-        if (!ready) return; // Daily already completed today
+        if (!ready) {
+            isRoundActive = false;
+            return; // Daily already completed today
+        }
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -650,10 +659,14 @@ function playRound() {
     
     let nextCard;
     if (isDailyMode) {
-        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
+        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
+            isRoundActive = false;
+            return;
+        }
 
         // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
+            isRoundActive = false;
             finishDailyGame();
             return;
         }
@@ -668,9 +681,6 @@ function playRound() {
             topic: dailyDeckPrompts[dailyCurrentIndex].category,
             letter: dailyDeckPrompts[dailyCurrentIndex].letter
         };
-
-        // Note: Do NOT increment dailyCurrentIndex here!
-        // Index advancing is handled in recordDailyResult() when user scores each card.
     } else {
         nextCard = drawNextCombo();
     }
@@ -688,6 +698,11 @@ function playRound() {
     }
     
     if (typeof refreshAds === 'function') refreshAds();
+
+    // Reset lock after card is fully loaded
+    setTimeout(() => {
+        isRoundActive = false;
+    }, 500);
 }
 
 const CATEGORIES = topicsMaster;
