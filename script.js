@@ -833,7 +833,7 @@ function initDailyMode() {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
     } else {
         const dailyData = getDailyPrompts();
-        dailyDeckPrompts = dailyData.prompts || [];
+        dailyDeckPrompts = dailyData.prompts || dailyData || [];
     }
 
     // Reset daily gameplay variables cleanly
@@ -851,13 +851,11 @@ function recordDailyResult(result) {
     if (!isDailyMode) return;
     
     dailyResultsArray.push(result);
-    dailyCurrentIndex++;
     
-    if (dailyCurrentIndex >= dailyDeckPrompts.length) {
+    // Check if all rounds are completed
+    if (dailyResultsArray.length >= dailyDeckPrompts.length) {
         finishDailyGame();
     }
-    // Removed automatic playRound() call! 
-    // The player will now click NEXT / PLAY to trigger the next card.
 }
 
 function finishDailyGame() {
@@ -871,7 +869,7 @@ function finishDailyGame() {
         return acc + (typeof current === 'number' ? current : (current === 'green' ? 1 : 0));
     }, 0);
     
-    // Save score and streak to local storage
+    // Save score, streak, and elapsed time to local storage
     const newStreak = typeof saveDailyResults === 'function' ? saveDailyResults(totalScore, dailyResultsArray, elapsedSeconds) : 1;
     
     if (typeof showDailyResults === 'function') {
@@ -880,41 +878,41 @@ function finishDailyGame() {
 }
 
 function getDailyStatus() {
-  const { dateStr } = getDaySeed();
-  const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
-  const currentStreak = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || "0", 10);
-  
-  return {
-    isCompletedToday: lastCompletedDate === dateStr,
-    streak: currentStreak,
-    todayDate: dateStr
-  };
+    const { dateStr } = getDaySeed();
+    const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
+    const currentStreak = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || "0", 10);
+    
+    return {
+        isCompletedToday: lastCompletedDate === dateStr,
+        streak: currentStreak,
+        todayDate: dateStr
+    };
 }
 
-function saveDailyResults(score, resultsArray) {
-  const { dateStr } = getDaySeed();
-  const status = getDailyStatus();
+function saveDailyResults(score, resultsArray, timeSpent = 0) {
+    const { dateStr } = getDaySeed();
+    const status = getDailyStatus();
 
-  if (status.isCompletedToday) return status.streak;
+    if (status.isCompletedToday) return status.streak;
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yYear = yesterday.getFullYear();
-  const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
-  const yDay = String(yesterday.getDate()).padStart(2, '0');
-  const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yYear = yesterday.getFullYear();
+    const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const yDay = String(yesterday.getDate()).padStart(2, '0');
+    const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
 
-  let newStreak = 1;
-  const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
-  if (lastCompletedDate === yesterdayStr) {
-    newStreak = status.streak + 1;
-  }
+    let newStreak = 1;
+    const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
+    if (lastCompletedDate === yesterdayStr) {
+        newStreak = status.streak + 1;
+    }
 
-  localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
-  localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
-  localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray }));
+    localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
+    localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
+    localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray, timeSpent }));
 
-  return newStreak;
+    return newStreak;
 }
 
 // ==========================================
@@ -1040,15 +1038,17 @@ if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
-            if (randomModeBtn) randomModeBtn.classList.remove('active');
+            if (typeof randomModeBtn !== 'undefined' && randomModeBtn) {
+                randomModeBtn.classList.remove('active');
+            }
 
             // 1. Stop any timers/voice currently running from Classic mode
             if (typeof stopEverything === 'function') stopEverything();
 
-            // 2. Initialize daily deck (resets dailyCurrentIndex to 0)
+            // 2. Initialize daily deck (resets dailyCurrentIndex to 0 and loads today's deck)
             initDailyMode();
 
-            // 3. Prepare game board UI
+            // 3. Prepare game board UI holding state
             const promptDisplay = document.getElementById('promptDisplay');
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay') || document.getElementById('timer');
@@ -1056,6 +1056,9 @@ if (dailyModeBtn) {
             if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
+
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) playBtn.innerText = "PLAY";
         });
     }
 
