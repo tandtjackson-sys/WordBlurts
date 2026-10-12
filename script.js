@@ -489,40 +489,84 @@ function playSlideDown() {
 }
 
 // ==========================================
-// GAME CORE ENGINE & SETUP
+// GAME CORE ENGINE & SETUP (LOCALIZED)
 // ==========================================
 
-const topicsMaster = [
-    "A famous actor", "An item in a refrigerator", "An item found in most offices",
-    "A fast food chain", "A superhero", "Something you find in a bathroom",
-    "A part of a car", "Something that makes noise", "A title of a TV show",
-    "A movie title", "A breakfast food", "Something in a hardware store",
-    "A musical instrument", "A sport or game", "A state in the U.S.A.",
-    "An animal found at a zoo", "A pizza topping", "A brand of car",
-    "Something you pack for a vacation", "A Halloween costume", "Something found in a garage",
-    "A board game", "A profession or job", "A country",
-    "A flavor of ice cream", "Something found in a classroom", "A candy",
-    "A part of the human body", "Something in the night sky", "A vegetable",
-    "A fruit", "Something you find at a beach", "A restaurant chain",
-    "Something found in a purse or wallet", "A household chore", "A liquid you drink",
-    "A word with double letters", "Something that uses electricity", "A piece of clothing",
-    "A holiday or celebration", "Something cold", "Something hot",
-    "Something hairy", "Something sharp", "An item in a bakery",
-    "A famous landmark", "Something found in an attic", "A daily activity",
-    "Something found in a kitchen", "A nickname", "Something sticky",
-    "A type of flower or plant", "Something you see at an amusement park", "A reason to celebrate",
-    "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
-    "Something round", "An item in a grocery store", "Something you find in nature",
-    "A snack food", "A land animal", "Something made of wood",
-    "Something made of metal", "A dog breed", "Something you buy at a gas station",
-    "A song title", "A famous musician", "Something you plug in",
-    "Something in an ocean", "Something you do in winter", "Something you do in summer",
-    "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
-    "A place you go on a date", "Something with wheels", "Something a mechanic uses",
-    "Something soft", "Something heavy"
-];
+const GAME_DATA = {
+    en: {
+        code: "en-US",
+        lettersMaster: ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","U","V","W"],
+        topicsMaster: [
+            "A famous actor", "An item in a refrigerator", "An item found in most offices",
+            "A fast food chain", "A superhero", "Something you find in a bathroom",
+            "A part of a car", "Something that makes noise", "A title of a TV show",
+            "A movie title", "A breakfast food", "Something in a hardware store",
+            "A musical instrument", "A sport or game", "A state in the U.S.A.",
+            "An animal found at a zoo", "A pizza topping", "A brand of car",
+            "Something you pack for a vacation", "A Halloween costume", "Something found in a garage",
+            "A board game", "A profession or job", "A country",
+            "A flavor of ice cream", "Something found in a classroom", "A candy",
+            "A part of the human body", "Something in the night sky", "A vegetable",
+            "A fruit", "Something you find at a beach", "A restaurant chain",
+            "Something found in a purse or wallet", "A household chore", "A liquid you drink",
+            "A word with double letters", "Something that uses electricity", "A piece of clothing",
+            "A holiday or celebration", "Something cold", "Something hot",
+            "Something hairy", "Something sharp", "An item in a bakery",
+            "A famous landmark", "Something found in an attic", "A daily activity",
+            "Something found in a kitchen", "A nickname", "Something sticky",
+            "A type of flower or plant", "Something you see at an amusement park", "A reason to celebrate",
+            "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
+            "Something round", "An item in a grocery store", "Something you find in nature",
+            "A snack food", "A land animal", "Something made of wood",
+            "Something made of metal", "A dog breed", "Something you buy at a gas station",
+            "A song title", "A famous musician", "Something you plug in",
+            "Something in an ocean", "Something you do in winter", "Something you do in summer",
+            "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
+            "A place you go on a date", "Something with wheels", "Something a mechanic uses",
+            "Something soft", "Something heavy"
+        ]
+    },
+    es: {
+        code: "es-MX",
+        lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
+        topicsMaster: [
+            "Un actor o actriz famoso/a", "Un alimento en la refrigeradora", "Un objeto que hay en una oficina",
+            "Una cadena de comida rápida", "Un superhéroe", "Algo que encuentras en el baño",
+            "Una parte de un automóvil", "Algo que hace ruido", "El título de un programa de TV",
+            "El título de una película", "Un alimento para el desayuno", "Algo que venden en una ferretería",
+            "Un instrumento musical", "Un deporte o juego", "Un país de América",
+            "Un animal del zoológico", "Un ingrediente para pizza", "Una marca de autos",
+            "Algo que empacas para ir de vacaciones", "Un disfraz de Halloween", "Algo que guardas en el garaje",
+            "Un juego de mesa", "Una profesión u oficio", "Un país",
+            "Un sabor de helado", "Algo que hay en un salón de clases", "Un dulce o caramelo",
+            "Una parte del cuerpo humano", "Algo que ves en el cielo nocturno", "Una verdura o hortaliza",
+            "Una fruta", "Algo que encuentras en la playa", "Una cadena de restaurantes",
+            "Algo que llevas en la cartera o billetera", "Una tarea del hogar", "Una bebida o líquido",
+            "Una palabra con letras dobles", "Algo que funciona con electricidad", "Una prenda de vestir",
+            "Un día festivo o celebración", "Algo frío", "Algo caliente",
+            "Algo peludo", "Algo afilado", "Un producto de panadería",
+            "Lugar o monumento famoso", "Algo que guardas en el ático", "Una actividad diaria",
+            "Algo que encuentras en la cocina", "Un apodo o sobrenombre", "Algo pegajoso",
+            "Un tipo de flor o planta", "Algo que ves en un parque de atracciones", "Un motivo para celebrar",
+            "Algo que llevas a un campamento", "Un personaje de dibujos animados", "Algo de color rojo, amarillo o azul",
+            "Algo redondo", "Un producto del supermercado", "Algo que encuentras en la naturaleza",
+            "Un bocadillo o snack", "Un animal terrestre", "Algo hecho de madera",
+            "Algo hecho de metal", "Una raza de perro", "Algo que compras en una gasolinera",
+            "El título de una canción", "Un músico o cantante famoso", "Algo que se conecta a la corriente",
+            "Algo que hay en el océano", "Algo que haces en invierno", "Algo que haces en verano",
+            "Un villano, monstruo o malo de película", "Algo que huele bien", "Algo que huele mal",
+            "Un lugar para ir en una cita", "Algo con ruedas", "Una herramienta de mecánico",
+            "Algo suave o blando", "Algo pesado"
+        ]
+    }
+};
 
-const lettersMaster = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","U","V","W"];
+// Active game language variable
+let currentLang = "en"; 
+
+// Helper references for backward compatibility with your engine
+let topicsMaster = GAME_DATA[currentLang].topicsMaster;
+let lettersMaster = GAME_DATA[currentLang].lettersMaster;
 
 function generateDeck() {
     const deck = [];
