@@ -622,10 +622,6 @@ function drawNextCombo() {
 let isRoundActive = false;
 
 function playRound() {
-    // Prevent double-triggering if a round is already actively firing
-    if (isRoundActive) return;
-    isRoundActive = true;
-
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
         if (mainCard) {
@@ -634,15 +630,6 @@ function playRound() {
         }
     } catch (err) {
         console.error("Error in playRound:", err);
-    }
-
-    // Auto-initialize daily deck if not yet initialized
-    if (isDailyMode && (!dailyDeckPrompts || dailyDeckPrompts.length === 0)) {
-        const ready = initDailyMode();
-        if (!ready) {
-            isRoundActive = false;
-            return; // Daily already completed today
-        }
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -659,15 +646,10 @@ function playRound() {
     
     let nextCard;
     if (isDailyMode) {
-        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
-            isRoundActive = false;
-            return;
-        }
+        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
 
         // Check if all 10 cards are completed
-     // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
-            isRoundActive = false;
             finishDailyGame();
             return;
         }
@@ -677,12 +659,12 @@ function playRound() {
             dailyStartTime = Date.now();
         }
 
-        // Pull current prompt object cleanly
+        // Pull current prompt object
         const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
 
-        // Safely extract prompt & letter regardless of property key naming (.prompt, .category, or .topic)
+        // Map `category` to `topic` so the display receives the prompt string
         nextCard = {
-            topic: currentObj.prompt || currentObj.category || currentObj.topic || "General Topic",
+            topic: currentObj.category || currentObj.prompt || currentObj.topic || "General Topic",
             letter: currentObj.letter || "A"
         };
     } else {
@@ -702,6 +684,7 @@ function playRound() {
     }
     
     if (typeof refreshAds === 'function') refreshAds();
+}
 
     // Reset lock after card is fully loaded
     setTimeout(() => {
@@ -816,13 +799,13 @@ function initDailyMode() {
         return false;
     }
 
-    // Load prompts for today
+    // Safely extract the prompts array from getDailyPrompts()
     const urlSeed = getURLSeed();
     if (urlSeed) {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
     } else {
-        const { prompts } = getDailyPrompts();
-        dailyDeckPrompts = prompts;
+        const dailyData = getDailyPrompts();
+        dailyDeckPrompts = dailyData.prompts || [];
     }
 
     // Reset daily gameplay variables cleanly
