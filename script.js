@@ -665,6 +665,7 @@ function playRound() {
         }
 
         // Check if all 10 cards are completed
+     // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
             isRoundActive = false;
             finishDailyGame();
@@ -676,10 +677,13 @@ function playRound() {
             dailyStartTime = Date.now();
         }
 
-        // Pull current prompt
+        // Pull current prompt object cleanly
+        const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
+
+        // Safely extract prompt & letter regardless of property key naming (.prompt, .category, or .topic)
         nextCard = {
-            topic: dailyDeckPrompts[dailyCurrentIndex].category,
-            letter: dailyDeckPrompts[dailyCurrentIndex].letter
+            topic: currentObj.prompt || currentObj.category || currentObj.topic || "General Topic",
+            letter: currentObj.letter || "A"
         };
     } else {
         nextCard = drawNextCombo();
@@ -1021,19 +1025,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-  if (dailyModeBtn) {
+if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
             if (randomModeBtn) randomModeBtn.classList.remove('active');
 
-            // Initialize daily deck (resets dailyCurrentIndex to 0)
+            // 1. Stop any timers/voice currently running from Classic mode
+            if (typeof stopEverything === 'function') stopEverything();
+
+            // 2. Initialize daily deck (resets dailyCurrentIndex to 0)
             initDailyMode();
 
-            // Prepare game board UI
+            // 3. Prepare game board UI
             const promptDisplay = document.getElementById('promptDisplay');
             const letterDisplay = document.getElementById('letterDisplay');
-            const timerDisplay = document.getElementById('timerDisplay');
+            const timerDisplay = document.getElementById('timerDisplay') || document.getElementById('timer');
 
             if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
             if (letterDisplay) letterDisplay.textContent = '-';
