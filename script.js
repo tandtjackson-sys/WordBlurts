@@ -563,12 +563,96 @@ const GAME_DATA = {
 
 // Active game language variable
 let currentLang = "en"; 
+// ==========================================
+// 2. ANNOUNCER ENGINE (CODE #2)
+// ==========================================
+function announceRound(letter, topic) {
+    if (!('speechSynthesis' in window)) return;
 
-// Helper references for backward compatibility with your engine
+    window.speechSynthesis.cancel(); // Stop any active speech
+
+    const langCode = GAME_DATA[currentLang].code;
+    const phrase = currentLang === "es" 
+        ? `Letra ${letter}. ${topic}` 
+        : `Letter ${letter}. ${topic}`;
+
+    const utterance = new SpeechSynthesisUtterance(phrase);
+    utterance.lang = langCode;
+    utterance.rate = 0.95; // Speech speed
+
+    // Find a native matching voice for speech synthesis
+    const voices = window.speechSynthesis.getVoices();
+    const matchingVoice = voices.find(v => v.lang.startsWith(currentLang));
+    if (matchingVoice) {
+        utterance.voice = matchingVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+}
+// ==========================================
+// 3. LANGUAGE SWITCHER & UI UPDATER (CODE #3)
+// ==========================================
+
+function switchLanguage(langCode) {
+    if (!GAME_DATA[langCode]) return;
+
+    // Update global state and save to browser storage
+    currentLang = langCode;
+    localStorage.setItem("wordblurts_lang", currentLang);
+
+    // Update active pointers for your game loop
+    const activeData = GAME_DATA[currentLang];
+    
+    // If your existing engine uses these variable names globally, keep them synced:
+    window.lettersMaster = activeData.lettersMaster;
+    window.topicsMaster = activeData.topicsMaster;
+
+    // Update static UI text elements on the page (buttons, labels, etc.)
+    updateStaticUI();
+
+    // Trigger a fresh round or reset current display if desired
+    if (typeof startNewRound === "function") {
+        startNewRound();
+    }
+}
+
+// Helper to translate static text elements on your HTML page
+function updateStaticUI() {
+    const isEs = currentLang === "es";
+
+    // Example bindings - update these IDs to match your actual HTML elements
+    const startBtn = document.getElementById("start-btn");
+    const langToggleBtn = document.getElementById("lang-toggle-btn");
+
+    if (startBtn) {
+        startBtn.textContent = isEs ? "Siguiente Ronda" : "Next Round";
+    }
+    
+    if (langToggleBtn) {
+        // Displays the flag or text for the *other* available language to switch to
+        langToggleBtn.textContent = isEs ? "🇺🇸 English" : "🇪🇸 Español";
+    }
+}
+
+// Run on page load to restore user's last selected language
+document.addEventListener("DOMContentLoaded", () => {
+    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
+    switchLanguage(savedLang);
+});
+
+// ==========================================
+// 3. YOUR GAME LOOP / ROUND TRIGGER
+// ==========================================
+
+// Helper references dynamically pointing to current language data
 let topicsMaster = GAME_DATA[currentLang].topicsMaster;
 let lettersMaster = GAME_DATA[currentLang].lettersMaster;
 
 function generateDeck() {
+    // Always draw from active language lists
+    topicsMaster = GAME_DATA[currentLang].topicsMaster;
+    lettersMaster = GAME_DATA[currentLang].lettersMaster;
+    
     const deck = [];
     for (let t of topicsMaster) {
         for (let l of lettersMaster) {
@@ -580,6 +664,23 @@ function generateDeck() {
 
 let comboDeck = generateDeck();
 let countdownInterval = null;
+
+function startNewRound() {
+    stopEverything();
+
+    // Pull next combo card from active deck
+    const card = drawNextCombo();
+
+    // Update screen display (with safeguards for missing elements)
+    const letterEl = document.getElementById("letter-display") || document.getElementById("letter");
+    const topicEl = document.getElementById("topic-display") || document.getElementById("topic");
+
+    if (letterEl) letterEl.textContent = card.letter;
+    if (topicEl) topicEl.textContent = card.topic;
+
+    // Announce the round out loud and start countdown
+    speakPrompt(card.topic, card.letter);
+}
 
 function stopEverything() {
     if (countdownInterval !== null) {
@@ -602,7 +703,7 @@ function startCountdown() {
     }
     speed = 8.0;
     let timeLeft = 10;
-    const timerEl = document.getElementById('timerDisplay');
+    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) timerEl.innerText = timeLeft;
     
     countdownInterval = setInterval(() => {
@@ -611,8 +712,8 @@ function startCountdown() {
         
         if (timeLeft <= 0) {
             stopEverything();
-            const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
-            if (timerEl) timerEl.innerText = "TIME'S UP!";
+            const timeUpText = currentLang === "es" ? "¡TIEMPO AGOTADO!" : "TIME'S UP!";
+            if (timerEl) timerEl.innerText = timeUpText;
             
             const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
             if (mainCard) {
@@ -641,8 +742,10 @@ function startCountdown() {
                 gameAudio.playSting();
             }
             
-            if (isDailyMode) {
-                recordDailyResult('red');
+            if (typeof isDailyMode !== 'undefined' && isDailyMode) {
+                if (typeof recordDailyResult === 'function') {
+                    recordDailyResult('red');
+                }
             }
         }
     }, 1000);
@@ -650,13 +753,31 @@ function startCountdown() {
 
 function speakPrompt(topicText, letterText) {
     if ('speechSynthesis' in window) {
-        const fullText = `${topicText}, that starts with the letter... ${letterText}... Blurt it out!`;
+        window.speechSynthesis.cancel(); // Stop active audio
+
+        const langCode = GAME_DATA[currentLang].code;
+        
+        // Localized voice prompt phrasing
+        const fullText = currentLang === "es"
+            ? `${topicText}, que comience con la letra... ${letterText}... ¡Dilo ya!`
+            : `${topicText}, that starts with the letter... ${letterText}... Blurt it out!`;
+
         const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.lang = langCode;
         utterance.rate = 1.0;
         utterance.pitch = 1.05;
+
+        // Select native voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const matchingVoice = voices.find(v => v.lang.startsWith(currentLang));
+        if (matchingVoice) {
+            utterance.voice = matchingVoice;
+        }
+
         utterance.onend = function() {
             startCountdown();
         };
+
         window.speechSynthesis.speak(utterance);
     } else {
         startCountdown();
