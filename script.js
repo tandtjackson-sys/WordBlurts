@@ -1046,10 +1046,13 @@ if (dailyModeBtn) {
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) playBtn.innerText = "PLAY";
-        });
-    }
+           const playBtn = document.getElementById('playBtn');
+if (playBtn) {
+    playBtn.addEventListener('click', () => {
+        // Force state if needed and start the round
+        playRound();
+    });
+}
 
     // 1. Check if player arrived via a friend's challenge link (?seed=XXXX)
     const urlSeed = getURLSeed();
