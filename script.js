@@ -641,7 +641,7 @@ function playRound() {
             mainCard.style.borderColor = '';
         }
     } catch (err) {
-        console.error("Error in playRound style reset:", err);
+        console.error("Error resetting card styling:", err);
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -659,10 +659,14 @@ function playRound() {
     let nextCard = { topic: "", letter: "" };
 
     if (isDailyMode) {
-        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
+        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
+            console.warn("playRound aborted: dailyDeckPrompts is empty or undefined");
+            return;
+        }
 
         // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
+            console.log("Daily mode completed all rounds.");
             if (typeof finishDailyGame === 'function') finishDailyGame();
             return;
         }
@@ -674,12 +678,13 @@ function playRound() {
 
         // Extract current card object
         const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
+        console.log("Raw object at index", dailyCurrentIndex, ":", currentObj);
 
-        // Fallback checks across all possible object keys
+        // Map topic string across common object formats
         nextCard.topic = currentObj.category || currentObj.topic || currentObj.prompt || "General Topic";
         nextCard.letter = currentObj.letter || "A";
 
-        // Increment index for the subsequent card click
+        // Increment index for the next round
         dailyCurrentIndex++;
     } else {
         if (typeof drawNextCombo === 'function') {
@@ -687,6 +692,9 @@ function playRound() {
         }
     }
     
+    console.log("Card object ready to display:", nextCard);
+
+    // Update DOM Display Elements
     const promptEl = document.getElementById('promptDisplay');
     const letterEl = document.getElementById('letterDisplay');
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
@@ -695,19 +703,18 @@ function playRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
-    // Trigger Announcer Voice
+    // Trigger Speech Announcer
     if (typeof speakPrompt === 'function') {
         speakPrompt(nextCard.topic, nextCard.letter);
     }
 
-    // Trigger Timer Loop
+    // Start Timer Loop
     if (typeof startTimer === 'function') {
         startTimer(10);
     }
     
     if (typeof refreshAds === 'function') refreshAds();
 }
-
     // Reset lock after card is fully loaded
     setTimeout(() => {
         isRoundActive = false;
