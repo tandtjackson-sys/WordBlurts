@@ -1048,14 +1048,16 @@ if (dailyModeBtn) {
             if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
+        });
+    }
 
-           const playBtn = document.getElementById('playBtn');
-if (playBtn) {
-    playBtn.addEventListener('click', () => {
-        // Force state if needed and start the round
-        playRound();
-    });
-}
+    // Single PLAY button listener at root scope
+    const playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            playRound();
+        });
+    }
 
     // 1. Check if player arrived via a friend's challenge link (?seed=XXXX)
     const urlSeed = getURLSeed();
