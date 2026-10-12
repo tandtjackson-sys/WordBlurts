@@ -630,7 +630,6 @@ function drawNextCombo() {
 // Main round trigger function
 // Main round trigger function
 // Main round trigger function
-let isRoundActive = false;
 
 function playRound() {
     try {
