@@ -632,8 +632,11 @@ function drawNextCombo() {
 // Main round trigger function
 
 function playRound() {
+    console.log("PLAY CLICKED! isDailyMode:", isDailyMode, "dailyCurrentIndex:", dailyCurrentIndex, "deck:", dailyDeckPrompts);
+    
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
+        // ... rest of playRound ...
         if (mainCard) {
             mainCard.style.boxShadow = '';
             mainCard.style.borderColor = '';
