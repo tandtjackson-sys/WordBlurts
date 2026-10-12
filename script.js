@@ -1,9 +1,20 @@
 // ==========================================
+// GAME STATE VARIABLES
+// ==========================================
+let isDailyMode = false;
+let isRoundActive = false;
+let dailyCurrentIndex = 0;
+let dailyDeckPrompts = [];
+let dailyResultsArray = [];
+let dailyStartTime = null;
+
+// ==========================================
 // 1. STARFIELD BACKGROUND ENGINE
 // ==========================================
 const canvas = document.getElementById('starfield');
 if (canvas) {
     const ctx = canvas.getContext('2d');
+    // ... rest of your starfield code
     let stars = [];
     const numStars = 1000;
     let speed = 2.5;
@@ -690,7 +701,7 @@ function playRound() {
     setTimeout(() => {
         isRoundActive = false;
     }, 500);
-}
+
 
 const CATEGORIES = topicsMaster;
 const LETTERS = lettersMaster;
