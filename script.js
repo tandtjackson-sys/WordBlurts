@@ -1053,7 +1053,7 @@ if (dailyModeBtn) {
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay') || document.getElementById('timer');
 
-            if (promptDisplay) promptDisplay.textContent = "Today's Daily Blurt is set! Press PLAY when ready!";
+            if (promptDisplay) promptDisplay.textContent = "Daily Blurts is not available at this time";
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
