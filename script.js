@@ -633,16 +633,15 @@ function drawNextCombo() {
 
 function playRound() {
     console.log("PLAY CLICKED! isDailyMode:", isDailyMode, "dailyCurrentIndex:", dailyCurrentIndex, "deck:", dailyDeckPrompts);
-    
+
     try {
         const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
-        // ... rest of playRound ...
         if (mainCard) {
             mainCard.style.boxShadow = '';
             mainCard.style.borderColor = '';
         }
     } catch (err) {
-        console.error("Error in playRound:", err);
+        console.error("Error in playRound style reset:", err);
     }
 
     if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
@@ -657,13 +656,14 @@ function playRound() {
     const btn = document.getElementById('playBtn');
     if (btn) btn.innerText = "NEXT";
     
-    let nextCard;
+    let nextCard = { topic: "", letter: "" };
+
     if (isDailyMode) {
         if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) return;
 
         // Check if all 10 cards are completed
         if (dailyCurrentIndex >= dailyDeckPrompts.length) {
-            finishDailyGame();
+            if (typeof finishDailyGame === 'function') finishDailyGame();
             return;
         }
 
@@ -672,18 +672,19 @@ function playRound() {
             dailyStartTime = Date.now();
         }
 
-        // Pull current prompt object cleanly
+        // Extract current card object
         const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
 
-        nextCard = {
-            topic: currentObj.category || currentObj.prompt || currentObj.topic || "General Topic",
-            letter: currentObj.letter || "A"
-        };
+        // Fallback checks across all possible object keys
+        nextCard.topic = currentObj.category || currentObj.topic || currentObj.prompt || "General Topic";
+        nextCard.letter = currentObj.letter || "A";
 
-        // Advance to the next prompt index for when NEXT is clicked
+        // Increment index for the subsequent card click
         dailyCurrentIndex++;
     } else {
-        nextCard = drawNextCombo();
+        if (typeof drawNextCombo === 'function') {
+            nextCard = drawNextCombo();
+        }
     }
     
     const promptEl = document.getElementById('promptDisplay');
@@ -694,12 +695,12 @@ function playRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
-    // Trigger speech announcer
+    // Trigger Announcer Voice
     if (typeof speakPrompt === 'function') {
         speakPrompt(nextCard.topic, nextCard.letter);
     }
 
-    // Trigger timer countdown
+    // Trigger Timer Loop
     if (typeof startTimer === 'function') {
         startTimer(10);
     }
