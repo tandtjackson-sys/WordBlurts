@@ -711,10 +711,10 @@ const STORAGE_KEYS = {
   COMPLETED_DATA: "wb_daily_last_score"
 };
 
-let dailyDeckPrompts = [];
-let dailyCurrentIndex = 0;
-let dailyResultsArray = [];
-let dailyStartTime = null;
+dailyDeckPrompts = [];
+dailyCurrentIndex = 0;
+dailyResultsArray = [];
+dailyStartTime = null;
 
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
