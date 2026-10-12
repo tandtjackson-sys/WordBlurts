@@ -711,7 +711,6 @@ const STORAGE_KEYS = {
   COMPLETED_DATA: "wb_daily_last_score"
 };
 
-let isDailyMode = false;
 let dailyDeckPrompts = [];
 let dailyCurrentIndex = 0;
 let dailyResultsArray = [];
