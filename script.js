@@ -669,14 +669,16 @@ function playRound() {
             dailyStartTime = Date.now();
         }
 
-        // Pull current prompt object
+        // Pull current prompt object cleanly
         const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
 
-        // Map `category` to `topic` so the display receives the prompt string
         nextCard = {
             topic: currentObj.category || currentObj.prompt || currentObj.topic || "General Topic",
             letter: currentObj.letter || "A"
         };
+
+        // Advance to the next prompt index for when NEXT is clicked
+        dailyCurrentIndex++;
     } else {
         nextCard = drawNextCombo();
     }
@@ -689,8 +691,14 @@ function playRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
+    // Trigger speech announcer
     if (typeof speakPrompt === 'function') {
         speakPrompt(nextCard.topic, nextCard.letter);
+    }
+
+    // Trigger timer countdown
+    if (typeof startTimer === 'function') {
+        startTimer(10);
     }
     
     if (typeof refreshAds === 'function') refreshAds();
