@@ -859,12 +859,28 @@ function playRound() {
     
     console.log("Card object ready to display:", nextCard);
 
-    // Update DOM Display Elements
+// Update DOM Display Elements
     const promptEl = document.getElementById('promptDisplay');
     const letterEl = document.getElementById('letterDisplay');
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     
-    if (promptEl) promptEl.innerText = nextCard.topic;
+    if (promptEl) {
+        if (typeof currentLang !== 'undefined' && currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
+            // Find the index of the current topic in the Spanish array to get its exact English counterpart
+            const esIndex = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
+            const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) 
+                ? GAME_DATA['en'].topicsMaster[esIndex] 
+                : "";
+
+            promptEl.innerHTML = `
+                <div style="font-size: 1.0em; color: #fef08a;">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="font-size: 0.75em; color: #94a3b8; margin-top: 4px;">(${englishTopic})</div>` : ''}
+            `;
+        } else {
+            promptEl.innerText = nextCard.topic;
+        }
+    }
+    
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) timerEl.innerText = 10;
     
