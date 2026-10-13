@@ -1448,3 +1448,41 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
         pwaBanner.classList.remove('hidden');
     }
 }
+// ==========================================
+// LANGUAGE TOGGLE & LOCALIZATION LOGIC
+// ==========================================
+
+// Toggle language between English and Spanish
+function toggleLanguage() {
+    const newLang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'es' : 'en';
+    switchLanguage(newLang);
+}
+
+// Switch language, update master pointers, save preference, and refresh UI
+function switchLanguage(langCode) {
+    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[langCode]) return;
+
+    currentLang = langCode;
+    localStorage.setItem("wordblurts_lang", currentLang);
+
+    // Update active word/topic master lists
+    window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
+    window.topicsMaster = GAME_DATA[currentLang].topicsMaster;
+
+    // Update button text to show current state
+    const langBtn = document.getElementById("lang-toggle-btn");
+    if (langBtn) {
+        langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
+    }
+
+    // Refresh active combo deck if in-game
+    if (typeof generateDeck === "function") {
+        comboDeck = generateDeck();
+    }
+}
+
+// Restore saved language on load
+document.addEventListener("DOMContentLoaded", () => {
+    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
+    switchLanguage(savedLang);
+});
