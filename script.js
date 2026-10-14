@@ -669,146 +669,17 @@ function startNewRound() {
     stopEverything();
 
     // Pull next combo card from active deck
-    const card = drawNextCombo();
+    const nextCard = drawNextCombo();
 
-    // Update screen display (with safeguards for missing elements)
-    const letterEl = document.getElementById("letter-display") || document.getElementById("letter");
-    const topicEl = document.getElementById("topic-display") || document.getElementById("topic");
-
-    if (letterEl) letterEl.textContent = card.letter;
-    if (topicEl) topicEl.textContent = card.topic;
-
-    // Announce the round out loud and start countdown
-    speakPrompt(card.topic, card.letter);
-}
-
-function stopEverything() {
-    if (countdownInterval !== null) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-    }
-    if (typeof gameAudio !== 'undefined' && gameAudio.stopAll) {
-        gameAudio.stopAll();
-    }
-    speed = 2.5;
-}
-
-function startCountdown() {
-    stopEverything();
-    if (typeof gameAudio !== 'undefined' && gameAudio.playCountdown) {
-        gameAudio.playCountdown(10);
-    }
-    speed = 8.0;
-    let timeLeft = 10;
-    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
-    if (timerEl) timerEl.innerText = timeLeft;
-    
-    countdownInterval = setInterval(() => {
-        timeLeft--;
-        if (timerEl) timerEl.innerText = timeLeft;
-        
-        if (timeLeft <= 0) {
-            stopEverything();
-            const timeUpText = currentLang === "es" ? "¡TIEMPO AGOTADO!" : "TIME'S UP!";
-            if (timerEl) {
-                timerEl.innerText = timeUpText;
-                timerEl.style.fontSize = "1.5rem"; // Direct override to shrink "TIEMPO AGOTADO" nicely!
-            }
-            
-            const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
-            if (mainCard) {
-                mainCard.style.transition = 'all 0.1s ease';
-                let flashCount = 0;
-                
-                const flashInterval = setInterval(() => {
-                    if (flashCount % 2 === 0) {
-                        mainCard.style.boxShadow = '0 0 50px 20px #ff2d55';
-                        mainCard.style.borderColor = '#ff2d55';
-                    } else {
-                        mainCard.style.boxShadow = '';
-                        mainCard.style.borderColor = '';
-                    }
-                    
-                    flashCount++;
-                    if (flashCount >= 6) {
-                        clearInterval(flashInterval);
-                        mainCard.style.boxShadow = '';
-                        mainCard.style.borderColor = '';
-                    }
-                }, 150);
-            }
-            
-            if (typeof gameAudio !== 'undefined' && gameAudio.playSting) {
-                gameAudio.playSting();
-            }
-            
-            if (typeof isDailyMode !== 'undefined' && isDailyMode) {
-                if (typeof recordDailyResult === 'function') {
-                    recordDailyResult('red');
-                }
-            }
-        }
-    }, 1000);
-}
-
-function speakPrompt(topicText, letterText) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Stop active audio
-
-        const langCode = GAME_DATA[currentLang].code;
-        
-        // Localized voice prompt phrasing
-        const fullText = currentLang === "es"
-            ? `${topicText}, que comience con la letra... ${letterText}... ¡Dilo ya!`
-            : `${topicText}, that starts with the letter... ${letterText}... Blurt it out!`;
-
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.lang = langCode;
-        utterance.rate = 1.0;
-        utterance.pitch = 1.05;
-
-        // Select native voice if available
-        const voices = window.speechSynthesis.getVoices();
-        const matchingVoice = voices.find(v => v.lang.startsWith(currentLang));
-        if (matchingVoice) {
-            utterance.voice = matchingVoice;
-        }
-
-        utterance.onend = function() {
-            startCountdown();
-        };
-
-        window.speechSynthesis.speak(utterance);
-    } else {
-        startCountdown();
-    }
-}
-
-function drawNextCombo() {
-    if (comboDeck.length === 0) {
-        comboDeck = generateDeck();
-    }
-    const index = Math.floor(Math.random() * comboDeck.length);
-    return comboDeck.splice(index, 1)[0];
-}
-
-// Main round trigger function
-// Main round trigger function
-// Main round trigger function
-
-console.log("Card object ready to display:", nextCard);
+    console.log("Card object ready to display:", nextCard);
 
     // Update DOM Display Elements
-    const promptEl = document.getElementById('promptDisplay');
-    const letterEl = document.getElementById('letterDisplay');
+    const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+    const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     
     if (promptEl) {
         if (typeof currentLang !== 'undefined' && currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
-            // Find the index of the current topic in the Spanish array to get its exact English counterpart
             const esIndex = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
             const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) 
                 ? GAME_DATA['en'].topicsMaster[esIndex] 
@@ -829,15 +700,8 @@ console.log("Card object ready to display:", nextCard);
         timerEl.style.fontSize = ""; // Resets the font size back to normal for the countdown numbers
     }
     
-    // Trigger Speech Announcer
-    if (typeof speakPrompt === 'function') {
-        speakPrompt(nextCard.topic, nextCard.letter);
-    }
-
-    // Start Timer Loop
-    if (typeof startTimer === 'function') {
-        startTimer(10);
-    }
+    // Announce the round out loud and start countdown
+    speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
 
@@ -845,6 +709,7 @@ console.log("Card object ready to display:", nextCard);
     setTimeout(() => {
         isRoundActive = false;
     }, 500);
+}
 
 
 const CATEGORIES = topicsMaster;
