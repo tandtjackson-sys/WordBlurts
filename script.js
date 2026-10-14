@@ -1190,7 +1190,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ------------------------------------------
+// ------------------------------------------
     // MODE TOGGLE WIRE-UP (Classic vs. Daily)
     // ------------------------------------------
     const randomModeBtn = document.getElementById('randomModeBtn');
@@ -1207,7 +1207,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const letterDisplay = document.getElementById('letterDisplay');
             const timerDisplay = document.getElementById('timerDisplay');
 
-            if (promptDisplay) promptDisplay.textContent = 'Classic Mode: Press the green button or hit Enter or Spacebar to start!';
+            if (promptDisplay) {
+                if (typeof currentLang !== 'undefined' && currentLang === 'es') {
+                    promptDisplay.innerHTML = `
+                        <div style="font-size: 0.95rem; color: #fef08a; line-height: 1.3;">Modo Clásico: ¡Presiona el botón verde, Enter o la barra espaciadora para comenzar!</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">(Classic Mode: Press the green button or hit Enter or Spacebar to start!)</div>
+                    `;
+                } else {
+                    promptDisplay.textContent = 'Classic Mode: Press the green button or hit Enter or Spacebar to start!';
+                }
+            }
             if (letterDisplay) letterDisplay.textContent = '-';
             if (timerDisplay) timerDisplay.textContent = '10';
 
