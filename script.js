@@ -713,7 +713,10 @@ function startCountdown() {
         if (timeLeft <= 0) {
             stopEverything();
             const timeUpText = currentLang === "es" ? "¡TIEMPO AGOTADO!" : "TIME'S UP!";
-            if (timerEl) timerEl.innerText = timeUpText;
+            if (timerEl) {
+                timerEl.innerText = timeUpText;
+                timerEl.style.fontSize = "1.5rem"; // Direct override to shrink "TIEMPO AGOTADO" nicely!
+            }
             
             const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
             if (mainCard) {
@@ -796,70 +799,9 @@ function drawNextCombo() {
 // Main round trigger function
 // Main round trigger function
 
-function playRound() {
-    console.log("PLAY CLICKED! isDailyMode:", isDailyMode, "dailyCurrentIndex:", dailyCurrentIndex, "deck:", dailyDeckPrompts);
+console.log("Card object ready to display:", nextCard);
 
-    try {
-        const mainCard = document.querySelector('.card') || document.querySelector('.game-card') || document.querySelector('section') || document.querySelector('main');
-        if (mainCard) {
-            mainCard.style.boxShadow = '';
-            mainCard.style.borderColor = '';
-        }
-    } catch (err) {
-        console.error("Error resetting card styling:", err);
-    }
-
-    if (typeof gameAudio !== 'undefined' && gameAudio.unlock) {
-        gameAudio.unlock();
-    }
-    if (typeof stopEverything === 'function') stopEverything();
-    
-    if (typeof gameAudio !== 'undefined' && gameAudio.playGo) {
-        gameAudio.playGo();
-    }
-    
-    const btn = document.getElementById('playBtn');
-    if (btn) btn.innerText = "NEXT";
-    
-    let nextCard = { topic: "", letter: "" };
-
-    if (isDailyMode) {
-        if (!dailyDeckPrompts || dailyDeckPrompts.length === 0) {
-            console.warn("playRound aborted: dailyDeckPrompts is empty or undefined");
-            return;
-        }
-
-        // Check if all 10 cards are completed
-        if (dailyCurrentIndex >= dailyDeckPrompts.length) {
-            console.log("Daily mode completed all rounds.");
-            if (typeof finishDailyGame === 'function') finishDailyGame();
-            return;
-        }
-
-        // Start session timer on Card #1
-        if (dailyCurrentIndex === 0 && !dailyStartTime) {
-            dailyStartTime = Date.now();
-        }
-
-        // Extract current card object
-        const currentObj = dailyDeckPrompts[dailyCurrentIndex] || {};
-        console.log("Raw object at index", dailyCurrentIndex, ":", currentObj);
-
-        // Map topic string across common object formats
-        nextCard.topic = currentObj.category || currentObj.topic || currentObj.prompt || "General Topic";
-        nextCard.letter = currentObj.letter || "A";
-
-        // Increment index for the next round
-        dailyCurrentIndex++;
-    } else {
-        if (typeof drawNextCombo === 'function') {
-            nextCard = drawNextCombo();
-        }
-    }
-    
-    console.log("Card object ready to display:", nextCard);
-
-// Update DOM Display Elements
+    // Update DOM Display Elements
     const promptEl = document.getElementById('promptDisplay');
     const letterEl = document.getElementById('letterDisplay');
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
@@ -873,8 +815,8 @@ function playRound() {
                 : "";
 
             promptEl.innerHTML = `
-                <div style="font-size: 1.0em; color: #fef08a;">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 0.75em; color: #94a3b8; margin-top: 4px;">(${englishTopic})</div>` : ''}
+                <div style="font-size: 1.0rem; color: #fef08a; line-height: 1.3;">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="font-size: 1.0rem; color: #94a3b8; margin-top: 6px;">(${englishTopic})</div>` : ''}
             `;
         } else {
             promptEl.innerText = nextCard.topic;
@@ -882,7 +824,10 @@ function playRound() {
     }
     
     if (letterEl) letterEl.innerText = nextCard.letter;
-    if (timerEl) timerEl.innerText = 10;
+    if (timerEl) {
+        timerEl.innerText = 10;
+        timerEl.style.fontSize = ""; // Resets the font size back to normal for the countdown numbers
+    }
     
     // Trigger Speech Announcer
     if (typeof speakPrompt === 'function') {
@@ -1211,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof currentLang !== 'undefined' && currentLang === 'es') {
                     promptDisplay.innerHTML = `
                         <div style="font-size: 0.95rem; color: #fef08a; line-height: 1.3;">Modo Clásico: ¡Presiona el botón verde, Enter o la barra espaciadora para comenzar!</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">(Classic Mode: Press the green button or hit Enter or Spacebar to start!)</div>
+                        <div style="font-size: 0.95rem; color: #94a3b8; margin-top: 6px;">(Classic Mode: Press the green button or hit Enter or Spacebar to start!)</div>
                     `;
                 } else {
                     promptDisplay.textContent = 'Classic Mode: Press the green button or hit Enter or Spacebar to start!';
@@ -1267,7 +1212,6 @@ if (dailyModeBtn) {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
         console.log(`Loaded custom challenge seed: ${urlSeed}`);
     }
-
     // PWA SERVICE WORKER REGISTRATION
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
