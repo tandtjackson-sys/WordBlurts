@@ -840,7 +840,7 @@ console.log("Card object ready to display:", nextCard);
     }
     
     if (typeof refreshAds === 'function') refreshAds();
-}
+
     // Reset lock after card is fully loaded
     setTimeout(() => {
         isRoundActive = false;
