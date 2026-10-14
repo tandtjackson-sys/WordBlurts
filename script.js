@@ -8,6 +8,11 @@ let dailyDeckPrompts = [];
 let dailyResultsArray = [];
 let dailyStartTime = null;
 
+// Alias playRound so existing HTML onclick hooks work seamlessly
+function playRound() {
+    startNewRound();
+}
+
 // ==========================================
 // 1. STARFIELD BACKGROUND ENGINE
 // ==========================================
@@ -18,7 +23,6 @@ if (canvas) {
     let stars = [];
     const numStars = 1000;
     let speed = 2.5;
-
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
