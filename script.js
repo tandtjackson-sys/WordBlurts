@@ -11,6 +11,7 @@ let countdownInterval = null;
 
 // Combo deck starts empty, populated safely after data loads
 let comboDeck = [];
+
 // ==========================================
 // AUDIO ANNOUNCER ENGINE
 // ==========================================
@@ -20,18 +21,28 @@ function speakPrompt(topic, letter) {
     window.speechSynthesis.cancel(); // Stop any ongoing speech
     
     let textToSpeak = "";
+    let voiceLang = 'en-US';
+
     if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-        textToSpeak = `Tema: ${topic}. Letra: ${letter}.`;
+        // Speaks Spanish prompt naturally without prepending "Tema" / "Letra"
+        textToSpeak = `${topic}. Letra ${letter}.`;
+        voiceLang = 'es-ES';
     } else {
-        textToSpeak = `Topic: ${topic}. Letter: ${letter}.`;
+        // Speaks English prompt naturally without prepending "Topic" / "Letter"
+        textToSpeak = `${topic}. Letter ${letter}.`;
+        voiceLang = 'en-US';
     }
     
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = (typeof currentLang !== 'undefined' && currentLang === 'es') ? 'es-ES' : 'en-US';
+    utterance.lang = voiceLang;
     utterance.rate = 1.0;
     
-    window.speechSynthesis.speak(utterance);
+    // Non-blocking asynchronous speech trigger
+    setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+    }, 50);
 }
+
 // Alias playRound so existing HTML onclick hooks work seamlessly
 function playRound() {
     startNewRound();
