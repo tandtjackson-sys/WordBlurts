@@ -7,16 +7,18 @@ let dailyCurrentIndex = 0;
 let dailyDeckPrompts = [];
 let dailyResultsArray = [];
 let dailyStartTime = null;
+let countdownInterval = null;
 
 // Alias playRound so existing HTML onclick hooks work seamlessly
 function playRound() {
     startNewRound();
 }
+
 // ==========================================
-// STOP EVERYTHING HELPER
+// SYSTEM UTILITIES (Stop Everything, etc.)
 // ==========================================
 function stopEverything() {
-    if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
+    if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
@@ -30,6 +32,33 @@ function stopEverything() {
         speed = 2.5;
     }
 }
+
+// ==========================================
+// DECK & COMBO DRAWING HELPERS
+// ==========================================
+function generateDeck() {
+    topicsMaster = GAME_DATA[currentLang].topicsMaster;
+    lettersMaster = GAME_DATA[currentLang].lettersMaster;
+    
+    const deck = [];
+    for (let t of topicsMaster) {
+        for (let l of lettersMaster) {
+            deck.push({ topic: t, letter: l });
+        }
+    }
+    return deck;
+}
+
+let comboDeck = generateDeck();
+
+function drawNextCombo() {
+    if (comboDeck.length === 0) {
+        comboDeck = generateDeck();
+    }
+    const index = Math.floor(Math.random() * comboDeck.length);
+    return comboDeck.splice(index, 1)[0];
+}
+
 // ==========================================
 // 1. STARFIELD BACKGROUND ENGINE
 // ==========================================
