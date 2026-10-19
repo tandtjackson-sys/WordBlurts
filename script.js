@@ -772,11 +772,11 @@ function startNewRound() {
                 : "";
 
             promptEl.innerHTML = `
-                <div style="font-size: 1.0rem; color: #fef08a; line-height: 1.3;">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 1.0rem; color: #94a3b8; margin-top: 6px;">(${englishTopic})</div>` : ''}
+                <div style="display: block; font-size: 1.25rem; font-weight: bold; color: #ffd700; margin-bottom: 6px;">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="display: block; font-size: 0.95rem; color: #aaa; opacity: 0.85;">(${englishTopic})</div>` : ''}
             `;
         } else {
-            promptEl.innerText = nextCard.topic;
+            promptEl.innerHTML = `<div style="display: block; font-size: 1.25rem; font-weight: bold; color: #ffd700;">${nextCard.topic}</div>`;
         }
     }
     
@@ -786,20 +786,26 @@ function startNewRound() {
         timerEl.style.fontSize = ""; // Resets the font size back to normal for the countdown numbers
     }
     
-    // Announce the round out loud and start countdown
+    // Announce the round out loud
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
 
-    // Reset lock after card is fully loaded
-    setTimeout(() => {
-        isRoundActive = false;
-    }, 500);
+    // Set round state active and trigger timer + music
+    isRoundActive = true;
+
+    if (typeof startTimer === 'function') {
+        startTimer();
+    }
+
+    if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+        gameAudio.playMusic();
+    }
 }
 
 
-const CATEGORIES = topicsMaster;
-const LETTERS = lettersMaster;
+const CATEGORIES = (typeof topicsMaster !== 'undefined') ? topicsMaster : [];
+const LETTERS = (typeof lettersMaster !== 'undefined') ? lettersMaster : [];
 
 const STORAGE_KEYS = {
   STREAK: "wb_daily_streak",
