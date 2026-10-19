@@ -714,7 +714,7 @@ function generateDeck() {
 }
 
 
-
+countdownInterval = null;
 
 function startNewRound() {
     stopEverything();
