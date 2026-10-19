@@ -49,6 +49,7 @@ function generateDeck() {
     return deck;
 }
 
+// Single global declaration for comboDeck
 let comboDeck = generateDeck();
 
 function drawNextCombo() {
@@ -712,7 +713,7 @@ function generateDeck() {
     return deck;
 }
 
-let comboDeck = generateDeck();
+
 let countdownInterval = null;
 
 function startNewRound() {
