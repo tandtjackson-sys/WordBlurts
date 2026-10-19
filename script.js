@@ -751,7 +751,14 @@ function generateDeck() {
 
 countdownInterval = null;
 
+let isTransitioning = false; // Add this near your state variables if not already there
+
 function startNewRound() {
+    // Prevent double-firing if a click happens while transitioning
+    if (isTransitioning) return;
+    isTransitioning = true;
+    setTimeout(() => { isTransitioning = false; }, 300); // Unlock after 300ms
+
     stopEverything();
 
     // Pull next combo card from active deck
@@ -783,10 +790,10 @@ function startNewRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     if (timerEl) {
         timerEl.innerText = 10;
-        timerEl.style.fontSize = ""; // Resets the font size back to normal for the countdown numbers
+        timerEl.style.fontSize = ""; 
     }
     
-    // Announce the round out loud
+    // Announce the round cleanly once
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
