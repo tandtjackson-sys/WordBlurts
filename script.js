@@ -9,6 +9,9 @@ let dailyResultsArray = [];
 let dailyStartTime = null;
 let countdownInterval = null;
 
+// Combo deck starts empty, populated safely after data loads
+let comboDeck = [];
+
 // Alias playRound so existing HTML onclick hooks work seamlessly
 function playRound() {
     startNewRound();
@@ -25,7 +28,7 @@ function stopEverything() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
     }
-    if (typeof gameAudio !== 'undefined' && gameAudio.stopAll) {
+    if (typeof gameAudio !== 'undefined' && gameAudio && typeof gameAudio.stopAll === 'function') {
         gameAudio.stopAll();
     }
     if (typeof speed !== 'undefined') {
@@ -37,8 +40,11 @@ function stopEverything() {
 // DECK & COMBO DRAWING HELPERS
 // ==========================================
 function generateDeck() {
-    topicsMaster = GAME_DATA[currentLang].topicsMaster;
-    lettersMaster = GAME_DATA[currentLang].lettersMaster;
+    // Safety check if GAME_DATA is loaded yet
+    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[currentLang]) return [];
+    
+    const topicsMaster = GAME_DATA[currentLang].topicsMaster;
+    const lettersMaster = GAME_DATA[currentLang].lettersMaster;
     
     const deck = [];
     for (let t of topicsMaster) {
@@ -49,13 +55,11 @@ function generateDeck() {
     return deck;
 }
 
-// Single global declaration for comboDeck
-let comboDeck = generateDeck();
-
 function drawNextCombo() {
     if (comboDeck.length === 0) {
         comboDeck = generateDeck();
     }
+    if (comboDeck.length === 0) return { topic: "Ready", letter: "A" }; // Fallback
     const index = Math.floor(Math.random() * comboDeck.length);
     return comboDeck.splice(index, 1)[0];
 }
