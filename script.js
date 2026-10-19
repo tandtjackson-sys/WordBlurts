@@ -12,7 +12,24 @@ let dailyStartTime = null;
 function playRound() {
     startNewRound();
 }
-
+// ==========================================
+// STOP EVERYTHING HELPER
+// ==========================================
+function stopEverything() {
+    if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    if (typeof gameAudio !== 'undefined' && gameAudio.stopAll) {
+        gameAudio.stopAll();
+    }
+    if (typeof speed !== 'undefined') {
+        speed = 2.5;
+    }
+}
 // ==========================================
 // 1. STARFIELD BACKGROUND ENGINE
 // ==========================================
