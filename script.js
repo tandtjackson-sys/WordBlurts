@@ -12,6 +12,12 @@ let countdownInterval = null;
 // Combo deck starts empty, populated safely after data loads
 let comboDeck = [];
 
+// Force timer display to 15 on initial page load
+window.addEventListener('DOMContentLoaded', () => {
+    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
+    if (timerEl) timerEl.innerText = "15";
+});
+
 // ==========================================
 // AUDIO ANNOUNCER ENGINE
 // ==========================================
