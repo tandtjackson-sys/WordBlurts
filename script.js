@@ -871,6 +871,21 @@ function startTimer() {
         countdownInterval = null;
     }
 
+    // --- DROP YOUR AUDIO TRIGGERS RIGHT HERE ---
+    if (typeof gameAudio !== 'undefined') {
+        gameAudio.unlock();
+        const t0 = gameAudio.ctx.currentTime;
+        const roundDuration = 15;
+        
+        if (typeof gameAudio.layerOstinato === 'function') {
+            gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        }
+        if (typeof gameAudio.layerDrone === 'function') {
+            gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        }
+    }
+    // -------------------------------------------
+
     // Reset container box styles on round start
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
     if (mainContainer) {
@@ -879,6 +894,7 @@ function startTimer() {
     }
     
     let timeLeft = 15;
+    // ... rest of your timer code ...
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = timeLeft;
