@@ -755,11 +755,16 @@ let isTransitioning = false; // Add this near your state variables if not alread
 
 let isTransitioning = false;
 
+// Ensure transition flag is initialized safely without redeclaring
+if (typeof window.isTransitioning === 'undefined') {
+    window.isTransitioning = false;
+}
+
 function startNewRound() {
     // Prevent double-firing if a click happens while transitioning
-    if (isTransitioning) return;
-    isTransitioning = true;
-    setTimeout(() => { isTransitioning = false; }, 300); // Unlock after 300ms
+    if (window.isTransitioning) return;
+    window.isTransitioning = true;
+    setTimeout(() => { window.isTransitioning = false; }, 300); // Unlock after 300ms
 
     stopEverything();
 
