@@ -810,20 +810,11 @@ function startNewRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     
     // Announce prompt out loud with animated voice
-    speakPrompt(nextCard.topic, nextCard.letter);
-    
-    if (typeof refreshAds === 'function') refreshAds();
-
-    isRoundActive = true;
-}
-
-// Animated Speech Engine: Adds "Blurt it out!" with higher pitch/excitement
-// Speech Engine with speech pauses and excited "Blurt it out!" ending
+   // Speech Engine with crisp letter pause and excited "Blurt it out!" ending
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel(); // Clear queued speech
 
-        // Part 1: Topic + Letter (with deliberate pauses for crisp pronunciation)
         let introText = `${topic}, starting with the letter... ${letter}.`;
         let hypeText = "Blurt it out!";
         let langCode = 'en-US';
@@ -836,66 +827,47 @@ function speakPrompt(topic, letter) {
 
         const utteranceIntro = new SpeechSynthesisUtterance(introText);
         utteranceIntro.lang = langCode;
-        utteranceIntro.rate = 0.95; // Slightly slower so the letter is distinct
+        utteranceIntro.rate = 0.95; // Clean pacing for letter clarity
 
         const utteranceHype = new SpeechSynthesisUtterance(hypeText);
         utteranceHype.lang = langCode;
         utteranceHype.rate = 1.15;
-        utteranceHype.pitch = 1.35; // Excited pitch!
+        utteranceHype.pitch = 1.35; // Excited pitch
 
-        // Chain the hype phrase right after the prompt
+        // Chain hype phrase right after intro
         utteranceIntro.onend = () => {
             window.speechSynthesis.speak(utteranceHype);
         };
 
-        // Start timer + audio track when speech finishes
+        // Start timer and play your custom background music when speech finishes
         utteranceHype.onend = () => {
             startTimer();
-            playGameMusic();
+            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+                gameAudio.playMusic();
+            }
         };
 
         window.speechSynthesis.speak(utteranceIntro);
     } else {
         startTimer();
-        playGameMusic();
-    }
-}
-
-// Built-in synthesized audio player fallback
-function playGameMusic() {
-    if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-        gameAudio.playMusic();
-    } else {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(440, ctx.currentTime);
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.3);
-        } catch (e) {
-            console.log("Audio play error:", e);
+        if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+            gameAudio.playMusic();
         }
     }
 }
 
-// 15-second timer with full-container flashing red alert on expiration
+// 15-second timer with a flashing red 3-pulse box alert on expiration
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
 
-    // Reset container box flashing styles on round start
-    const mainBox = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('.container');
-    if (mainBox) {
-        mainBox.style.boxShadow = "";
-        mainBox.style.borderColor = "";
-        mainBox.style.animation = "";
+    // Reset container box styles on round start
+    const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.style.boxShadow = "";
+        mainContainer.style.borderColor = "";
     }
     
     let timeLeft = 15;
@@ -928,13 +900,29 @@ function startTimer() {
                 timerEl.style.color = "#ff0000";
             }
 
-            // 2. Flash the whole main container box red!
-            const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
+            // 2. Flash the container box red 3 times!
             if (mainContainer) {
-                mainContainer.style.borderColor = "#ff0000";
-                mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
+                let flashCount = 0;
+                const flashInterval = setInterval(() => {
+                    if (flashCount >= 6) { // 6 toggles = 3 full flashes
+                        clearInterval(flashInterval);
+                        // Leave it solid red on the final beat
+                        mainContainer.style.borderColor = "#ff0000";
+                        mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
+                        return;
+                    }
+                    if (flashCount % 2 === 0) {
+                        mainContainer.style.borderColor = "#ff0000";
+                        mainContainer.style.boxShadow = "0 0 35px #ff0000, inset 0 0 20px #ff0000";
+                    } else {
+                        mainContainer.style.borderColor = "";
+                        mainContainer.style.boxShadow = "";
+                    }
+                    flashCount++;
+                }, 250);
             }
 
+            // Stop custom music
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
                 gameAudio.stopMusic();
             }
