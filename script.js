@@ -811,6 +811,7 @@ function startNewRound() {
     
     // Announce prompt out loud with animated voice
    // Speech Engine with crisp letter pause and excited "Blurt it out!" ending
+// Speech Engine with crisp letter pause and excited "Blurt it out!" ending
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel(); // Clear queued speech
@@ -906,7 +907,6 @@ function startTimer() {
                 const flashInterval = setInterval(() => {
                     if (flashCount >= 6) { // 6 toggles = 3 full flashes
                         clearInterval(flashInterval);
-                        // Leave it solid red on the final beat
                         mainContainer.style.borderColor = "#ff0000";
                         mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
                         return;
