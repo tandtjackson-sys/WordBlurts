@@ -747,7 +747,8 @@ function generateDeck() {
     }
     return deck;
 }
-let countdownInterval = null;
+// Reset countdownInterval safely without redeclaring 'let'
+countdownInterval = null;
 
 // Use window property to prevent any block-scoped redeclaration conflicts
 if (typeof window.isTransitioning === 'undefined') {
