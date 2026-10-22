@@ -1173,12 +1173,24 @@ div.time-up-text {
         </div>
     </div>
 
- <!-- PWA INSTALL BANNER -->
+<!-- PWA INSTALL BANNER -->
     <div id="pwaInstallBanner" class="pwa-banner hidden">
-        ... (your existing pwa banner code) ...
+        <div class="pwa-banner-content">
+            <div class="pwa-icon-wrapper">
+                <img src="icon-192.png" alt="Word Blurts Icon" class="pwa-app-icon">
+            </div>
+            <div class="pwa-text">
+                <span class="pwa-title">Install Word Blurts!</span>
+                <span class="pwa-subtext">Add to Home Screen for fast offline play!</span>
+            </div>
+        </div>
+        <div class="pwa-actions">
+            <button id="pwaInstallBtn" class="pwa-btn-install">Install</button>
+            <button id="pwaDismissBtn" class="pwa-btn-close" aria-label="Dismiss">&times;</button>
+        </div>
     </div>
 
-    <!-- 1. PASTE THE NEW ABOUT SECTION HERE -->
+    <!-- SEO ON-PAGE ABOUT SECTION -->
     <section id="about-section" style="max-width: 650px; width: 90%; margin: 40px auto; padding: 30px; text-align: left; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff;">
         <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
         
@@ -1218,7 +1230,7 @@ div.time-up-text {
         </p>
     </section>
 
-    <!-- 2. SMOOTH SCROLL JAVASCRIPT FOR ABOUT LINK -->
+    <!-- SMOOTH SCROLL JAVASCRIPT FOR ABOUT LINK -->
     <script>
     function openAboutModal(e) {
         if (e) e.preventDefault();
@@ -1229,7 +1241,7 @@ div.time-up-text {
     }
     </script>
 
-    <!-- 3. YOUR MAIN SCRIPT TAG STAYS AT THE VERY BOTTOM -->
+    <!-- MAIN SCRIPT TAG -->
     <script src="script.js?v=1.86"></script>
 
 </body>
