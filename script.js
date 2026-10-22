@@ -747,7 +747,8 @@ function generateDeck() {
     }
     return deck;
 }
-let countdownInterval = null;
+// Reset countdownInterval safely without redeclaring 'let'
+countdownInterval = null;
 
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
@@ -803,7 +804,7 @@ function startNewRound() {
     
     if (letterEl) letterEl.innerText = nextCard.letter;
     
-    // Announce the full phrase and start timer ONLY when speech finishes
+    // Announce prompt out loud
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
@@ -828,7 +829,7 @@ function speakPrompt(topic, letter) {
         utterance.lang = langCode;
         utterance.rate = 1.0;
 
-        // CRITICAL: Timer and music start precisely when the announcer finishes speaking!
+        // Timer & music trigger precisely when the announcer finishes speaking
         utterance.onend = () => {
             startTimer();
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
@@ -838,7 +839,6 @@ function speakPrompt(topic, letter) {
 
         window.speechSynthesis.speak(utterance);
     } else {
-        // Fallback if browser speech synthesis isn't supported
         startTimer();
         if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
             gameAudio.playMusic();
@@ -876,7 +876,7 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // Large, prominent "TIME'S UP!" alert
+            // Prominent "TIME'S UP!" alert
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
                 timerEl.style.fontSize = "1.6rem";
