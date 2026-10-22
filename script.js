@@ -761,13 +761,15 @@ function startNewRound() {
 
     stopEverything();
 
-    // Reset timer display styling
+    // Reset timer display & flashing container styles
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = 15;
         timerEl.style.color = ""; 
         timerEl.style.fontSize = ""; 
         timerEl.style.fontWeight = "";
+        timerEl.style.textShadow = "";
+        timerEl.style.animation = "";
         timerEl.classList.remove('flash-red');
     }
 
@@ -791,11 +793,13 @@ function startNewRound() {
                 ? GAME_DATA['en'].topicsMaster[esIndex] 
                 : "";
 
+            // Spanish Mode: Topics boosted by ~20% (2.0rem primary, 1.25rem subtitle)
             promptEl.innerHTML = `
-                <div style="font-size: 1.65rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 1.1rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
+                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="font-size: 1.25rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
         } else {
+            // English Mode
             promptEl.innerHTML = `
                 <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
             `;
@@ -812,7 +816,7 @@ function startNewRound() {
     isRoundActive = true;
 }
 
-// Robust Speech Engine with Natural Phrasing & On-End Trigger
+// Speech Engine: Triggers Timer + Music strictly after speech ends
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel(); // Clear any queued speech
@@ -829,7 +833,7 @@ function speakPrompt(topic, letter) {
         utterance.lang = langCode;
         utterance.rate = 1.0;
 
-        // Timer & music trigger precisely when the announcer finishes speaking
+        // Timer & background music kick off simultaneously when speech finishes
         utterance.onend = () => {
             startTimer();
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
@@ -846,7 +850,7 @@ function speakPrompt(topic, letter) {
     }
 }
 
-// Built-in 15-second countdown timer with large Time's Up alert
+// 15-second countdown timer with massive, flashing red "TIME'S UP!" alert
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
@@ -866,6 +870,7 @@ function startTimer() {
         if (timerEl) {
             timerEl.innerText = timeLeft;
             
+            // Warning color as time gets low
             if (timeLeft <= 4 && timeLeft > 0) {
                 timerEl.style.color = "#ff4444";
             }
@@ -876,14 +881,16 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // Prominent "TIME'S UP!" alert
+            // Huge, flashing red "TIME'S UP!" visual alert
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
-                timerEl.style.fontSize = "1.6rem";
-                timerEl.style.fontWeight = "bold";
+                timerEl.style.fontSize = "2.4rem";
+                timerEl.style.fontWeight = "900";
                 timerEl.style.color = "#ff0000";
+                timerEl.style.textShadow = "0 0 12px #ff0000, 0 0 25px #ff0000";
             }
 
+            // Stop background music on round end
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
                 gameAudio.stopMusic();
             }
