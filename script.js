@@ -818,48 +818,84 @@ function startNewRound() {
 }
 
 // Animated Speech Engine: Adds "Blurt it out!" with higher pitch/excitement
+// Speech Engine with speech pauses and excited "Blurt it out!" ending
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Clear any queued speech
+        window.speechSynthesis.cancel(); // Clear queued speech
 
-        let textToSpeak = `${topic}, starting with the letter ${letter}... Blurt it out!`;
+        // Part 1: Topic + Letter (with deliberate pauses for crisp pronunciation)
+        let introText = `${topic}, starting with the letter... ${letter}.`;
+        let hypeText = "Blurt it out!";
         let langCode = 'en-US';
 
         if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-            textToSpeak = `${topic}, empezando con la letra ${letter}... ¡Dilo ya!`;
+            introText = `${topic}, empezando con la letra... ${letter}.`;
+            hypeText = "¡Dilo ya!";
             langCode = 'es-ES';
         }
 
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = langCode;
-        
-        // Pitch & Rate adjustments to simulate energy & excitement!
-        utterance.rate = 1.05; 
-        utterance.pitch = 1.25;
+        const utteranceIntro = new SpeechSynthesisUtterance(introText);
+        utteranceIntro.lang = langCode;
+        utteranceIntro.rate = 0.95; // Slightly slower so the letter is distinct
 
-        // Timer & background music kick off simultaneously when speech finishes
-        utterance.onend = () => {
-            startTimer();
-            if (typeof gameAudio !== 'undefined') {
-                if (typeof gameAudio.init === 'function') gameAudio.init(); // Unlock AudioContext if restricted
-                if (typeof gameAudio.playMusic === 'function') gameAudio.playMusic();
-            }
+        const utteranceHype = new SpeechSynthesisUtterance(hypeText);
+        utteranceHype.lang = langCode;
+        utteranceHype.rate = 1.15;
+        utteranceHype.pitch = 1.35; // Excited pitch!
+
+        // Chain the hype phrase right after the prompt
+        utteranceIntro.onend = () => {
+            window.speechSynthesis.speak(utteranceHype);
         };
 
-        window.speechSynthesis.speak(utterance);
+        // Start timer + audio track when speech finishes
+        utteranceHype.onend = () => {
+            startTimer();
+            playGameMusic();
+        };
+
+        window.speechSynthesis.speak(utteranceIntro);
     } else {
         startTimer();
-        if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-            gameAudio.playMusic();
+        playGameMusic();
+    }
+}
+
+// Built-in synthesized audio player fallback
+function playGameMusic() {
+    if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+        gameAudio.playMusic();
+    } else {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {
+            console.log("Audio play error:", e);
         }
     }
 }
 
-// 15-second countdown timer with flashing red "TIME'S UP!" alert
+// 15-second timer with full-container flashing red alert on expiration
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
+    }
+
+    // Reset container box flashing styles on round start
+    const mainBox = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('.container');
+    if (mainBox) {
+        mainBox.style.boxShadow = "";
+        mainBox.style.borderColor = "";
+        mainBox.style.animation = "";
     }
     
     let timeLeft = 15;
@@ -874,8 +910,6 @@ function startTimer() {
         timeLeft--;
         if (timerEl) {
             timerEl.innerText = timeLeft;
-            
-            // Warning color as time gets low
             if (timeLeft <= 4 && timeLeft > 0) {
                 timerEl.style.color = "#ff4444";
             }
@@ -886,17 +920,21 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // Massive red flashing "TIME'S UP!" alert
+            // 1. Text display update
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
                 timerEl.style.fontSize = "2.4rem";
                 timerEl.style.fontWeight = "900";
                 timerEl.style.color = "#ff0000";
-                timerEl.style.textShadow = "0 0 12px #ff0000, 0 0 25px #ff0000";
-                timerEl.style.boxShadow = "0 0 20px #ff0000";
             }
 
-            // Stop background music on round end
+            // 2. Flash the whole main container box red!
+            const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
+            if (mainContainer) {
+                mainContainer.style.borderColor = "#ff0000";
+                mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
+            }
+
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
                 gameAudio.stopMusic();
             }
