@@ -871,20 +871,26 @@ function startTimer() {
         countdownInterval = null;
     }
 
-    // --- DROP YOUR AUDIO TRIGGERS RIGHT HERE ---
+    // --- FULL DRAMATIC AUDIO SUITE ---
     if (typeof gameAudio !== 'undefined') {
         gameAudio.unlock();
         const t0 = gameAudio.ctx.currentTime;
         const roundDuration = 15;
         
-        if (typeof gameAudio.layerOstinato === 'function') {
-            gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        }
         if (typeof gameAudio.layerDrone === 'function') {
             gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
         }
+        if (typeof gameAudio.layerOstinato === 'function') {
+            gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        }
+        if (typeof gameAudio.layerHeartbeat === 'function') {
+            gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        }
+        if (typeof gameAudio.layerRiser === 'function') {
+            gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        }
     }
-    // -------------------------------------------
+    // ---------------------------------
 
     // Reset container box styles on round start
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
@@ -894,7 +900,6 @@ function startTimer() {
     }
     
     let timeLeft = 15;
-    // ... rest of your timer code ...
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = timeLeft;
@@ -916,7 +921,12 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // 1. Text display update
+            // 1. Play the "ting!" sting sound effect
+            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playSting === 'function') {
+                gameAudio.playSting();
+            }
+
+            // 2. Text display update
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
                 timerEl.style.fontSize = "2.4rem";
@@ -924,7 +934,7 @@ function startTimer() {
                 timerEl.style.color = "#ff0000";
             }
 
-            // 2. Flash the container box red 3 times!
+            // 3. Flash the container box red 3 times!
             if (mainContainer) {
                 let flashCount = 0;
                 const flashInterval = setInterval(() => {
@@ -948,6 +958,8 @@ function startTimer() {
             // Stop custom music
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
                 gameAudio.stopMusic();
+            } else if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopAll === 'function') {
+                gameAudio.stopAll();
             }
         }
     }, 1000);
