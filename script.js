@@ -747,15 +747,9 @@ function generateDeck() {
     }
     return deck;
 }
+let countdownInterval = null;
 
-
-countdownInterval = null;
-
-let isTransitioning = false; // Add this near your state variables if not already there
-
-let isTransitioning = false;
-
-// Ensure transition flag is initialized safely without redeclaring
+// Use window property to prevent any block-scoped redeclaration conflicts
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
 }
