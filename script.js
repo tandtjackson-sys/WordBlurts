@@ -747,28 +747,26 @@ function generateDeck() {
     }
     return deck;
 }
-// Reset countdownInterval safely without redeclaring 'let'
-countdownInterval = null;
+let countdownInterval = null;
 
-// Use window property to prevent any block-scoped redeclaration conflicts
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
 }
 
 function startNewRound() {
-    // Prevent double-firing if a click happens while transitioning
     if (window.isTransitioning) return;
     window.isTransitioning = true;
-    setTimeout(() => { window.isTransitioning = false; }, 300); // Unlock after 300ms
+    setTimeout(() => { window.isTransitioning = false; }, 300);
 
     stopEverything();
 
-    // Reset timer display styling from any previous "Time's Up" flash
+    // Reset timer display styling
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
-        timerEl.innerText = 15; // Set to 15 seconds
+        timerEl.innerText = 15;
         timerEl.style.color = ""; 
         timerEl.style.fontSize = ""; 
+        timerEl.style.fontWeight = "";
         timerEl.classList.remove('flash-red');
     }
 
@@ -797,7 +795,6 @@ function startNewRound() {
                 ${englishTopic ? `<div style="font-size: 1.1rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
         } else {
-            // English Mode: Prominent large display font
             promptEl.innerHTML = `
                 <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
             `;
@@ -806,34 +803,62 @@ function startNewRound() {
     
     if (letterEl) letterEl.innerText = nextCard.letter;
     
-    // Announce the round out loud
+    // Announce the full phrase and start timer ONLY when speech finishes
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
 
     isRoundActive = true;
+}
 
-    // Start 15s timer and music after announcer speech delay (~1.5 seconds)
-    setTimeout(() => {
+// Robust Speech Engine with Natural Phrasing & On-End Trigger
+function speakPrompt(topic, letter) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Clear any queued speech
+
+        let textToSpeak = `${topic}, starting with the letter ${letter}`;
+        let langCode = 'en-US';
+
+        if (typeof currentLang !== 'undefined' && currentLang === 'es') {
+            textToSpeak = `${topic}, empezando con la letra ${letter}`;
+            langCode = 'es-ES';
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = langCode;
+        utterance.rate = 1.0;
+
+        // CRITICAL: Timer and music start precisely when the announcer finishes speaking!
+        utterance.onend = () => {
+            startTimer();
+            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+                gameAudio.playMusic();
+            }
+        };
+
+        window.speechSynthesis.speak(utterance);
+    } else {
+        // Fallback if browser speech synthesis isn't supported
         startTimer();
         if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
             gameAudio.playMusic();
         }
-    }, 1500);
+    }
 }
 
-// Built-in 15-second countdown timer with Time's Up & Flashing Red alert
+// Built-in 15-second countdown timer with large Time's Up alert
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
     
-    let timeLeft = 15; // 15-second round duration
+    let timeLeft = 15;
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = timeLeft;
         timerEl.style.color = "";
+        timerEl.style.fontSize = "";
     }
 
     countdownInterval = setInterval(() => {
@@ -841,7 +866,6 @@ function startTimer() {
         if (timerEl) {
             timerEl.innerText = timeLeft;
             
-            // Visual warning color as timer gets close to 0
             if (timeLeft <= 4 && timeLeft > 0) {
                 timerEl.style.color = "#ff4444";
             }
@@ -852,14 +876,14 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // Trigger "TIME'S UP!" alert & flashing red state
+            // Large, prominent "TIME'S UP!" alert
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
-                timerEl.style.fontSize = "1.2rem";
+                timerEl.style.fontSize = "1.6rem";
+                timerEl.style.fontWeight = "bold";
                 timerEl.style.color = "#ff0000";
             }
 
-            // Stop background music on time out
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
                 gameAudio.stopMusic();
             }
