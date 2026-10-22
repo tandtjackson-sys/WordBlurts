@@ -1173,54 +1173,63 @@ div.time-up-text {
         </div>
     </div>
 
-    <!-- PWA INSTALL BANNER (Moved above script tag) -->
+ <!-- PWA INSTALL BANNER -->
     <div id="pwaInstallBanner" class="pwa-banner hidden">
-        <div class="pwa-banner-content">
-            <div class="pwa-icon-wrapper">
-                <img src="icon-192.png" alt="Word Blurts Icon" class="pwa-app-icon">
-            </div>
-            <div class="pwa-text">
-                <span class="pwa-title">Install Word Blurts!</span>
-                <span class="pwa-subtext">Add to Home Screen for fast offline play!</span>
-            </div>
-        </div>
-        <div class="pwa-actions">
-            <button id="pwaInstallBtn" class="pwa-btn-install">Install</button>
-            <button id="pwaDismissBtn" class="pwa-btn-close" aria-label="Dismiss">&times;</button>
-        </div>
+        ... (your existing pwa banner code) ...
     </div>
 
-  <!-- ABOUT MODAL JAVASCRIPT -->
+    <!-- 1. PASTE THE NEW ABOUT SECTION HERE -->
+    <section id="about-section" style="max-width: 650px; width: 90%; margin: 40px auto; padding: 30px; text-align: left; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff;">
+        <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
+        
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            Welcome to <strong>Word Blurts!</strong> — a digital adaptation of a tabletop word game I originally created as a teenager back in 1984, which I called <em>Word Wit</em>. I copyrighted the rules with the federal government and sold copies at local bookstores and mail-order. Four years later, Milton Bradley released a similar game called <em>Scattergories</em>, which went on to become an incredible hit.
+        </p>
+
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            The original inspiration came from my Mother, who grew up playing a similar word association game in Germany. She taught us how to play, and it became a beloved family favorite over the years. The biggest drawback was always needing pencil and paper to write everything down — this digital version completely solves that issue!
+        </p>
+
+        <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Exercise for the Brain</h3>
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            Word Blurts! is designed for players of all ages. It offers youngsters a fun way to develop vocabulary and cognitive processing speed, while helping older adults keep their minds sharp and active — think of it as light exercise for your brain!
+        </p>
+
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            It is <strong>100% free to play</strong> with no sign-ups, downloads, or accounts required.
+        </p>
+
+        <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Behind the Project & Feedback</h3>
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            I built this web version with assistance from Gemini over about two months. The text-to-speech audio rendering varies across devices — it sounds crisp on Android devices and Firefox, though iOS behavior may differ depending on system speech synthesis settings.
+        </p>
+
+        <p style="margin-bottom: 14px; line-height: 1.6;">
+            I would love to hear your thoughts, bug reports, or feature ideas! Please share your feedback on Reddit:
+        </p>
+
+        <p style="text-align: center; margin-top: 18px;">
+            <a href="https://www.reddit.com/r/playmygame/comments/1wu77ad/blurt_it_out/" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               style="display: inline-block; background: #00f5d4; color: #0b0d19; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
+                💬 Leave Feedback on Reddit
+            </a>
+        </p>
+    </section>
+
+    <!-- 2. SMOOTH SCROLL JAVASCRIPT FOR ABOUT LINK -->
     <script>
     function openAboutModal(e) {
         if (e) e.preventDefault();
-        const modal = document.getElementById('about-modal');
-        if (modal) modal.style.display = 'flex';
-    }
-
-    function closeAboutModal() {
-        const modal = document.getElementById('about-modal');
-        if (modal) modal.style.display = 'none';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const closeBtn = document.getElementById('close-about-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeAboutModal);
+        const target = document.getElementById('about-section');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
         }
-
-        const modal = document.getElementById('about-modal');
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeAboutModal();
-                }
-            });
-        }
-    });
+    }
     </script>
 
-    <!-- SCRIPT TAG (Always comes last before </body>) -->
+    <!-- 3. YOUR MAIN SCRIPT TAG STAYS AT THE VERY BOTTOM -->
     <script src="script.js?v=1.85"></script>
 
 </body>
