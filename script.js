@@ -763,18 +763,24 @@ function startNewRound() {
 
     stopEverything();
 
+    // Reset timer display styling from any previous "Time's Up" flash
+    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
+    if (timerEl) {
+        timerEl.innerText = 15; // Set to 15 seconds
+        timerEl.style.color = ""; 
+        timerEl.style.fontSize = ""; 
+        timerEl.classList.remove('flash-red');
+    }
+
     // Pull next combo card from active deck
     const nextCard = drawNextCombo();
-
     console.log("Card object ready to display:", nextCard);
 
     // Update DOM Display Elements
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
-    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     
     if (promptEl) {
-        // Force the container to stack vertically as a flex column (fixes side-by-side layout bug)
         promptEl.style.display = 'flex';
         promptEl.style.flexDirection = 'column';
         promptEl.style.alignItems = 'center';
@@ -787,58 +793,76 @@ function startNewRound() {
                 : "";
 
             promptEl.innerHTML = `
-                <div style="font-size: 1.25rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 0.95rem; color: #aaa; opacity: 0.85; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
+                <div style="font-size: 1.65rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="font-size: 1.1rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
         } else {
-            // English Mode: Full prominent font size, centered, stacked
+            // English Mode: Prominent large display font
             promptEl.innerHTML = `
-                <div style="font-size: 1.25rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%;">${nextCard.topic}</div>
+                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
             `;
         }
     }
     
     if (letterEl) letterEl.innerText = nextCard.letter;
-    if (timerEl) {
-        timerEl.innerText = 10;
-        timerEl.style.fontSize = ""; 
-    }
     
-    // Announce the round cleanly once
+    // Announce the round out loud
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
 
-    // Set round state active and trigger timer + music
     isRoundActive = true;
 
-    // Guaranteed Timer Engine execution
-    startTimer();
-
-    if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-        gameAudio.playMusic();
-    }
+    // Start 15s timer and music after announcer speech delay (~1.5 seconds)
+    setTimeout(() => {
+        startTimer();
+        if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
+            gameAudio.playMusic();
+        }
+    }, 1500);
 }
 
-// Built-in robust countdown timer
+// Built-in 15-second countdown timer with Time's Up & Flashing Red alert
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
     
-    let timeLeft = 10;
+    let timeLeft = 15; // 15-second round duration
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
-    if (timerEl) timerEl.innerText = timeLeft;
+    if (timerEl) {
+        timerEl.innerText = timeLeft;
+        timerEl.style.color = "";
+    }
 
     countdownInterval = setInterval(() => {
         timeLeft--;
-        if (timerEl) timerEl.innerText = timeLeft;
+        if (timerEl) {
+            timerEl.innerText = timeLeft;
+            
+            // Visual warning color as timer gets close to 0
+            if (timeLeft <= 4 && timeLeft > 0) {
+                timerEl.style.color = "#ff4444";
+            }
+        }
         
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
             isRoundActive = false;
+
+            // Trigger "TIME'S UP!" alert & flashing red state
+            if (timerEl) {
+                timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
+                timerEl.style.fontSize = "1.2rem";
+                timerEl.style.color = "#ff0000";
+            }
+
+            // Stop background music on time out
+            if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
+                gameAudio.stopMusic();
+            }
         }
     }, 1000);
 }
