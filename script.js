@@ -747,6 +747,7 @@ function generateDeck() {
     }
     return deck;
 }
+
 // Reset countdownInterval safely without redeclaring 'let'
 countdownInterval = null;
 
@@ -810,7 +811,13 @@ function startNewRound() {
     if (letterEl) letterEl.innerText = nextCard.letter;
     
     // Announce prompt out loud with animated voice
-   // Speech Engine with crisp letter pause and excited "Blurt it out!" ending
+    speakPrompt(nextCard.topic, nextCard.letter);
+    
+    if (typeof refreshAds === 'function') refreshAds();
+
+    isRoundActive = true;
+}
+
 // Speech Engine with crisp letter pause and excited "Blurt it out!" ending
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
