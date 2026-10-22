@@ -793,10 +793,10 @@ function startNewRound() {
                 ? GAME_DATA['en'].topicsMaster[esIndex] 
                 : "";
 
-            // Spanish Mode: Topics boosted by ~20% (2.0rem primary, 1.25rem subtitle)
+            // Spanish Mode: Topics boosted by ~20% (2.0rem primary, 1.5rem subtitle)
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 1.25rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
+                ${englishTopic ? `<div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
         } else {
             // English Mode
