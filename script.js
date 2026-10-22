@@ -753,6 +753,8 @@ countdownInterval = null;
 
 let isTransitioning = false; // Add this near your state variables if not already there
 
+let isTransitioning = false;
+
 function startNewRound() {
     // Prevent double-firing if a click happens while transitioning
     if (isTransitioning) return;
@@ -772,6 +774,12 @@ function startNewRound() {
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     
     if (promptEl) {
+        // Force the container to stack vertically as a flex column (fixes side-by-side layout bug)
+        promptEl.style.display = 'flex';
+        promptEl.style.flexDirection = 'column';
+        promptEl.style.alignItems = 'center';
+        promptEl.style.justifyContent = 'center';
+
         if (typeof currentLang !== 'undefined' && currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
             const esIndex = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
             const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) 
@@ -779,11 +787,14 @@ function startNewRound() {
                 : "";
 
             promptEl.innerHTML = `
-                <div style="display: block; font-size: 1.25rem; font-weight: bold; color: #ffd700; margin-bottom: 6px;">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="display: block; font-size: 0.95rem; color: #aaa; opacity: 0.85;">(${englishTopic})</div>` : ''}
+                <div style="font-size: 1.25rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>
+                ${englishTopic ? `<div style="font-size: 0.95rem; color: #aaa; opacity: 0.85; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
         } else {
-            promptEl.innerHTML = `<div style="display: block; font-size: 1.25rem; font-weight: bold; color: #ffd700;">${nextCard.topic}</div>`;
+            // English Mode: Full prominent font size, centered, stacked
+            promptEl.innerHTML = `
+                <div style="font-size: 1.25rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%;">${nextCard.topic}</div>
+            `;
         }
     }
     
@@ -801,13 +812,35 @@ function startNewRound() {
     // Set round state active and trigger timer + music
     isRoundActive = true;
 
-    if (typeof startTimer === 'function') {
-        startTimer();
-    }
+    // Guaranteed Timer Engine execution
+    startTimer();
 
     if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
         gameAudio.playMusic();
     }
+}
+
+// Built-in robust countdown timer
+function startTimer() {
+    if (countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    
+    let timeLeft = 10;
+    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
+    if (timerEl) timerEl.innerText = timeLeft;
+
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timerEl) timerEl.innerText = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            isRoundActive = false;
+        }
+    }, 1000);
 }
 
 
