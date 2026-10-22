@@ -769,6 +769,7 @@ function startNewRound() {
         timerEl.style.fontSize = ""; 
         timerEl.style.fontWeight = "";
         timerEl.style.textShadow = "";
+        timerEl.style.boxShadow = "";
         timerEl.style.animation = "";
         timerEl.classList.remove('flash-red');
     }
@@ -793,7 +794,7 @@ function startNewRound() {
                 ? GAME_DATA['en'].topicsMaster[esIndex] 
                 : "";
 
-            // Spanish Mode: Topics boosted by ~20% (2.0rem primary, 1.5rem subtitle)
+            // Spanish Mode: 2.0rem primary, 1.5rem gray sub-text
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
                 ${englishTopic ? `<div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
@@ -808,7 +809,7 @@ function startNewRound() {
     
     if (letterEl) letterEl.innerText = nextCard.letter;
     
-    // Announce prompt out loud
+    // Announce prompt out loud with animated voice
     speakPrompt(nextCard.topic, nextCard.letter);
     
     if (typeof refreshAds === 'function') refreshAds();
@@ -816,28 +817,32 @@ function startNewRound() {
     isRoundActive = true;
 }
 
-// Speech Engine: Triggers Timer + Music strictly after speech ends
+// Animated Speech Engine: Adds "Blurt it out!" with higher pitch/excitement
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel(); // Clear any queued speech
 
-        let textToSpeak = `${topic}, starting with the letter ${letter}`;
+        let textToSpeak = `${topic}, starting with the letter ${letter}... Blurt it out!`;
         let langCode = 'en-US';
 
         if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-            textToSpeak = `${topic}, empezando con la letra ${letter}`;
+            textToSpeak = `${topic}, empezando con la letra ${letter}... ¡Dilo ya!`;
             langCode = 'es-ES';
         }
 
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = langCode;
-        utterance.rate = 1.0;
+        
+        // Pitch & Rate adjustments to simulate energy & excitement!
+        utterance.rate = 1.05; 
+        utterance.pitch = 1.25;
 
         // Timer & background music kick off simultaneously when speech finishes
         utterance.onend = () => {
             startTimer();
-            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-                gameAudio.playMusic();
+            if (typeof gameAudio !== 'undefined') {
+                if (typeof gameAudio.init === 'function') gameAudio.init(); // Unlock AudioContext if restricted
+                if (typeof gameAudio.playMusic === 'function') gameAudio.playMusic();
             }
         };
 
@@ -850,7 +855,7 @@ function speakPrompt(topic, letter) {
     }
 }
 
-// 15-second countdown timer with massive, flashing red "TIME'S UP!" alert
+// 15-second countdown timer with flashing red "TIME'S UP!" alert
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
@@ -881,13 +886,14 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false;
 
-            // Huge, flashing red "TIME'S UP!" visual alert
+            // Massive red flashing "TIME'S UP!" alert
             if (timerEl) {
                 timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
                 timerEl.style.fontSize = "2.4rem";
                 timerEl.style.fontWeight = "900";
                 timerEl.style.color = "#ff0000";
                 timerEl.style.textShadow = "0 0 12px #ff0000, 0 0 25px #ff0000";
+                timerEl.style.boxShadow = "0 0 20px #ff0000";
             }
 
             // Stop background music on round end
