@@ -653,8 +653,7 @@ const GAME_DATA = {
     }
 };
 
-// Active game language variable
-let currentLang = "en"; 
+
 // ==========================================
 // 2. ANNOUNCER ENGINE (CODE #2)
 // ==========================================
