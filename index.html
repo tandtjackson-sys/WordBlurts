@@ -1244,16 +1244,19 @@ div.time-up-text {
 
     <!-- SMOOTH SCROLL JAVASCRIPT FOR ABOUT LINK -->
     <script>
+<script>
     function openAboutModal(e) {
         if (e) e.preventDefault();
-        const target = document.getElementById('about-section');
+        const target = document.getElementById('about-modal');
         if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
+            target.style.display = 'flex';
         }
     }
-        let currentLang = 'en';
 
-function toggleLanguage() {
+    let currentLang = 'en';
+
+    function toggleLanguage() {
+        // ... rest of your toggleLanguage code stays exactly the same ...
     const langBtn = document.getElementById('lang-toggle-btn');
     const rulesCard = document.getElementById('rulesCard');
     const about1 = document.getElementById('about-section-1');
@@ -1423,7 +1426,7 @@ function toggleLanguage() {
     </script>
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=1.96"></script>
+    <script src="script.js?v=1.97"></script>
 
 </body>
 </html>
