@@ -635,7 +635,7 @@ function playSlideDown() {
 // GAME CORE ENGINE & SETUP (LOCALIZED)
 // ==========================================
 
-const GAME_DATA = {
+
     en: {
         code: "en-US",
         lettersMaster: ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","W"],
