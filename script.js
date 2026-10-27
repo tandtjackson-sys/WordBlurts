@@ -669,7 +669,7 @@ const GAME_DATA = {
             "Something soft", "Something heavy"
         ]
     },
-   es: {
+    es: {
         code: "es-MX",
         lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
         topicsMaster: [
@@ -703,7 +703,6 @@ const GAME_DATA = {
         ]
     }
 };
-
 
 // ==========================================
 // 2. ANNOUNCER ENGINE (CODE #2)
