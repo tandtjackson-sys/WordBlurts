@@ -1,4 +1,55 @@
 // ==========================================
+// GAME CORE ENGINE & SETUP (LOCALIZED)
+// ==========================================
+
+const GAME_DATA = {
+    en: {
+        // ... your English data ...
+    },
+    es: {
+        // ... your Spanish data ...
+    }
+};
+
+let currentLang = 'en';
+
+function toggleLanguage() {
+    const langBtn = document.getElementById('lang-toggle-btn');
+    const rulesCard = document.getElementById('rulesCard');
+    const about1 = document.getElementById('about-section-1');
+    const about2 = document.getElementById('about-section-2');
+    
+    if (currentLang === 'en') {
+        currentLang = 'es';
+        if (langBtn) langBtn.innerHTML = '<span>🇺🇸 English</span>';
+        
+        if (rulesCard) {
+            rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, mantén presionada la tecla Función (Fn) mientras presionas F11 para jugar en pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!", tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta tus puntuaciones a continuación...`;
+        }
+        
+        if (about1) {
+            about1.innerHTML = `
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">Acerca de Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción.</p>
+            `;
+        }
+    } else {
+        currentLang = 'en';
+        if (langBtn) langBtn.innerHTML = '<span>🇪🇸 Español</span>';
+        
+        if (rulesCard) {
+            rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter...`;
+        }
+        
+        if (about1) {
+            about1.innerHTML = `
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> is a fast-paced, free online party word game...</p>
+            `;
+        }
+    }
+}
+// ==========================================
 // GAME STATE VARIABLES
 // ==========================================
 let isDailyMode = false;
