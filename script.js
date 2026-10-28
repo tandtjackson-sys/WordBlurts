@@ -668,7 +668,8 @@ const GAME_DATA = {
             "A place you go on a date", "Something with wheels", "Something a mechanic uses",
             "Something soft", "Something heavy"
         ]
-    },
+    }
+};
     es: {
         code: "es-MX",
         lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
