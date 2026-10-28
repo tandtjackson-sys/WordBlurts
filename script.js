@@ -668,8 +668,7 @@ const GAME_DATA = {
             "A place you go on a date", "Something with wheels", "Something a mechanic uses",
             "Something soft", "Something heavy"
         ]
-    }
-};
+    },
     es: {
         code: "es-MX",
         lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
@@ -681,7 +680,7 @@ const GAME_DATA = {
             "Un instrumento musical", "Un deporte o juego", "Un estado de EE. UU.",
             "Cualquier animal", "Un ingrediente para pizza", "Una marca de autos",
             "Algo que no debes tocar con las manos desnudas", "Un disfraz de Halloween", "Algo que te hace sentir cansado o agotado",
-            "Un juego de mesa o videojuego", "Una profesión u oficio", "Un país",
+            "Un juego de mesa o videojuego", "Un oficio u profesión", "Un país",
             "Un sabor de helado", "Algo que hay en un salón de clases", "Un dulce o caramelo",
             "Una parte del cuerpo humano", "Algo que ves en el cielo nocturno", "Una verdura",
             "Una fruta", "Algo que encuentras en la playa", "Una cadena de restaurantes",
@@ -770,6 +769,7 @@ function announceRound(letter, topic) {
 
     window.speechSynthesis.speak(utterance);
 }
+
 // ==========================================
 // 3. LANGUAGE SWITCHER & UI UPDATER (CODE #3)
 // ==========================================
@@ -784,7 +784,6 @@ function switchLanguage(langCode) {
     // Update active pointers for your game loop
     const activeData = GAME_DATA[currentLang];
     
-    // If your existing engine uses these variable names globally, keep them synced:
     window.lettersMaster = activeData.lettersMaster;
     window.topicsMaster = activeData.topicsMaster;
 
@@ -801,7 +800,6 @@ function switchLanguage(langCode) {
 function updateStaticUI() {
     const isEs = currentLang === "es";
 
-    // Example bindings - update these IDs to match your actual HTML elements
     const startBtn = document.getElementById("start-btn");
     const langToggleBtn = document.getElementById("lang-toggle-btn");
 
@@ -810,7 +808,6 @@ function updateStaticUI() {
     }
     
     if (langToggleBtn) {
-        // Displays the flag or text for the *other* available language to switch to
         langToggleBtn.textContent = isEs ? "🇺🇸 English" : "🇪🇸 Español";
     }
 }
@@ -825,12 +822,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // 3. YOUR GAME LOOP / ROUND TRIGGER
 // ==========================================
 
-// Helper references dynamically pointing to current language data
 let topicsMaster = GAME_DATA[currentLang].topicsMaster;
 let lettersMaster = GAME_DATA[currentLang].lettersMaster;
 
 function generateDeck() {
-    // Always draw from active language lists
     topicsMaster = GAME_DATA[currentLang].topicsMaster;
     lettersMaster = GAME_DATA[currentLang].lettersMaster;
     
@@ -844,7 +839,7 @@ function generateDeck() {
 }
 
 // Reset countdownInterval safely without redeclaring 'let'
-countdownInterval = null;
+let countdownInterval = null;
 
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
@@ -855,9 +850,10 @@ function startNewRound() {
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
-    stopEverything();
+    if (typeof stopEverything === "function") {
+        stopEverything();
+    }
 
-    // Reset timer display & flashing container styles
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = 15;
@@ -869,6 +865,7 @@ function startNewRound() {
         timerEl.style.animation = "";
         timerEl.classList.remove('flash-red');
     }
+}
 
     // Pull next combo card from active deck
     const nextCard = drawNextCombo();
