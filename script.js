@@ -865,9 +865,8 @@ function startNewRound() {
         timerEl.style.animation = "";
         timerEl.classList.remove('flash-red');
     }
-}
 
-    // Pull next combo card from active deck
+    // Pull next combo card from active deck (Now safely inside startNewRound!)
     const nextCard = drawNextCombo();
     console.log("Card object ready to display:", nextCard);
 
@@ -899,6 +898,7 @@ function startNewRound() {
             `;
         }
     }
+}
     
     if (letterEl) letterEl.innerText = nextCard.letter;
     
