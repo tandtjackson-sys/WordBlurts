@@ -839,8 +839,7 @@ function generateDeck() {
     return deck;
 }
 
-// Reset countdownInterval safely without redeclaring 'let'
-let countdownInterval = null;
+
 
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
