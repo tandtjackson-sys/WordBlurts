@@ -110,7 +110,7 @@ function toggleLanguage() {
     }
 }
 
-let currentLang = 'en';
+
 
 function toggleLanguage() {
     const langBtn = document.getElementById('lang-toggle-btn');
