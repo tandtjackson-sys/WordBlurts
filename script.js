@@ -734,41 +734,8 @@ function playSlideDown() {
 // GAME CORE ENGINE & SETUP (LOCALIZED)
 // ==========================================
 
-const GAME_DATA = {
-    en: {
-        code: "en-US",
-        lettersMaster: ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","W"],
-        topicsMaster: [
-            "A famous actor", "An item in a refrigerator", "An item found in most offices",
-            "A fast food chain", "A superhero", "Something you find in a bathroom",
-            "A part of a car", "Something that makes noise", "A title of a TV show",
-            "A movie title", "A breakfast food", "Something in a hardware store",
-            "A musical instrument", "A sport or game", "A state in the U.S.A.",
-            "Any animal", "A pizza topping", "A brand of car",
-            "Something you shouldn't touch with your bare hands", "A Halloween costume", "Something that makes you tired or exhausted",
-            "A board game or video game", "A profession or job", "A country",
-            "A flavor of ice cream", "Something found in a classroom", "A candy",
-            "A part of the human body", "Something in the night sky", "A vegetable",
-            "A fruit", "Something you find at a beach", "A restaurant chain",
-            "Something found in a purse or wallet", "A household chore", "Something you drink",
-            "A word with double letters", "Something that uses electricity", "A piece of clothing",
-            "A holiday or celebration", "Something cold", "Something hot",
-            "Something hairy", "Something sharp", "An item in a bakery",
-            "A famous landmark", "Something found in an attic", "A daily activity",
-            "Something found in a kitchen", "A nickname", "Something sticky",
-            "A type of flower or plant", "Clothing or accessories", "A dangerous animal",
-            "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
-            "Something round", "An item in a grocery store", "Something you find in nature",
-            "A snack food", "A famous company", "Something made of wood",
-            "Something made of metal", "A dog breed", "Something you buy at a gas station",
-            "A song title", "A famous musician", "Something you plug in",
-            "Something in an ocean", "A breakfast cereal", "Something you do in summer",
-            "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
-            "A place you go on a date", "Something with wheels", "Something a mechanic uses",
-            "Something soft", "Something heavy"
-        ]
-    }
-let currentLang = 'en';
+
+
 
 function toggleLanguage() {
     const langBtn = document.getElementById('lang-toggle-btn');
