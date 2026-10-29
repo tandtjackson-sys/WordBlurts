@@ -767,7 +767,7 @@ const GAME_DATA = {
             "A place you go on a date", "Something with wheels", "Something a mechanic uses",
             "Something soft", "Something heavy"
         ]
-    },
+    }
 let currentLang = 'en';
 
 function toggleLanguage() {
