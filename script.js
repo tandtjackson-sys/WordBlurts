@@ -4,12 +4,111 @@
 
 const GAME_DATA = {
     en: {
-        // ... your English data ...
+        code: "en-US",
+        lettersMaster: ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","W"],
+        topicsMaster: [
+            "A famous actor", "An item in a refrigerator", "An item found in most offices",
+            "A fast food chain", "A superhero", "Something you find in a bathroom",
+            "A part of a car", "Something that makes noise", "A title of a TV show",
+            "A movie title", "A breakfast food", "Something in a hardware store",
+            "A musical instrument", "A sport or game", "A state in the U.S.A.",
+            "Any animal", "A pizza topping", "A brand of car",
+            "Something you shouldn't touch with your bare hands", "A Halloween costume", "Something that makes you tired or exhausted",
+            "A board game or video game", "A profession or job", "A country",
+            "A flavor of ice cream", "Something found in a classroom", "A candy",
+            "A part of the human body", "Something in the night sky", "A vegetable",
+            "A fruit", "Something you find at a beach", "A restaurant chain",
+            "Something found in a purse or wallet", "A household chore", "Something you drink",
+            "A word with double letters", "Something that uses electricity", "A piece of clothing",
+            "A holiday or celebration", "Something cold", "Something hot",
+            "Something hairy", "Something sharp", "An item in a bakery",
+            "A famous landmark", "Something found in an attic", "A daily activity",
+            "Something found in a kitchen", "A nickname", "Something sticky",
+            "A type of flower or plant", "Clothing or accessories", "A dangerous animal",
+            "Something you take on a camping trip", "A cartoon character", "Something red, yellow or blue",
+            "Something round", "An item in a grocery store", "Something you find in nature",
+            "A snack food", "A famous company", "Something made of wood",
+            "Something made of metal", "A dog breed", "Something you buy at a gas station",
+            "A song title", "A famous musician", "Something you plug in",
+            "Something in an ocean", "A breakfast cereal", "Something you do in summer",
+            "A villain, bad guy or monster", "Something that smells good", "Something that smells bad",
+            "A place you go on a date", "Something with wheels", "Something a mechanic uses",
+            "Something soft", "Something heavy"
+        ]
     },
     es: {
-        // ... your Spanish data ...
+        code: "es-MX",
+        lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
+        topicsMaster: [
+            "Un actor o actriz famoso/a", "Un alimento en el refrigerador", "Un objeto que hay en una oficina",
+            "Una cadena de comida rápida", "Un superhéroe", "Algo que encuentras en el baño",
+            "Una parte de un automóvil", "Algo que hace ruido", "El título de un programa de TV",
+            "El título de una película", "Un alimento para el desayuno", "Algo que venden en una ferretería",
+            "Un instrumento musical", "Un deporte o juego", "Un estado de EE. UU.",
+            "Cualquier animal", "Un ingrediente para pizza", "Una marca de autos",
+            "Algo que no debes tocar con las manos desnudas", "Un disfraz de Halloween", "Algo que te hace sentir cansado o agotado",
+            "Un juego de mesa o videojuego", "Un oficio u profesión", "Un país",
+            "Un sabor de helado", "Algo que hay en un salón de clases", "Un dulce o caramelo",
+            "Una parte del cuerpo humano", "Algo que ves en el cielo nocturno", "Una verdura",
+            "Una fruta", "Algo que encuentras en la playa", "Una cadena de restaurantes",
+            "Algo que encuentras en una cartera o billetera", "Una tarea del hogar", "Algo que bebes",
+            "Una palabra con letras dobles", "Algo que usa electricidad", "Una prenda de vestir",
+            "Un día festivo o celebración", "Algo frío", "Algo caliente",
+            "Algo peludo", "Algo afilado", "Un producto de panadería",
+            "Un lugar o monumento famoso", "Algo que guardas en el ático", "Una actividad diaria",
+            "Algo que encuentras en la cocina", "Un apodo o sobrenombre", "Algo pegajoso",
+            "Un tipo de flor o planta", "Ropa o accesorios", "Un animal peligroso",
+            "Algo que llevas a un campamento", "Un personaje de dibujos animados", "Algo de color rojo, amarillo o azul",
+            "Algo redondo", "Un producto de supermercado", "Algo que encuentras en la naturaleza",
+            "Un bocadillo o snack", "Una empresa famosa", "Algo hecho de madera",
+            "Algo hecho de metal", "Una raza de perro", "Algo que compras en una gasolinera",
+            "El título de una canción", "Un músico famoso", "Algo que se conecta a la corriente",
+            "Algo que hay en un océano", "Un cereal para el desayuno", "Algo que haces en verano",
+            "Un villano, malo o monstruo", "Algo que huele bien", "Algo que huele mal",
+            "Un lugar para ir en una cita", "Algo con ruedas", "Una herramienta que usa un mecánico",
+            "Algo suave", "Algo pesado"
+        ]
     }
 };
+
+let currentLang = 'en';
+
+function toggleLanguage() {
+    const langBtn = document.getElementById('lang-toggle-btn');
+    const rulesCard = document.getElementById('rulesCard');
+    const about1 = document.getElementById('about-section-1');
+    const about2 = document.getElementById('about-section-2');
+    
+    if (currentLang === 'en') {
+        currentLang = 'es';
+        if (langBtn) langBtn.innerHTML = '<span>🇺🇸 English</span>';
+        
+        if (rulesCard) {
+            rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, mantén presionada la tecla Función (Fn) mientras presionas F11 para jugar en pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!", tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta tus puntuaciones a continuación...`;
+        }
+        
+        if (about1) {
+            about1.innerHTML = `
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">Acerca de Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción.</p>
+            `;
+        }
+    } else {
+        currentLang = 'en';
+        if (langBtn) langBtn.innerHTML = '<span>🇪🇸 Español</span>';
+        
+        if (rulesCard) {
+            rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter...`;
+        }
+        
+        if (about1) {
+            about1.innerHTML = `
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> is a fast-paced, free online party word game...</p>
+            `;
+        }
+    }
+}
 
 let currentLang = 'en';
 
@@ -669,41 +768,6 @@ const GAME_DATA = {
             "Something soft", "Something heavy"
         ]
     },
-    es: {
-        code: "es-MX",
-        lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"],
-        topicsMaster: [
-            "Un actor o actriz famoso/a", "Un alimento en el refrigerador", "Un objeto que hay en una oficina",
-            "Una cadena de comida rápida", "Un superhéroe", "Algo que encuentras en el baño",
-            "Una parte de un automóvil", "Algo que hace ruido", "El título de un programa de TV",
-            "El título de una película", "Un alimento para el desayuno", "Algo que venden en una ferretería",
-            "Un instrumento musical", "Un deporte o juego", "Un estado de EE. UU.",
-            "Cualquier animal", "Un ingrediente para pizza", "Una marca de autos",
-            "Algo que no debes tocar con las manos desnudas", "Un disfraz de Halloween", "Algo que te hace sentir cansado o agotado",
-            "Un juego de mesa o videojuego", "Un oficio u profesión", "Un país",
-            "Un sabor de helado", "Algo que hay en un salón de clases", "Un dulce o caramelo",
-            "Una parte del cuerpo humano", "Algo que ves en el cielo nocturno", "Una verdura",
-            "Una fruta", "Algo que encuentras en la playa", "Una cadena de restaurantes",
-            "Algo que encuentras en una cartera o billetera", "Una tarea del hogar", "Algo que bebes",
-            "Una palabra con letras dobles", "Algo que usa electricidad", "Una prenda de vestir",
-            "Un día festivo o celebración", "Algo frío", "Algo caliente",
-            "Algo peludo", "Algo afilado", "Un producto de panadería",
-            "Un lugar o monumento famoso", "Algo que guardas en el ático", "Una actividad diaria",
-            "Algo que encuentras en la cocina", "Un apodo o sobrenombre", "Algo pegajoso",
-            "Un tipo de flor o planta", "Ropa o accesorios", "Un animal peligroso",
-            "Algo que llevas a un campamento", "Un personaje de dibujos animados", "Algo de color rojo, amarillo o azul",
-            "Algo redondo", "Un producto de supermercado", "Algo que encuentras en la naturaleza",
-            "Un bocadillo o snack", "Una empresa famosa", "Algo hecho de madera",
-            "Algo hecho de metal", "Una raza de perro", "Algo que compras en una gasolinera",
-            "El título de una canción", "Un músico famoso", "Algo que se conecta a la corriente",
-            "Algo que hay en un océano", "Un cereal para el desayuno", "Algo que haces en verano",
-            "Un villano, malo o monstruo", "Algo que huele bien", "Algo que huele mal",
-            "Un lugar para ir en una cita", "Algo con ruedas", "Una herramienta que usa un mecánico",
-            "Algo suave", "Algo pesado"
-        ]
-    }
-};
-
 let currentLang = 'en';
 
 function toggleLanguage() {
@@ -711,36 +775,6 @@ function toggleLanguage() {
     const rulesCard = document.getElementById('rulesCard');
     const about1 = document.getElementById('about-section-1');
     const about2 = document.getElementById('about-section-2');
-    
-    if (currentLang === 'en') {
-        currentLang = 'es';
-        if (langBtn) langBtn.innerHTML = '<span>🇺🇸 English</span>';
-        
-        if (rulesCard) {
-            rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, mantén presionada la tecla Función (Fn) mientras presionas F11 para jugar en pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!", tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta tus puntuaciones a continuación...`;
-        }
-        
-        if (about1) {
-            about1.innerHTML = `
-                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">Acerca de Word Blurts!</h2>
-                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción.</p>
-            `;
-        }
-    } else {
-        currentLang = 'en';
-        if (langBtn) langBtn.innerHTML = '<span>🇪🇸 Español</span>';
-        
-        if (rulesCard) {
-            rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter...`;
-        }
-        
-        if (about1) {
-            about1.innerHTML = `
-                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
-                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> is a fast-paced, free online party word game...</p>
-            `;
-        }
-    }
 }
 
 // ==========================================
