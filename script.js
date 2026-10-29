@@ -891,24 +891,23 @@ function startNewRound() {
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
                 ${englishTopic ? `<div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
-        } else {
-            // English Mode
-            promptEl.innerHTML = `
-                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
-            `;
-        }
-    }
-}
-    
-    if (letterEl) letterEl.innerText = nextCard.letter;
-    
-    // Announce prompt out loud with animated voice
-    speakPrompt(nextCard.topic, nextCard.letter);
-    
-    if (typeof refreshAds === 'function') refreshAds();
+   } else {
+                    // English Mode
+                    promptEl.innerHTML = `
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
+                    `;
+                }
+            } // <--- Keep only the braces needed to close your if/else and parent blocks
+            
+            if (letterEl) letterEl.innerText = nextCard.letter;
+            
+            // Announce prompt out loud with animated voice
+            speakPrompt(nextCard.topic, nextCard.letter);
+            
+            if (typeof refreshAds === 'function') refreshAds();
 
-    isRoundActive = true;
-}
+            isRoundActive = true;
+        } // <--- This final brace closes the whole function cleanly
 
 // Speech Engine with crisp letter pause and excited "Blurt it out!" ending
 function speakPrompt(topic, letter) {
