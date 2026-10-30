@@ -5,7 +5,7 @@
 const GAME_DATA = {
     en: {
         code: "en-US",
-        lettersMaster: ["A!","B!","C!","D!","E!","F!","G!","H!","I!","J!","K!","L!","M!","N!","P!","R!","S!","T!","W!"],
+        lettersMaster: ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","P","R","S","T","W"],
         topicsMaster: [
             "A famous actor!", "An item in a refrigerator!", "An item found in most offices!",
             "A fast food chain!", "A superhero!", "Something you find in a bathroom!",
@@ -38,7 +38,7 @@ const GAME_DATA = {
     },
     es: {
         code: "es-MX",
-        lettersMaster: ["A!", "B!", "C!", "D!", "E!", "F!", "G!", "H!", "I!", "J!", "L!", "M!", "N!", "Ñ!", "P!", "Q!", "R!", "S!", "T!", "U!", "V!", "Z!"],
+        lettersMaster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "L", "M", "N", "Ñ", "P", "Q", "R", "S", "T", "U", "V", "Z"],
         topicsMaster: [
             "¡Un actor o actriz famoso/a!", "¡Un alimento en el refrigerador!", "¡Un objeto que hay en una oficina!",
             "¡Una cadena de comida rápida!", "¡Un superhéroe!", "¡Algo que encuentras en el baño!",
