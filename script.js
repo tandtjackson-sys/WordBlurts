@@ -144,7 +144,7 @@ function speakPrompt(topic, letter) {
     if (typeof currentLang !== 'undefined' && currentLang === 'es') {
         // Speaks Spanish prompt naturally without prepending "Tema" / "Letra"
         textToSpeak = `${topic}. Letra ${letter}.`;
-        voiceLang = 'es-ES';
+        voiceLang = 'es-MX';
     } else {
         // Speaks English prompt naturally without prepending "Topic" / "Letter"
         textToSpeak = `${topic}. Letter ${letter}.`;
@@ -153,7 +153,8 @@ function speakPrompt(topic, letter) {
     
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = voiceLang;
-    utterance.rate = 1.0;
+    utterance.pitch = 1.25; // Pumps up the pitch for excitement!
+    utterance.rate = 1.1;   // Snaps the speed up so it sounds punchy!
     
     // Non-blocking asynchronous speech trigger
     setTimeout(() => {
@@ -859,7 +860,7 @@ function startNewRound() {
                         <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
                     `;
                 }
-            } // <--- Keep only the braces needed to close your if/else and parent blocks
+      } // <--- Closes topic/letter DOM assignment block
             
             if (letterEl) letterEl.innerText = nextCard.letter;
             
@@ -869,9 +870,11 @@ function startNewRound() {
             if (typeof refreshAds === 'function') refreshAds();
 
             isRoundActive = true;
-        } // <--- This final brace closes the whole function cleanly
+        } // <--- Closes the main drawCard / dealRound function cleanly
 
-// Speech Engine with crisp letter pause and excited "Blurt it out!" ending
+// ==========================================
+// AUDIO ANNOUNCER ENGINE
+// ==========================================
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel(); // Clear queued speech
@@ -883,26 +886,27 @@ function speakPrompt(topic, letter) {
         if (typeof currentLang !== 'undefined' && currentLang === 'es') {
             introText = `${topic}, empezando con la letra... ${letter}.`;
             hypeText = "¡Dilo ya!";
-            langCode = 'es-ES';
+            langCode = 'es-MX';
         }
 
         const utteranceIntro = new SpeechSynthesisUtterance(introText);
         utteranceIntro.lang = langCode;
-        utteranceIntro.rate = 0.95; // Clean pacing for letter clarity
+        utteranceIntro.rate = 1.05; // Crisp pacing for topic and letter clarity
+        utteranceIntro.pitch = 1.1;
 
         const utteranceHype = new SpeechSynthesisUtterance(hypeText);
         utteranceHype.lang = langCode;
-        utteranceHype.rate = 1.15;
-        utteranceHype.pitch = 1.35; // Excited pitch
+        utteranceHype.rate = 1.15; // Snappy delivery
+        utteranceHype.pitch = 1.35; // Excited announcer inflection
 
         // Chain hype phrase right after intro
         utteranceIntro.onend = () => {
             window.speechSynthesis.speak(utteranceHype);
         };
 
-        // Start timer and play your custom background music when speech finishes
+        // Start timer and play background music when speech completes
         utteranceHype.onend = () => {
-            startTimer();
+            if (typeof startTimer === 'function') startTimer();
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
                 gameAudio.playMusic();
             }
@@ -910,7 +914,7 @@ function speakPrompt(topic, letter) {
 
         window.speechSynthesis.speak(utteranceIntro);
     } else {
-        startTimer();
+        if (typeof startTimer === 'function') startTimer();
         if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
             gameAudio.playMusic();
         }
