@@ -110,6 +110,9 @@ function toggleLanguage() {
     }
 }
 
+// Explicitly expose it to the global window scope so inline HTML onclick can find it
+window.toggleLanguage = toggleLanguage;
+
 // ==========================================
 // GAME STATE VARIABLES
 // ==========================================
