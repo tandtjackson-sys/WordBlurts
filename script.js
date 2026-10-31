@@ -1659,4 +1659,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Any other global window bindings your HTML needs can go right here too!
 
-})(); // Closes and executes the IIFE immediately
+
