@@ -1339,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '10';
+            if (timerDisplay) timerDisplay.textContent = '15'; // <--- Set to 15
 
             if (typeof resetTimer === 'function') resetTimer();
         });
@@ -1366,7 +1366,7 @@ if (dailyModeBtn) {
 
             if (promptDisplay) promptDisplay.textContent = "Daily Blurts is not available at this time";
             if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '10';
+            if (timerDisplay) timerDisplay.textContent = '15'; // <--- Set to 15
 
             const playBtn = document.getElementById('playBtn');
             if (playBtn) playBtn.innerText = "PLAY";
