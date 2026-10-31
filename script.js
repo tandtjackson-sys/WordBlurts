@@ -1,3 +1,5 @@
+(function() {
+    'use strict';
 // ==========================================
 // GAME CORE ENGINE & SETUP (LOCALIZED)
 // ==========================================
@@ -1650,3 +1652,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
     switchLanguage(savedLang);
 });
+// Explicitly expose UI functions to the global window object
+    window.toggleLanguage = toggleLanguage;
+    window.toggleRules = toggleRules;
+    window.openAboutModal = openAboutModal;
+
+    // Any other global window bindings your HTML needs can go right here too!
+
+})(); // Closes and executes the IIFE immediately
