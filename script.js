@@ -1311,7 +1311,20 @@ function showDailyResults(totalScore, streak, resultsArray) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 
-// ------------------------------------------
+    // ------------------------------------------
+    // ABOUT BUTTON SMOOTH SCROLL WIRE-UP
+    // ------------------------------------------
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutSection = document.getElementById('aboutSection');
+
+    if (aboutBtn && aboutSection) {
+        aboutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            aboutSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // ------------------------------------------
     // MODE TOGGLE WIRE-UP (Classic vs. Daily)
     // ------------------------------------------
     const randomModeBtn = document.getElementById('randomModeBtn');
@@ -1339,13 +1352,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '15'; // <--- Set to 15
+            if (timerDisplay) timerDisplay.textContent = '15';
 
             if (typeof resetTimer === 'function') resetTimer();
         });
     }
 
-if (dailyModeBtn) {
+    if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
@@ -1366,12 +1379,14 @@ if (dailyModeBtn) {
 
             if (promptDisplay) promptDisplay.textContent = "Daily Blurts is not available at this time";
             if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '15'; // <--- Set to 15
+            if (timerDisplay) timerDisplay.textContent = '15';
 
             const playBtn = document.getElementById('playBtn');
             if (playBtn) playBtn.innerText = "PLAY";
         });
     }
+
+}); // <--- Closes DOMContentLoaded
 
     // Single PLAY button listener at root scope
     const playBtn = document.getElementById('playBtn');
