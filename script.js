@@ -439,7 +439,7 @@ class GameAudioEngine {
         whoosh.start(t);
         whoosh.stop(t + 0.34);
     }
-    playCountdown(duration = 10) {
+    playCountdown(duration = 15) {
         const ctx = this.ctx;
         const dest = this.music;
         if (!ctx || !dest || !this.noise) return;
@@ -1535,18 +1535,19 @@ document.addEventListener('DOMContentLoaded', () => {
             aboutModal.style.display = 'none';
         });
     }
-
-    if (aboutModal) {
+if (aboutModal) {
         aboutModal.addEventListener('click', (e) => {
             if (e.target === aboutModal) {
                 aboutModal.style.display = 'none';
             }
         });
     }
-});
-/* ==========================================
-   PWA INSTALL PROMPT CONTROLLER
-   ========================================== */
+
+}); // Closes DOMContentLoaded cleanly
+
+// ==========================================
+// PWA INSTALL PROMPT CONTROLLER
+// ==========================================
 let deferredPrompt = null;
 
 const pwaBanner = document.getElementById('pwaInstallBanner');
