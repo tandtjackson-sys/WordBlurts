@@ -1652,11 +1652,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
     switchLanguage(savedLang);
 });
-// Explicitly expose UI functions to the global window object
-    window.toggleLanguage = toggleLanguage;
-    window.toggleRules = toggleRules;
-    window.openAboutModal = openAboutModal;
 
-    // Any other global window bindings your HTML needs can go right here too!
-
-
+// Expose UI functions to the global window object
+window.toggleLanguage = toggleLanguage;
+window.switchLanguage = switchLanguage;
+window.toggleRules = toggleRules;
+window.openAboutModal = openAboutModal;
