@@ -1,5 +1,4 @@
-(function() {
-    'use strict';
+
 // ==========================================
 // GAME CORE ENGINE & SETUP (LOCALIZED)
 // ==========================================
@@ -1670,4 +1669,3 @@ window.switchLanguage = typeof switchLanguage !== 'undefined' ? switchLanguage :
 window.toggleRules = toggleRules;
 window.openAboutModal = openAboutModal;
 
-})();
