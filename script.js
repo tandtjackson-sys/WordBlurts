@@ -1543,7 +1543,7 @@ if (aboutModal) {
                 aboutModal.style.display = 'none';
             }
         });
-    
+}
 
 }); // Closes DOMContentLoaded cleanly
 
