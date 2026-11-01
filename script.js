@@ -1641,9 +1641,18 @@ function switchLanguage(langCode) {
         langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
 
-    // Refresh active combo deck if in-game
-    if (typeof generateDeck === "function") {
-        comboDeck = generateDeck();
+ // Define the modal toggle functions
+function toggleRules() {
+    const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
+    if (card) {
+        card.style.display = (card.style.display === 'flex' || card.style.display === 'block') ? 'none' : 'block';
+    }
+}
+
+function openAboutModal() {
+    const modal = document.getElementById('aboutModal') || document.getElementById('aboutCard');
+    if (modal) {
+        modal.style.display = 'block';
     }
 }
 
@@ -1653,7 +1662,7 @@ document.addEventListener("DOMContentLoaded", () => {
     switchLanguage(savedLang);
 });
 
-// Expose UI functions to the global window object
+// Expose UI functions to the global window object (right before the IIFE ends)
 window.toggleLanguage = toggleLanguage;
 window.switchLanguage = switchLanguage;
 window.toggleRules = toggleRules;
