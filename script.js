@@ -1555,11 +1555,9 @@ const pwaDismissBtn = document.getElementById('pwaDismissBtn');
 
 // 1. Android & Chrome Automatic Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent standard automatic browser banner
     e.preventDefault();
     deferredPrompt = e;
 
-    // Show banner if not previously dismissed
     if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
         pwaBanner.classList.remove('hidden');
     }
@@ -1584,7 +1582,6 @@ if (pwaInstallBtn) {
 if (pwaDismissBtn) {
     pwaDismissBtn.addEventListener('click', () => {
         if (pwaBanner) pwaBanner.classList.add('hidden');
-        // Don't show again in this session
         localStorage.setItem('pwaPromptDismissed', Date.now());
     });
 }
@@ -1596,7 +1593,7 @@ window.addEventListener('appinstalled', () => {
     console.log('Word Blurts PWA installed successfully.');
 });
 
-// 2. iOS Safari Custom Detection (Since Apple blocks beforeinstallprompt)
+// 2. iOS Safari Custom Detection
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
@@ -1605,7 +1602,6 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
         const bannerText = pwaBanner.querySelector('p') || pwaBanner;
         bannerText.innerHTML = 'Tap the <strong>Share</strong> button <span style="font-size:1.2em;">⎋</span> and select <strong>"Add to Home Screen"</strong> to install Word Blurts!';
         
-        // Hide the "Install" button on iPhone since Safari requires manual install
         if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
         
         pwaBanner.classList.remove('hidden');
@@ -1613,34 +1609,29 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
 }
 
 // ==========================================
-// LANGUAGE TOGGLE & LOCALIZATION LOGIC
+// LANGUAGE & UI MODAL CONTROLLERS
 // ==========================================
 
-// Toggle language between English and Spanish
 function toggleLanguage() {
     const newLang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'es' : 'en';
     switchLanguage(newLang);
 }
 
-// Switch language, update master pointers, save preference, and refresh UI
 function switchLanguage(langCode) {
     if (typeof GAME_DATA === 'undefined' || !GAME_DATA[langCode]) return;
 
     currentLang = langCode;
     localStorage.setItem("wordblurts_lang", currentLang);
 
-    // Update active word/topic master lists
     window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
     window.topicsMaster = GAME_DATA[currentLang].topicsMaster;
 
-    // Update button text to show current state
     const langBtn = document.getElementById("lang-toggle-btn");
     if (langBtn) {
         langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
-} // <--- Properly closed switchLanguage!
+}
 
-// Define the modal toggle functions
 function toggleRules() {
     const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
     if (card) {
@@ -1664,7 +1655,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Expose UI functions to the global window object
-window.toggleLanguage = typeof toggleLanguage !== 'undefined' ? toggleLanguage : null;
-window.switchLanguage = typeof switchLanguage !== 'undefined' ? switchLanguage : null;
+window.toggleLanguage = toggleLanguage;
+window.switchLanguage = switchLanguage;
 window.toggleRules = toggleRules;
 window.openAboutModal = openAboutModal;
