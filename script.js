@@ -1659,13 +1659,15 @@ function openAboutModal() {
 // Restore saved language on load
 document.addEventListener("DOMContentLoaded", () => {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    switchLanguage(savedLang);
+    if (typeof switchLanguage === "function") {
+        switchLanguage(savedLang);
+    }
 });
 
 // Expose UI functions to the global window object
-window.toggleLanguage = toggleLanguage;
-window.switchLanguage = switchLanguage;
+window.toggleLanguage = typeof toggleLanguage !== 'undefined' ? toggleLanguage : null;
+window.switchLanguage = typeof switchLanguage !== 'undefined' ? switchLanguage : null;
 window.toggleRules = toggleRules;
 window.openAboutModal = openAboutModal;
 
-})(); // <--- This closes the main file IIFE wrapper
+})();
