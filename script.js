@@ -1641,7 +1641,7 @@ function switchLanguage(langCode) {
         langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
 
- // Define the modal toggle functions
+// Define the modal toggle functions
 function toggleRules() {
     const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
     if (card) {
@@ -1662,8 +1662,10 @@ document.addEventListener("DOMContentLoaded", () => {
     switchLanguage(savedLang);
 });
 
-// Expose UI functions to the global window object (right before the IIFE ends)
+// Expose UI functions to the global window object
 window.toggleLanguage = toggleLanguage;
 window.switchLanguage = switchLanguage;
 window.toggleRules = toggleRules;
 window.openAboutModal = openAboutModal;
+
+})(); // <--- This closes the main file IIFE wrapper
