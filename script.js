@@ -1544,8 +1544,6 @@ if (aboutModal) {
         });
 
 
-}); // Closes DOMContentLoaded cleanly
-
 // ==========================================
 // PWA INSTALL PROMPT CONTROLLER
 // ==========================================
@@ -1613,6 +1611,7 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
         pwaBanner.classList.remove('hidden');
     }
 }
+
 // ==========================================
 // LANGUAGE TOGGLE & LOCALIZATION LOGIC
 // ==========================================
@@ -1639,6 +1638,7 @@ function switchLanguage(langCode) {
     if (langBtn) {
         langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
+} // <--- Properly closed switchLanguage!
 
 // Define the modal toggle functions
 function toggleRules() {
@@ -1668,4 +1668,3 @@ window.toggleLanguage = typeof toggleLanguage !== 'undefined' ? toggleLanguage :
 window.switchLanguage = typeof switchLanguage !== 'undefined' ? switchLanguage : null;
 window.toggleRules = toggleRules;
 window.openAboutModal = openAboutModal;
-
