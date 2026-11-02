@@ -1,17 +1,3 @@
-function setGameMode(mode) {
-    if (mode === 'daily') {
-        isDailyMode = true;
-        document.getElementById('dailyModeBtn').classList.add('active');
-        document.getElementById('randomModeBtn').classList.remove('active');
-        if (typeof initDailyMode === 'function' && initDailyMode()) {
-            if (typeof playRound === 'function') playRound();
-        }
-    } else {
-        isDailyMode = false;
-        document.getElementById('randomModeBtn').classList.add('active');
-        document.getElementById('dailyModeBtn').classList.remove('active');
-    }
-}
 // ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
@@ -435,19 +421,113 @@ function updateStaticUI() {
         }
     }
 
-    // Translate On-Page SEO About Section
+    // Translate SEO About Section (Bottom of Page)
     const about1 = document.getElementById('about-section-1');
     if (about1) {
         if (isEs) {
             about1.innerHTML = `
                 <h2>Acerca de Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> es una adaptación digital de un juego de mesa de palabras que creé originalmente cuando era adolescente en 1984, al que llamé <em>Word Wit</em>.</p>
-                <p>La inspiración original vino de mi madre, quien creció jugando a un juego similar de asociación de palabras en Alemania.</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Ejercicio para el cerebro</h3>
-                <p>Word Blurts! está diseñado para ser mucho más que solo entretenimiento; es un ejercicio cognitivo ligero y rápido para jugadores de todas las edades.</p>
-                <p>Es <strong>100% gratis para jugar</strong>, sin registros, descargas ni cuentas requeridas.</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Comentarios</h3>
-                <p>¡Me encantaría conocer tus opiniones o ideas de funciones! Comparte tus comentarios en Reddit:</p>
+                <p><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción. Ya sea que estés organizando una noche de juegos con amigos, jugando con la familia o poniendo a prueba tus propios conocimientos, ¡Word Blurts! ofrece diversión instantánea directamente en tu navegador web.</p>
+                
+                <h3>Cómo Funciona</h3>
+                <p>Cada ronda genera un tema aleatorio y una letra inicial. Una vez que el locutor da la señal, los jugadores compiten contra un cronómetro de 15 segundos para decir una palabra coincidente antes de que se acabe el tiempo. ¡Lleva la puntuación directamente en el marcador de equipo integrado y mira quién reina supremo!</p>
+
+                <h3>Características Principales</h3>
+                <ul>
+                    <li>⚡ <strong>Juego instantáneo en el navegador:</strong> No se requieren descargas, registros de cuenta ni instalaciones.</li>
+                    <li>⏱ <strong>Cuenta regresiva dinámica de 15 segundos:</strong> El temporizador visual y de audio integrado mantiene la presión.</li>
+                    <li>👥 <strong>Marcador interactivo:</strong> Lleva las puntuaciones del Jugador 1 y Jugador 2 o de equipos completos sin problemas.</li>
+                    <li>📱 <strong>Compatible con dispositivos móviles y de escritorio:</strong> Diseño totalmente receptivo con controles táctiles y de barra espaciadora.</li>
+                </ul>
+
+                <h3>Preguntas Frecuentes</h3>
+                <div class="faq-item">
+                    <strong>P: ¿Word Blurts! es gratis para jugar?</strong>
+                    <p>Sí, ¡Word Blurts! es 100% gratuito para jugar en computadoras de escritorio, tabletas y dispositivos móviles.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Cuántos jugadores pueden participar?</strong>
+                    <p>¡Word Blurts! funciona muy bien para 1 o 2 jugadores, o hasta grupos grandes divididos en Equipo 1 y Equipo 2. Cuantos más jugadores, más respuestas divertidas escucharás y más hilarante se vuelve.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Puedo jugar en mi teléfono?</strong>
+                    <p>¡Absolutamente! El juego está optimizado para todos los tamaños de pantalla y navegadores móviles.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Las reglas son estrictas?</strong>
+                    <p>¡Absolutamente no! El juego fue creado para el disfrute máximo de todos. Solo asegúrate de que todos estén de acuerdo con cualquier regla modificada antes de empezar a jugar.</p>
+                </div>
+            `;
+        } else {
+            about1.innerHTML = `
+                <h2>What is Word Blurts!???</h2>
+                <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+                
+                <h3>How It Works</h3>
+                <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+
+                <h3>Key Features</h3>
+                <ul>
+                    <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
+                    <li>⏱ <strong>Dynamic 15-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
+                    <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
+                    <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
+                </ul>
+
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-item">
+                    <strong>Q: Is Word Blurts! free to play?</strong>
+                    <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: How many players can play?</strong>
+                    <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Can I play on my phone?</strong>
+                    <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Are the rules strict?</strong>
+                    <p>Absolutely not! The game was created for everyone's maximum enjoyment! Just make sure everyone agrees to any changed rules before beginning to play.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Translate About Modal Pop-up (about-section-2)
+    const about2 = document.getElementById('about-section-2');
+    if (about2) {
+        if (isEs) {
+            about2.innerHTML = `
+                <button id="close-about-btn" onclick="document.getElementById('about-modal').style.display='none';" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ffffff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">Acerca de Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Bienvenido a <strong>Word Blurts!</strong> — una adaptación digital de un juego de mesa de palabras que creé originalmente cuando era adolescente en 1984, al que llamé <em>Word Wit</em>. Registré las reglas con derechos de autor en el gobierno federal y vendí copias en librerías locales y por pedido por correo. Cuatro años después, Milton Bradley lanzó un juego similar llamado <em>Scattergories</em>, que se convirtió en un éxito increíble.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    La inspiración original vino de mi madre, quien creció jugando a un juego similar de asociación de palabras en Alemania. Ella nos enseñó a jugar y se convirtió en el favorito de la familia a lo largo de los años. El mayor inconveniente siempre fue necesitar papel y lápiz para anotar todo; ¡esta versión digital resuelve ese problema por completo!
+                </p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Ejercicio para el cerebro: Desarrollo y agilidad</h3>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Word Blurts! está diseñado para ser mucho más que solo entretenimiento; es un ejercicio cognitivo ligero y rápido para jugadores de todas las edades. 
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    <strong>Para niños y jóvenes estudiantes:</strong> Los juegos rápidos de categorización juegan un papel vital en el desarrollo cerebral infantil. Amplían activamente el vocabulario, mejoran la retención de la ortografía y aumentan la velocidad de procesamiento cognitivo. Al obligar al cerebro a buscar en la memoria semántica bajo presión de tiempo, los jóvenes construyen vías neuronales más fuertes para la fluidez verbal, la memoria de trabajo y el pensamiento lateral.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    <strong>Para adultos mayores y personas de la tercera edad:</strong> Mantener la mente aguda requiere agilidad mental y desafíos lingüísticos regulares. Los juegos de asociación de palabras estimulan la función ejecutiva y fomentan la recuperación léxica, ayudando a los jugadores mayores a mantener la agudeza verbal, la flexibilidad de la memoria y la rapidez mental en un ambiente divertido y sin estrés.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Es <strong>100% gratis para jugar</strong>, sin registros, descargas ni cuentas requeridas.
+                </p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Detrás del proyecto y comentarios</h3>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Construí esta versión web con la asistencia de Gemini durante aproximadamente dos meses. La reproducción de audio de texto a voz varía según el dispositivo; suena nítido en dispositivos Android y Firefox, aunque el comportamiento en iOS puede variar según la configuración de síntesis de voz del sistema.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    ¡Me encantaría conocer tus opiniones, reportes de errores o ideas de funciones! Por favor, comparte tus comentarios en Reddit:
+                </p>
                 <p style="text-align: center; margin-top: 18px;">
                     <a href="https://www.reddit.com/r/playmygame/comments/1wu77ad/blurt_it_out/" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #00f5d4; color: #0b0d19; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
                         💬 Dejar comentarios en Reddit
@@ -455,15 +535,29 @@ function updateStaticUI() {
                 </p>
             `;
         } else {
-            about1.innerHTML = `
-                <h2>About Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> is a digital adaptation of a tabletop word game I originally created as a teenager back in 1984, which I called <em>Word Wit</em>.</p>
-                <p>The original inspiration came from my Mother, who grew up playing a similar word association game in Germany.</p>
+            about2.innerHTML = `
+                <button id="close-about-btn" onclick="document.getElementById('about-modal').style.display='none';" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ffffff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Welcome to <strong>Word Blurts!</strong> — a digital adaptation of a tabletop word game I originally created as a teenager back in 1984, which I called <em>Word Wit</em>. I copyrighted the rules with the federal government and sold copies at local bookstores and mail-order. Four years later, Milton Bradley released a similar game called <em>Scattergories</em>, which went on to become an incredible hit.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    The original inspiration came from my Mother, who grew up playing a similar word association game in Germany. She taught us how to play, and it became a beloved family favorite over the years. The biggest drawback was always needing pencil and paper to write everything down — this digital version completely solves that issue!
+                </p>
                 <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Exercise for the Brain</h3>
-                <p>Word Blurts! is designed for players of all ages. It offers youngsters a fun way to develop vocabulary and cognitive processing speed.</p>
-                <p>It is <strong>100% free to play</strong> with no sign-ups, downloads, or accounts required.</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Feedback</h3>
-                <p>I would love to hear your thoughts, bug reports, or feature ideas! Please share your feedback on Reddit:</p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    Word Blurts! is designed for players of all ages. It offers youngsters a fun way to develop vocabulary and cognitive processing speed, while helping older adults keep their minds sharp and active — think of it as light exercise for your brain!
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    It is <strong>100% free to play</strong> with no sign-ups, downloads, or accounts required.
+                </p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Behind the Project & Feedback</h3>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    I built this web version with assistance from Gemini over about two months. The text-to-speech audio rendering varies across devices — it sounds crisp on Android devices and Firefox, though iOS behavior may differ depending on system speech synthesis settings.
+                </p>
+                <p style="margin-bottom: 14px; line-height: 1.6;">
+                    I would love to hear your thoughts, bug reports, or feature ideas! Please share your feedback on Reddit:
+                </p>
                 <p style="text-align: center; margin-top: 18px;">
                     <a href="https://www.reddit.com/r/playmygame/comments/1wu77ad/blurt_it_out/" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #00f5d4; color: #0b0d19; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
                         💬 Leave Feedback on Reddit
@@ -471,6 +565,20 @@ function updateStaticUI() {
                 </p>
             `;
         }
+    }
+}
+
+function toggleRules() {
+    const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
+    if (card) {
+        card.style.display = (card.style.display === 'flex' || card.style.display === 'block') ? 'none' : 'block';
+    }
+}
+
+function openAboutModal() {
+    const modal = document.getElementById('aboutModal') || document.getElementById('aboutCard') || document.getElementById('about-modal');
+    if (modal) {
+        modal.style.display = 'block';
     }
 }
 
@@ -726,7 +834,7 @@ function getDaySeed() {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
+    const dateStr = `year-{month}-${day}`;
     let hash = 0;
     for (let i = 0; i < dateStr.length; i++) {
         hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
