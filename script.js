@@ -421,22 +421,19 @@ function updateStaticUI() {
         }
     }
 
-    // Translate On-Page SEO About Section (Permanently Visible to Crawlers & Users)
+    // Translate On-Page SEO About Section
     const about1 = document.getElementById('about-section-1');
     if (about1) {
         if (isEs) {
             about1.innerHTML = `
                 <h2>Acerca de Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> es una adaptación digital de un juego de mesa de palabras que creé originalmente cuando era adolescente en 1984, al que llamé <em>Word Wit</em>. Registré las reglas con derechos de autor en el gobierno federal y vendí copias en librerías locales y por pedido por correo. Cuatro años después, Milton Bradley lanzó un juego similar llamado <em>Scattergories</em>, que se convirtió en un éxito increíble.</p>
-                <p>La inspiración original vino de mi madre, quien creció jugando a un juego similar de asociación de palabras en Alemania. Ella nos enseñó a jugar y se convirtió en el favorito de la familia a lo largo de los años. El mayor inconveniente siempre fue necesitar papel y lápiz para anotar todo; ¡esta versión digital resuelve ese problema por completo!</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Ejercicio para el cerebro: Desarrollo y agilidad</h3>
+                <p><strong>Word Blurts!</strong> es una adaptación digital de un juego de mesa de palabras que creé originalmente cuando era adolescente en 1984, al que llamé <em>Word Wit</em>.</p>
+                <p>La inspiración original vino de mi madre, quien creció jugando a un juego similar de asociación de palabras en Alemania.</p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Ejercicio para el cerebro</h3>
                 <p>Word Blurts! está diseñado para ser mucho más que solo entretenimiento; es un ejercicio cognitivo ligero y rápido para jugadores de todas las edades.</p>
-                <p><strong>Para niños y jóvenes estudiantes:</strong> Los juegos rápidos de categorización juegan un papel vital en el desarrollo cerebral infantil. Amplían activamente el vocabulario, mejoran la retención de la ortografía y aumentan la velocidad de procesamiento cognitivo.</p>
-                <p><strong>Para adultos mayores y personas de la tercera edad:</strong> Mantener la mente aguda requiere agilidad mental y desafíos lingüísticos regulares. Los juegos de asociación de palabras estimulan la función ejecutiva y fomentan la recuperación léxica.</p>
                 <p>Es <strong>100% gratis para jugar</strong>, sin registros, descargas ni cuentas requeridas.</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Detrás del proyecto y comentarios</h3>
-                <p>Construí esta versión web con la asistencia de Gemini durante aproximadamente dos meses. La reproducción de audio de texto a voz varía según el dispositivo; suena nítido en dispositivos Android y Firefox.</p>
-                <p>¡Me encantaría conocer tus opiniones, reportes de errores o ideas de funciones! Por favor, comparte tus comentarios en Reddit:</p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Comentarios</h3>
+                <p>¡Me encantaría conocer tus opiniones o ideas de funciones! Comparte tus comentarios en Reddit:</p>
                 <p style="text-align: center; margin-top: 18px;">
                     <a href="https://www.reddit.com/r/playmygame/comments/1wu77ad/blurt_it_out/" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #00f5d4; color: #0b0d19; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
                         💬 Dejar comentarios en Reddit
@@ -446,16 +443,22 @@ function updateStaticUI() {
         } else {
             about1.innerHTML = `
                 <h2>About Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> is a digital adaptation of a tabletop word game I originally created as a teenager back in 1984, which I called <em>Word Wit</em>. I copyrighted the rules with the federal government and sold copies at local bookstores and mail-order. Four years later, Milton Bradley released a similar game called <em>Scattergories</em>, which went on to become an incredible hit.</p>
-                <p>The original inspiration came from my Mother, who grew up playing a similar word association game in Germany. She taught us how to play, and it became a beloved family favorite over the years. The biggest drawback was always needing pencil and paper to write everything down — this digital version completely solves that issue!</p>
+                <p><strong>Word Blurts!</strong> is a digital adaptation of a tabletop word game I originally created as a teenager back in 1984, which I called <em>Word Wit</em>.</p>
+                <p>The original inspiration came from my Mother, who grew up playing a similar word association game in Germany.</p>
                 <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Exercise for the Brain</h3>
-                <p>Word Blurts! is designed for players of all ages. It offers youngsters a fun way to develop vocabulary and cognitive processing speed, while helping older adults keep their minds sharp and active — think of it as light exercise for your brain!</p>
+                <p>Word Blurts! is designed for players of all ages. It offers youngsters a fun way to develop vocabulary and cognitive processing speed.</p>
                 <p>It is <strong>100% free to play</strong> with no sign-ups, downloads, or accounts required.</p>
-                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Behind the Project & Feedback</h3>
-                <p>I built this web version with assistance from Gemini over about two months. The text-to-speech audio rendering varies across devices — it sounds crisp on Android devices and Firefox.</p>
+                <h3 style="color: #7b2cbf; font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Feedback</h3>
                 <p>I would love to hear your thoughts, bug reports, or feature ideas! Please share your feedback on Reddit:</p>
                 <p style="text-align: center; margin-top: 18px;">
-                    <a href="
+                    <a href="https://www.reddit.com/r/playmygame/comments/1wu77ad/blurt_it_out/" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #00f5d4; color: #0b0d19; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
+                        💬 Leave Feedback on Reddit
+                    </a>
+                </p>
+            `;
+        }
+    }
+}
 
 // ==========================================
 // 5. DECK & GAME LOOP HELPERS
