@@ -1541,10 +1541,10 @@ if (aboutModal) {
             if (e.target === aboutModal) {
          // Close modal if clicked outside
         if (e.target === aboutModal) {
+            if (e.target === aboutModal) {
             aboutModal.style.display = 'none';
         }
     });
-}
 
 // ==========================================
 // PWA INSTALL PROMPT CONTROLLER
