@@ -787,3 +787,166 @@ function triggerInterstitialAd() {
 
 let lastAdRefreshTime = 0;
 const AD_REFRESH_INTERVAL = 35000;
+
+function refreshAds() {
+    const now = Date.now();
+    if (now - lastAdRefreshTime >= AD_REFRESH_INTERVAL) {
+        if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                lastAdRefreshTime = now;
+            } catch (e) {}
+        }
+    }
+}
+
+function adjustScore(team, delta) {
+    const el = document.getElementById(team + "Score");
+    if (el) {
+        let current = parseInt(el.innerText, 10) || 0;
+        el.innerText = Math.max(0, current + delta);
+        if (delta > 0) playSlideUp();
+        else if (delta < 0 && current > 0) playSlideDown();
+    }
+}
+
+function resetScores() {
+    const t1 = document.getElementById('team1Score');
+    const t2 = document.getElementById('team2Score');
+    if (t1) t1.innerText = '0';
+    if (t2) t2.innerText = '0';
+    triggerInterstitialAd();
+}
+
+// ==========================================
+// 9. EVENT LISTENERS & INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Restore language preference
+    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
+    switchLanguage(savedLang);
+
+    // About button smooth scroll
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutSection = document.getElementById('aboutSection');
+    if (aboutBtn && aboutSection) {
+        aboutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            aboutSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // Mode toggles
+    const randomModeBtn = document.getElementById('randomModeBtn');
+    const dailyModeBtn = document.getElementById('dailyModeBtn');
+
+    if (randomModeBtn) {
+        randomModeBtn.addEventListener('click', () => {
+            isDailyMode = false;
+            randomModeBtn.classList.add('active');
+            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
+            stopEverything();
+        });
+    }
+
+    if (dailyModeBtn) {
+        dailyModeBtn.addEventListener('click', () => {
+            isDailyMode = true;
+            dailyModeBtn.classList.add('active');
+            if (randomModeBtn) randomModeBtn.classList.remove('active');
+            stopEverything();
+            initDailyMode();
+        });
+    }
+
+    // Main Play button
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            playRound();
+        });
+    }
+
+    // Modal listeners
+    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
+    const openAboutBtn = document.getElementById('open-about-btn');
+    const closeAboutBtn = document.getElementById('close-about-btn');
+
+    if (openAboutBtn && aboutModal) {
+        openAboutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            aboutModal.style.display = 'flex';
+        });
+    }
+
+    if (closeAboutBtn && aboutModal) {
+        closeAboutBtn.addEventListener('click', () => {
+            aboutModal.style.display = 'none';
+        });
+    }
+
+    if (aboutModal) {
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                aboutModal.style.display = 'none';
+            }
+        });
+    }
+});
+
+// ==========================================
+// 10. PWA INSTALL PROMPT & SERVICE WORKER
+// ==========================================
+let deferredPrompt = null;
+const pwaBanner = document.getElementById('pwaInstallBanner');
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const pwaDismissBtn = document.getElementById('pwaDismissBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
+        pwaBanner.classList.remove('hidden');
+    }
+});
+
+if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        if (pwaBanner) pwaBanner.classList.add('hidden');
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+    });
+}
+
+if (pwaDismissBtn) {
+    pwaDismissBtn.addEventListener('click', () => {
+        if (pwaBanner) pwaBanner.classList.add('hidden');
+        localStorage.setItem('pwaPromptDismissed', Date.now());
+    });
+}
+
+window.addEventListener('appinstalled', () => {
+    if (pwaBanner) pwaBanner.classList.add('hidden');
+    deferredPrompt = null;
+});
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {});
+    });
+}
+
+// ==========================================
+// 11. GLOBAL WINDOW EXPORTS
+// ==========================================
+window.toggleLanguage = toggleLanguage;
+window.switchLanguage = switchLanguage;
+window.toggleRules = toggleRules;
+window.openAboutModal = openAboutModal;
+window.playRound = playRound;
+window.startNewRound = startNewRound;
+window.adjustScore = adjustScore;
+window.resetScores = resetScores;
