@@ -1537,17 +1537,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 if (aboutModal) {
-        aboutModal.addEventListener('click', (e) => {
-            if (e.target === aboutModal) {
-         // Close modal if clicked outside
-        if (e.target === aboutModal) {
-            if (e.target === aboutModal) {
-            aboutModal.style.display = 'none';
-        }
-    });
+      aboutModal.addEventListener('click', (e) => {
+    // Close modal if clicked outside
+    if (e.target === aboutModal) {
+        aboutModal.style.display = 'none';
+    }
+});
 
 // ==========================================
 // PWA INSTALL PROMPT CONTROLLER
+// ==========================================
 // ==========================================
 let deferredPrompt = null;
 
