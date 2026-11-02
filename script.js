@@ -1,8 +1,6 @@
-
 // ==========================================
-// GAME CORE ENGINE & SETUP (LOCALIZED)
+// 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
-
 const GAME_DATA = {
     en: {
         code: "en-US",
@@ -73,50 +71,18 @@ const GAME_DATA = {
 };
 
 let currentLang = 'en';
+let topicsMaster = GAME_DATA[currentLang].topicsMaster;
+let lettersMaster = GAME_DATA[currentLang].lettersMaster;
 
-function toggleLanguage() {
-    const langBtn = document.getElementById('lang-toggle-btn');
-    const rulesCard = document.getElementById('rulesCard');
-    const about1 = document.getElementById('about-section-1');
-    const about2 = document.getElementById('about-section-2');
-    
-    if (currentLang === 'en') {
-        currentLang = 'es';
-        if (langBtn) langBtn.innerHTML = '<span>🇺🇸 English</span>';
-        
-        if (rulesCard) {
-            rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, mantén presionada la tecla Función (Fn) mientras presionas F11 para jugar en pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!", tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta tus puntuaciones a continuación...`;
-        }
-        
-        if (about1) {
-            about1.innerHTML = `
-                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">Acerca de Word Blurts!</h2>
-                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción.</p>
-            `;
-        }
-    } else {
-        currentLang = 'en';
-        if (langBtn) langBtn.innerHTML = '<span>🇪🇸 Español</span>';
-        
-        if (rulesCard) {
-            rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter...`;
-        }
-        
-        if (about1) {
-            about1.innerHTML = `
-                <h2 style="color: #00f5d4; font-size: 1.8rem; margin-bottom: 16px;">About Word Blurts!</h2>
-                <p style="margin-bottom: 14px; line-height: 1.6;"><strong>Word Blurts!</strong> is a fast-paced, free online party word game...</p>
-            `;
-        }
-    }
-}
+const CATEGORIES = topicsMaster;
+const LETTERS = lettersMaster;
 
-// Explicitly expose it to the global window scope so inline HTML onclick can find it
-window.toggleLanguage = toggleLanguage;
+const STORAGE_KEYS = {
+    STREAK: "wb_daily_streak",
+    LAST_DATE: "wb_daily_last_date",
+    COMPLETED_DATA: "wb_daily_last_score"
+};
 
-// ==========================================
-// GAME STATE VARIABLES
-// ==========================================
 let isDailyMode = false;
 let isRoundActive = false;
 let dailyCurrentIndex = 0;
@@ -124,235 +90,10 @@ let dailyDeckPrompts = [];
 let dailyResultsArray = [];
 let dailyStartTime = null;
 let countdownInterval = null;
-
-// Combo deck starts empty, populated safely after data loads
 let comboDeck = [];
 
-// Force timer display to 15 on initial page load
-window.addEventListener('DOMContentLoaded', () => {
-    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
-    if (timerEl) timerEl.innerText = "15";
-});
-
 // ==========================================
-// AUDIO ANNOUNCER ENGINE
-// ==========================================
-function speakPrompt(topic, letter) {
-    if (!('speechSynthesis' in window)) return;
-    
-    window.speechSynthesis.cancel(); // Stop any ongoing speech
-    
-    let textToSpeak = "";
-    let voiceLang = 'en-US';
-
-    if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-        // Speaks Spanish prompt naturally without prepending "Tema" / "Letra"
-        textToSpeak = `${topic}. Letra ${letter}.`;
-        voiceLang = 'es-MX';
-    } else {
-        // Speaks English prompt naturally without prepending "Topic" / "Letter"
-        textToSpeak = `${topic}. Letter ${letter}.`;
-        voiceLang = 'en-US';
-    }
-    
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = voiceLang;
-    utterance.pitch = 1.25; // Pumps up the pitch for excitement!
-    utterance.rate = 1.1;   // Snaps the speed up so it sounds punchy!
-    
-    // Non-blocking asynchronous speech trigger
-    setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-    }, 50);
-}
-
-// Alias playRound so existing HTML onclick hooks work seamlessly
-function playRound() {
-    startNewRound();
-}
-
-// ==========================================
-// SYSTEM UTILITIES (Stop Everything, etc.)
-// ==========================================
-function stopEverything() {
-    if (countdownInterval !== null) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-    }
-    if (typeof gameAudio !== 'undefined' && gameAudio && typeof gameAudio.stopAll === 'function') {
-        gameAudio.stopAll();
-    }
-    if (typeof speed !== 'undefined') {
-        speed = 2.5;
-    }
-}
-
-// ==========================================
-// DECK & COMBO DRAWING HELPERS
-// ==========================================
-function generateDeck() {
-    // Safety check if GAME_DATA is loaded yet
-    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[currentLang]) return [];
-    
-    const topicsMaster = GAME_DATA[currentLang].topicsMaster;
-    const lettersMaster = GAME_DATA[currentLang].lettersMaster;
-    
-    const deck = [];
-    for (let t of topicsMaster) {
-        for (let l of lettersMaster) {
-            deck.push({ topic: t, letter: l });
-        }
-    }
-    return deck;
-}
-
-function drawNextCombo() {
-    if (comboDeck.length === 0) {
-        comboDeck = generateDeck();
-    }
-    if (comboDeck.length === 0) return { topic: "Ready", letter: "A" }; // Fallback
-    const index = Math.floor(Math.random() * comboDeck.length);
-    return comboDeck.splice(index, 1)[0];
-}
-
-// ==========================================
-// 1. STARFIELD BACKGROUND ENGINE
-// ==========================================
-const canvas = document.getElementById('starfield');
-if (canvas) {
-    const ctx = canvas.getContext('2d');
-    // ... rest of your starfield code
-    let stars = [];
-    const numStars = 1000;
-    let speed = 2.5;
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class Star {
-        constructor() { this.reset(); }
-        reset() {
-            this.x = (Math.random() - 0.5) * canvas.width * 2;
-            this.y = (Math.random() - 0.5) * canvas.height * 2;
-            this.z = Math.random() * canvas.width;
-            this.pz = this.z;
-        }
-        update() {
-            this.z -= speed;
-            if (this.z <= 0) {
-                this.reset();
-                this.z = canvas.width;
-                this.pz = this.z;
-            }
-        }
-        draw() {
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const sx = (this.x / this.z) * canvas.width + cx;
-            const sy = (this.y / this.z) * canvas.height + cy;
-            
-            const r = (1 - this.z / canvas.width) * 8;
-            
-            const px = (this.x / this.pz) * canvas.width + cx;
-            const py = (this.y / this.pz) * canvas.height + cy;
-            this.pz = this.z;
-            if (sx >= 0 && sx <= canvas.width && sy >= 0 && sy <= canvas.height) {
-                ctx.beginPath();
-                ctx.moveTo(px, py);
-                ctx.lineTo(sx, sy);
-                ctx.strokeStyle = "rgba(255, 255, 255, " + (1 - this.z / canvas.width) + ")";
-                ctx.lineWidth = r;
-                ctx.stroke();
-            }
-        }
-    }
-    for (let i = 0; i < numStars; i++) { stars.push(new Star()); }
-    function animateStars() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        for (let star of stars) {
-            star.update();
-            star.draw();
-        }
-        requestAnimationFrame(animateStars);
-    }
-    animateStars();
-}
-
-// ==========================================
-// 2. UI TOGGLES & SCOREBOARD ENGINE
-// ==========================================
-function toggleRules() {
-    const card = document.getElementById('rulesCard');
-    if (card) {
-        card.style.display = (card.style.display === 'block') ? 'none' : 'block';
-    }
-}
-
-function adjustScore(team, delta) {
-    const el = document.getElementById(team + "Score");
-    if (el) {
-        let current = parseInt(el.innerText, 10) || 0;
-        const newScore = Math.max(0, current + delta);
-        el.innerText = newScore;
-        
-        if (delta > 0) {
-            playSlideUp();
-        } else if (delta < 0 && current > 0) {
-            playSlideDown();
-        }
-    }
-}
-
-function resetScores() {
-    const t1 = document.getElementById('team1Score');
-    const t2 = document.getElementById('team2Score');
-    if (t1) t1.innerText = '0';
-    if (t2) t2.innerText = '0';
-    triggerInterstitialAd();
-}
-
-// ==========================================
-// 3. AD MANAGEMENT ENGINE
-// ==========================================
-function triggerInterstitialAd() {
-    console.log("Score reset triggered: Showing interstitial ad break.");
-    if (window.googletag && googletag.apiReady) {
-        googletag.cmd.push(function() {
-            googletag.display('interstitial-ad-slot'); 
-        });
-    }
-}
-
-let lastAdRefreshTime = 0;
-const AD_REFRESH_INTERVAL = 35000;
-
-function refreshAds() {
-    const now = Date.now();
-    if (now - lastAdRefreshTime >= AD_REFRESH_INTERVAL) {
-        if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
-            try {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                lastAdRefreshTime = now;
-                console.log("35s elapsed: Fresh banners loaded.");
-            } catch (e) {
-                console.log("AdSense refresh error:", e);
-            }
-        }
-    } else {
-        const secondsLeft = Math.ceil((AD_REFRESH_INTERVAL - (now - lastAdRefreshTime)) / 1000);
-        console.log(`Skipped refresh to protect viewability. (${secondsLeft}s remaining)`);
-    }
-}
-
-// ==========================================
-// 4. SYNTHESIZED AUDIO ENGINE & GAME LOOP LOGIC
+// 2. SYNTHESIZED AUDIO ENGINE
 // ==========================================
 const D1 = 36.71, D2 = 73.42, A2 = 110, D3 = 146.83, F3 = 174.61, GS3 = 207.65, A3 = 220, C4 = 261.63, D4 = 293.66, F4 = 349.23, A4 = 440, D5 = 587.33;
 
@@ -409,65 +150,6 @@ class GameAudioEngine {
             try { voice.stop(when); } catch (e) {}
         }
         this.voices = [];
-    }
-    playGo() {
-        const ctx = this.ctx;
-        const dest = this.sfx;
-        if (!ctx || !dest || !this.noise) return;
-        const t = ctx.currentTime;
-        const click = ctx.createOscillator();
-        click.type = "square";
-        click.frequency.setValueAtTime(420, t);
-        click.frequency.exponentialRampToValueAtTime(140, t + 0.09);
-        const clickGain = ctx.createGain();
-        clickGain.gain.setValueAtTime(clampGain(0.18), t);
-        clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-        click.connect(clickGain).connect(dest);
-        click.start(t);
-        click.stop(t + 0.14);
-        const whoosh = ctx.createBufferSource();
-        whoosh.buffer = this.noise;
-        whoosh.playbackRate.value = 0.7;
-        const filter = ctx.createBiquadFilter();
-        filter.type = "bandpass";
-        filter.frequency.setValueAtTime(400, t);
-        filter.frequency.exponentialRampToValueAtTime(2400, t + 0.28);
-        filter.Q.value = 2.4;
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(clampGain(0.22), t);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
-        whoosh.connect(filter).connect(g).connect(dest);
-        whoosh.start(t);
-        whoosh.stop(t + 0.34);
-    }
-    playCountdown(duration = 15) {
-        const ctx = this.ctx;
-        const dest = this.music;
-        if (!ctx || !dest || !this.noise) return;
-        this.stopAll();
-        const t0 = ctx.currentTime;
-        const end = t0 + duration;
-        const track = (voice) => { this.voices.push(voice); };
-        const bus = ctx.createGain();
-        bus.gain.setValueAtTime(0.0001, t0);
-        bus.gain.exponentialRampToValueAtTime(0.28, t0 + 0.18);
-        bus.gain.linearRampToValueAtTime(0.55, t0 + duration * 0.62);
-        bus.gain.linearRampToValueAtTime(0.95, end - 0.08);
-        bus.connect(dest);
-        this.layerDrone(ctx, t0, end, bus, track);
-        this.layerHeartbeat(ctx, t0, end, bus, track);
-        this.layerTicks(ctx, t0, end, bus, track);
-        this.layerOstinato(ctx, t0, end, bus, track);
-        this.layerRiser(ctx, t0, end, bus, track);
-        this.layerDissonance(ctx, t0, end, bus, track);
-        track({
-            stop: (when = ctx.currentTime) => {
-                try {
-                    bus.gain.cancelScheduledValues(when);
-                    bus.gain.setTargetAtTime(0.0001, when, 0.04);
-                } catch (e) {}
-            },
-        });
     }
     playSting() {
         const ctx = this.ctx;
@@ -536,39 +218,6 @@ class GameAudioEngine {
             interval = Math.max(0.11, interval * 0.9);
         }
     }
-    layerTicks(ctx, t0, end, dest, track) {
-        const duration = end - t0;
-        for (let s = 1; s <= 10; s++) {
-            const when = t0 + s;
-            if (when >= end) break;
-            this.scheduleTick(ctx, when, dest, 0.35 + s * 0.05, 1900 + s * 90, track);
-        }
-        let t = 0.5;
-        let interval = 0.5;
-        while (t0 + t < end - 0.03) {
-            const progress = t / duration;
-            const brightness = 1400 + progress * 1600;
-            const amp = 0.05 + progress * 0.16;
-            this.scheduleTick(ctx, t0 + t, dest, amp, brightness, track);
-            t += interval;
-            interval = Math.max(0.055, interval * 0.93);
-        }
-    }
-    scheduleTick(ctx, when, dest, amp, freq, track) {
-        const osc = ctx.createOscillator();
-        osc.type = "square";
-        osc.frequency.value = freq;
-        const filter = ctx.createBiquadFilter();
-        filter.type = "highpass";
-        filter.frequency.value = Math.max(900, freq - 400);
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(clampGain(amp * 0.22), when);
-        g.gain.exponentialRampToValueAtTime(0.0001, when + 0.045);
-        osc.connect(filter).connect(g).connect(dest);
-        osc.start(when);
-        osc.stop(when + 0.05);
-        track({ stop: (stopAt = ctx.currentTime) => { try { osc.stop(stopAt); } catch (e) {} } });
-    }
     layerOstinato(ctx, t0, end, dest, track) {
         const scale = [D3, F3, A3, C4, D4, F4, A4, D5];
         const pattern = [0, 2, 1, 2, 0, 3, 2, 4];
@@ -621,56 +270,23 @@ class GameAudioEngine {
         src.stop(end + 0.02);
         track({ stop: (when = ctx.currentTime) => { try { src.stop(when); } catch (e) {} } });
     }
-    layerDissonance(ctx, t0, end, dest, track) {
-        const start = t0 + 6.8;
-        const oscA = ctx.createOscillator();
-        const oscB = ctx.createOscillator();
-        oscA.type = "sawtooth";
-        oscB.type = "sawtooth";
-        oscA.frequency.setValueAtTime(D4, start);
-        oscB.frequency.setValueAtTime(GS3, start);
-        oscA.frequency.linearRampToValueAtTime(D4 * 1.03, end);
-        oscB.frequency.linearRampToValueAtTime(GS3 * 1.06, end);
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(0.0001, start);
-        g.gain.exponentialRampToValueAtTime(0.08, start + 0.4);
-        g.gain.linearRampToValueAtTime(0.18, end - 0.05);
-        const filter = ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(700, start);
-        filter.frequency.exponentialRampToValueAtTime(2400, end);
-        oscA.connect(filter);
-        oscB.connect(filter);
-        filter.connect(g).connect(dest);
-        oscA.start(start);
-        oscB.start(start);
-        oscA.stop(end + 0.02);
-        oscB.stop(end + 0.02);
-        track({ stop: (when = ctx.currentTime) => { try { oscA.stop(when); oscB.stop(when); } catch (e) {} } });
-    }
 }
 
 const gameAudio = new GameAudioEngine();
 
-// --- SLIDE WHISTLE SOUND SYNTHESIZERS (REUSING MAIN AUDIO CONTEXT) ---
 function playSlideUp() {
     gameAudio.unlock();
     const ctx = gameAudio.ctx;
     const dest = gameAudio.sfx || ctx.destination;
-    
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(400, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.25);
-
     gain.gain.setValueAtTime(0.2, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-
     osc.connect(gain);
     gain.connect(dest);
-
     osc.start();
     osc.stop(ctx.currentTime + 0.25);
 }
@@ -679,137 +295,175 @@ function playSlideDown() {
     gameAudio.unlock();
     const ctx = gameAudio.ctx;
     const dest = gameAudio.sfx || ctx.destination;
-
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(1200, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.25);
-
     gain.gain.setValueAtTime(0.2, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-
     osc.connect(gain);
     gain.connect(dest);
-
     osc.start();
     osc.stop(ctx.currentTime + 0.25);
 }
 
 // ==========================================
-// GAME CORE ENGINE & SETUP (LOCALIZED)
+// 3. STARFIELD BACKGROUND ENGINE
 // ==========================================
-
-
-
-
-function toggleLanguage() {
-    const langBtn = document.getElementById('lang-toggle-btn');
-    const rulesCard = document.getElementById('rulesCard');
-    const about1 = document.getElementById('about-section-1');
-    const about2 = document.getElementById('about-section-2');
-}
-
-// ==========================================
-// 2. ANNOUNCER ENGINE (CODE #2)
-// ==========================================
-function announceRound(letter, topic) {
-    if (!('speechSynthesis' in window)) return;
-
-    window.speechSynthesis.cancel(); // Stop any active speech
-
-    const langCode = GAME_DATA[currentLang].code;
-    const phrase = currentLang === "es" 
-        ? `Letra ${letter}. ${topic}` 
-        : `Letter ${letter}. ${topic}`;
-
-    const utterance = new SpeechSynthesisUtterance(phrase);
-    utterance.lang = langCode;
-    utterance.rate = 0.95; // Speech speed
-
-    // Find a native matching voice for speech synthesis
-    const voices = window.speechSynthesis.getVoices();
-    const matchingVoice = voices.find(v => v.lang.startsWith(currentLang));
-    if (matchingVoice) {
-        utterance.voice = matchingVoice;
+const canvas = document.getElementById('starfield');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const numStars = 1000;
+    let speed = 2.5;
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    window.speechSynthesis.speak(utterance);
+    class Star {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = (Math.random() - 0.5) * canvas.width * 2;
+            this.y = (Math.random() - 0.5) * canvas.height * 2;
+            this.z = Math.random() * canvas.width;
+            this.pz = this.z;
+        }
+        update() {
+            this.z -= speed;
+            if (this.z <= 0) {
+                this.reset();
+                this.z = canvas.width;
+                this.pz = this.z;
+            }
+        }
+        draw() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const sx = (this.x / this.z) * canvas.width + cx;
+            const sy = (this.y / this.z) * canvas.height + cy;
+            const r = (1 - this.z / canvas.width) * 8;
+            const px = (this.x / this.pz) * canvas.width + cx;
+            const py = (this.y / this.pz) * canvas.height + cy;
+            this.pz = this.z;
+            if (sx >= 0 && sx <= canvas.width && sy >= 0 && sy <= canvas.height) {
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(sx, sy);
+                ctx.strokeStyle = "rgba(255, 255, 255, " + (1 - this.z / canvas.width) + ")";
+                ctx.lineWidth = r;
+                ctx.stroke();
+            }
+        }
+    }
+    for (let i = 0; i < numStars; i++) { stars.push(new Star()); }
+    function animateStars() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let star of stars) {
+            star.update();
+            star.draw();
+        }
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
 }
 
 // ==========================================
-// 3. LANGUAGE SWITCHER & UI UPDATER (CODE #3)
+// 4. LANGUAGE SWITCHER & UI CONTROLLERS
 // ==========================================
+function toggleLanguage() {
+    const newLang = (currentLang === 'en') ? 'es' : 'en';
+    switchLanguage(newLang);
+}
 
 function switchLanguage(langCode) {
     if (!GAME_DATA[langCode]) return;
-
-    // Update global state and save to browser storage
     currentLang = langCode;
     localStorage.setItem("wordblurts_lang", currentLang);
 
-    // Update active pointers for your game loop
-    const activeData = GAME_DATA[currentLang];
-    
-    window.lettersMaster = activeData.lettersMaster;
-    window.topicsMaster = activeData.topicsMaster;
+    window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
+    window.topicsMaster = GAME_DATA[currentLang].topicsMaster;
+    topicsMaster = window.topicsMaster;
+    lettersMaster = window.lettersMaster;
 
-    // Update static UI text elements on the page (buttons, labels, etc.)
     updateStaticUI();
-
-    // Trigger a fresh round or reset current display if desired
-    if (typeof startNewRound === "function") {
-        startNewRound();
-    }
 }
 
-// Helper to translate static text elements on your HTML page
 function updateStaticUI() {
     const isEs = currentLang === "es";
-
     const startBtn = document.getElementById("start-btn");
     const langToggleBtn = document.getElementById("lang-toggle-btn");
 
     if (startBtn) {
         startBtn.textContent = isEs ? "Siguiente Ronda" : "Next Round";
     }
-    
     if (langToggleBtn) {
-        langToggleBtn.textContent = isEs ? "🇺🇸 English" : "🇪🇸 Español";
+        langToggleBtn.innerHTML = isEs ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
 }
 
-// Run on page load to restore user's last selected language
-document.addEventListener("DOMContentLoaded", () => {
-    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    switchLanguage(savedLang);
-});
+function toggleRules() {
+    const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
+    if (card) {
+        card.style.display = (card.style.display === 'flex' || card.style.display === 'block') ? 'none' : 'block';
+    }
+}
+
+function openAboutModal() {
+    const modal = document.getElementById('aboutModal') || document.getElementById('aboutCard') || document.getElementById('about-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
 
 // ==========================================
-// 3. YOUR GAME LOOP / ROUND TRIGGER
+// 5. DECK & GAME LOOP HELPERS
 // ==========================================
-
-let topicsMaster = GAME_DATA[currentLang].topicsMaster;
-let lettersMaster = GAME_DATA[currentLang].lettersMaster;
-
 function generateDeck() {
-    topicsMaster = GAME_DATA[currentLang].topicsMaster;
-    lettersMaster = GAME_DATA[currentLang].lettersMaster;
-    
+    const tList = GAME_DATA[currentLang].topicsMaster;
+    const lList = GAME_DATA[currentLang].lettersMaster;
     const deck = [];
-    for (let t of topicsMaster) {
-        for (let l of lettersMaster) {
+    for (let t of tList) {
+        for (let l of lList) {
             deck.push({ topic: t, letter: l });
         }
     }
     return deck;
 }
 
+function drawNextCombo() {
+    if (comboDeck.length === 0) {
+        comboDeck = generateDeck();
+    }
+    if (comboDeck.length === 0) return { topic: "Ready", letter: "A" };
+    const index = Math.floor(Math.random() * comboDeck.length);
+    return comboDeck.splice(index, 1)[0];
+}
 
+function stopEverything() {
+    if (countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    if (typeof gameAudio !== 'undefined' && gameAudio && typeof gameAudio.stopAll === 'function') {
+        gameAudio.stopAll();
+    }
+    speed = 2.5;
+}
 
 if (typeof window.isTransitioning === 'undefined') {
     window.isTransitioning = false;
+}
+
+function playRound() {
+    startNewRound();
 }
 
 function startNewRound() {
@@ -817,15 +471,13 @@ function startNewRound() {
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
-    if (typeof stopEverything === "function") {
-        stopEverything();
-    }
+    stopEverything();
 
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
-        timerEl.innerText = 15;
-        timerEl.style.color = ""; 
-        timerEl.style.fontSize = ""; 
+        timerEl.innerText = "15";
+        timerEl.style.color = "";
+        timerEl.style.fontSize = "";
         timerEl.style.fontWeight = "";
         timerEl.style.textShadow = "";
         timerEl.style.boxShadow = "";
@@ -833,61 +485,49 @@ function startNewRound() {
         timerEl.classList.remove('flash-red');
     }
 
-    // Pull next combo card from active deck (Now safely inside startNewRound!)
     const nextCard = drawNextCombo();
-    console.log("Card object ready to display:", nextCard);
 
-    // Update DOM Display Elements
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
-    
+
     if (promptEl) {
         promptEl.style.display = 'flex';
         promptEl.style.flexDirection = 'column';
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
-        if (typeof currentLang !== 'undefined' && currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
+        if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
             const esIndex = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
-            const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) 
-                ? GAME_DATA['en'].topicsMaster[esIndex] 
-                : "";
-
-            // Spanish Mode: 2.0rem primary, 1.5rem gray sub-text
+            const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) ? GAME_DATA['en'].topicsMaster[esIndex] : "";
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
                 ${englishTopic ? `<div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
             `;
-   } else {
-                    // English Mode
-                    promptEl.innerHTML = `
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
-                    `;
-                }
-      } // <--- Closes topic/letter DOM assignment block
-            
-            if (letterEl) letterEl.innerText = nextCard.letter;
-            
-            // Announce prompt out loud with animated voice
-            speakPrompt(nextCard.topic, nextCard.letter);
-            
-            if (typeof refreshAds === 'function') refreshAds();
+        } else {
+            promptEl.innerHTML = `
+                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
+            `;
+        }
+    }
 
-            isRoundActive = true;
-        } // <--- Closes the main drawCard / dealRound function cleanly
+    if (letterEl) letterEl.innerText = nextCard.letter;
+
+    speakPrompt(nextCard.topic, nextCard.letter);
+    if (typeof refreshAds === 'function') refreshAds();
+    isRoundActive = true;
+}
 
 // ==========================================
-// AUDIO ANNOUNCER ENGINE
+// 6. ANNOUNCER & TIMER ENGINE
 // ==========================================
 function speakPrompt(topic, letter) {
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Clear queued speech
-
+        window.speechSynthesis.cancel();
         let introText = `${topic}, starting with the letter... ${letter}.`;
         let hypeText = "Blurt it out!";
         let langCode = 'en-US';
 
-        if (typeof currentLang !== 'undefined' && currentLang === 'es') {
+        if (currentLang === 'es') {
             introText = `${topic}, empezando con la letra... ${letter}.`;
             hypeText = "¡Dilo ya!";
             langCode = 'es-MX';
@@ -895,71 +535,50 @@ function speakPrompt(topic, letter) {
 
         const utteranceIntro = new SpeechSynthesisUtterance(introText);
         utteranceIntro.lang = langCode;
-        utteranceIntro.rate = 1.05; // Crisp pacing for topic and letter clarity
+        utteranceIntro.rate = 1.05;
         utteranceIntro.pitch = 1.1;
 
         const utteranceHype = new SpeechSynthesisUtterance(hypeText);
         utteranceHype.lang = langCode;
-        utteranceHype.rate = 1.15; // Snappy delivery
-        utteranceHype.pitch = 1.35; // Excited announcer inflection
+        utteranceHype.rate = 1.15;
+        utteranceHype.pitch = 1.35;
 
-        // Chain hype phrase right after intro
         utteranceIntro.onend = () => {
             window.speechSynthesis.speak(utteranceHype);
         };
 
-        // Start timer and play background music when speech completes
         utteranceHype.onend = () => {
-            if (typeof startTimer === 'function') startTimer();
-            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-                gameAudio.playMusic();
-            }
+            startTimer();
         };
 
         window.speechSynthesis.speak(utteranceIntro);
     } else {
-        if (typeof startTimer === 'function') startTimer();
-        if (typeof gameAudio !== 'undefined' && typeof gameAudio.playMusic === 'function') {
-            gameAudio.playMusic();
-        }
+        startTimer();
     }
 }
 
-// 15-second timer with a flashing red 3-pulse box alert on expiration
 function startTimer() {
     if (countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
     }
 
-    // --- FULL DRAMATIC AUDIO SUITE ---
     if (typeof gameAudio !== 'undefined') {
         gameAudio.unlock();
         const t0 = gameAudio.ctx.currentTime;
         const roundDuration = 15;
-        
-        if (typeof gameAudio.layerDrone === 'function') {
-            gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        }
-        if (typeof gameAudio.layerOstinato === 'function') {
-            gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        }
-        if (typeof gameAudio.layerHeartbeat === 'function') {
-            gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        }
-        if (typeof gameAudio.layerRiser === 'function') {
-            gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        }
+        if (typeof gameAudio.layerDrone === 'function') gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        if (typeof gameAudio.layerOstinato === 'function') gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        if (typeof gameAudio.layerHeartbeat === 'function') gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+        if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
     }
-    // ---------------------------------
 
-    // Reset container box styles on round start
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
     if (mainContainer) {
         mainContainer.style.boxShadow = "";
         mainContainer.style.borderColor = "";
     }
-    
+
     let timeLeft = 15;
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
@@ -976,30 +595,27 @@ function startTimer() {
                 timerEl.style.color = "#ff4444";
             }
         }
-        
+
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
             isRoundActive = false;
 
-            // 1. Play the "ting!" sting sound effect
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playSting === 'function') {
                 gameAudio.playSting();
             }
 
-            // 2. Text display update
             if (timerEl) {
-                timerEl.innerText = (typeof currentLang !== 'undefined' && currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
+                timerEl.innerText = (currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
                 timerEl.style.fontSize = "2.4rem";
                 timerEl.style.fontWeight = "900";
                 timerEl.style.color = "#ff0000";
             }
 
-            // 3. Flash the container box red 3 times!
             if (mainContainer) {
                 let flashCount = 0;
                 const flashInterval = setInterval(() => {
-                    if (flashCount >= 6) { // 6 toggles = 3 full flashes
+                    if (flashCount >= 6) {
                         clearInterval(flashInterval);
                         mainContainer.style.borderColor = "#ff0000";
                         mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
@@ -1016,31 +632,16 @@ function startTimer() {
                 }, 250);
             }
 
-            // Stop custom music
-            if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopMusic === 'function') {
-                gameAudio.stopMusic();
-            } else if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopAll === 'function') {
+            if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopAll === 'function') {
                 gameAudio.stopAll();
             }
         }
     }, 1000);
 }
 
-
-const CATEGORIES = (typeof topicsMaster !== 'undefined') ? topicsMaster : [];
-const LETTERS = (typeof lettersMaster !== 'undefined') ? lettersMaster : [];
-
-const STORAGE_KEYS = {
-  STREAK: "wb_daily_streak",
-  LAST_DATE: "wb_daily_last_date",
-  COMPLETED_DATA: "wb_daily_last_score"
-};
-
-dailyDeckPrompts = [];
-dailyCurrentIndex = 0;
-dailyResultsArray = [];
-dailyStartTime = null;
-
+// ==========================================
+// 7. DAILY & CHALLENGE MODE ENGINE
+// ==========================================
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
     const seedParam = params.get('seed');
@@ -1050,12 +651,10 @@ function getURLSeed() {
 function getSeededPrompts(customSeed) {
     const prompts = [];
     let currentSeed = customSeed;
-
     function nextRandom() {
         currentSeed = (currentSeed * 9301 + 49297) % 233280;
         return currentSeed / 233280;
     }
-
     for (let i = 0; i < 10; i++) {
         const catIndex = Math.floor(nextRandom() * CATEGORIES.length);
         const letterIndex = Math.floor(nextRandom() * LETTERS.length);
@@ -1065,129 +664,78 @@ function getSeededPrompts(customSeed) {
             letter: LETTERS[letterIndex]
         });
     }
-
     return prompts;
 }
 
 function getDaySeed() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const dateStr = `${year}-${month}-${day}`;
-
-  let hash = 0;
-  for (let i = 0; i < dateStr.length; i++) {
-    hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return { seed: Math.abs(hash), dateStr };
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+        hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return { seed: Math.abs(hash), dateStr };
 }
 
 function getDailyPrompts() {
-  const { seed, dateStr } = getDaySeed();
-  const prompts = [];
-  
-  // Safely resolve category and letter lists regardless of scope/declaration order
-  const catList = (typeof topicsMaster !== 'undefined' && topicsMaster.length) ? topicsMaster : (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []);
-  const letList = (typeof lettersMaster !== 'undefined' && lettersMaster.length) ? lettersMaster : (typeof LETTERS !== 'undefined' ? LETTERS : []);
+    const { seed, dateStr } = getDaySeed();
+    const prompts = [];
+    const catList = topicsMaster.length ? topicsMaster : CATEGORIES;
+    const letList = lettersMaster.length ? lettersMaster : LETTERS;
 
-  if (!catList.length || !letList.length) {
-      console.error("Critical Error: Categories or Letters list is missing/empty!", { catList, letList });
-      return { prompts: [], dateStr };
-  }
+    let currentSeed = seed;
+    function nextRandom() {
+        currentSeed = (currentSeed * 9301 + 49297) % 233280;
+        return currentSeed / 233280;
+    }
 
-  let currentSeed = seed;
-  function nextRandom() {
-    currentSeed = (currentSeed * 9301 + 49297) % 233280;
-    return currentSeed / 233280;
-  }
-
-  for (let i = 0; i < 10; i++) {
-    const catIndex = Math.floor(nextRandom() * catList.length);
-    const letterIndex = Math.floor(nextRandom() * letList.length);
-    prompts.push({
-      round: i + 1,
-      category: catList[catIndex],
-      letter: letList[letterIndex]
-    });
-  }
-
-  return { prompts, dateStr };
+    for (let i = 0; i < 10; i++) {
+        const catIndex = Math.floor(nextRandom() * catList.length);
+        const letterIndex = Math.floor(nextRandom() * letList.length);
+        prompts.push({
+            round: i + 1,
+            category: catList[catIndex],
+            letter: letList[letterIndex]
+        });
+    }
+    return { prompts, dateStr };
 }
 
 function initDailyMode() {
     isDailyMode = true;
-    
-    // Check if player has already completed today's Daily Blurt
-    const status = typeof getDailyStatus === 'function' ? getDailyStatus() : { isCompletedToday: false };
+    const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
         const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
         if (typeof showDailyResults === 'function') {
-            showDailyResults(
-                savedData.score || 0, 
-                status.streak || 0, 
-                savedData.resultsArray || [],
-                savedData.timeSpent || 0
-            );
+            showDailyResults(savedData.score || 0, status.streak || 0, savedData.resultsArray || []);
         }
         return false;
     }
 
-    // Safely extract the prompts array from getDailyPrompts()
     const urlSeed = getURLSeed();
     if (urlSeed) {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
     } else {
         const dailyData = getDailyPrompts();
-        dailyDeckPrompts = dailyData.prompts || dailyData || [];
+        dailyDeckPrompts = dailyData.prompts || [];
     }
 
-    // Reset daily gameplay variables cleanly
     dailyCurrentIndex = 0;
     dailyResultsArray = [];
     dailyStartTime = null;
-    
+
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
-
     return true;
-}
-
-function recordDailyResult(result) {
-    if (!isDailyMode) return;
-    
-    dailyResultsArray.push(result);
-    
-    // Check if all rounds are completed
-    if (dailyResultsArray.length >= dailyDeckPrompts.length) {
-        finishDailyGame();
-    }
-}
-
-function finishDailyGame() {
-    if (typeof stopEverything === 'function') stopEverything();
-
-    // Calculate total elapsed time cleanly in seconds
-    const elapsedSeconds = dailyStartTime ? Math.round((Date.now() - dailyStartTime) / 1000) : 0;
-
-    // Calculate total points earned
-    const totalScore = dailyResultsArray.reduce((acc, current) => {
-        return acc + (typeof current === 'number' ? current : (current === 'green' ? 1 : 0));
-    }, 0);
-    
-    // Save score, streak, and elapsed time to local storage
-    const newStreak = typeof saveDailyResults === 'function' ? saveDailyResults(totalScore, dailyResultsArray, elapsedSeconds) : 1;
-    
-    if (typeof showDailyResults === 'function') {
-        showDailyResults(totalScore, newStreak, dailyResultsArray, elapsedSeconds);
-    }
 }
 
 function getDailyStatus() {
     const { dateStr } = getDaySeed();
     const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
     const currentStreak = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || "0", 10);
-    
     return {
         isCompletedToday: lastCompletedDate === dateStr,
         streak: currentStreak,
@@ -1198,464 +746,44 @@ function getDailyStatus() {
 function saveDailyResults(score, resultsArray, timeSpent = 0) {
     const { dateStr } = getDaySeed();
     const status = getDailyStatus();
-
     if (status.isCompletedToday) return status.streak;
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yYear = yesterday.getFullYear();
-    const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
-    const yDay = String(yesterday.getDate()).padStart(2, '0');
-    const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
+    const yStr = yesterday.toISOString().split('T')[0];
 
     let newStreak = 1;
-    const lastCompletedDate = localStorage.getItem(STORAGE_KEYS.LAST_DATE);
-    if (lastCompletedDate === yesterdayStr) {
+    if (localStorage.getItem(STORAGE_KEYS.LAST_DATE) === yStr) {
         newStreak = status.streak + 1;
     }
 
     localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
     localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
     localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray, timeSpent }));
-
     return newStreak;
 }
 
-// ==========================================
-// SHARE RESULTS CLIPBOARD HELPER
-// ==========================================
-
-function copyDailyResults(totalScore, streak, resultsArray) {
-    // 1. Build the 2x5 emoji block grid
-    let grid = "";
-    resultsArray.forEach((res, index) => {
-        grid += (res > 0 || res === 'green') ? '🟩' : '🟥';
-        if (index === 4) grid += '\n'; // Line break after round 5
-    });
-
-    // 2. Format streak with "Day"
-    const streakText = `${streak} Day Streak`;
-
-    // 3. Construct your custom text payload
-    const shareText = `Today's Score: ${totalScore} points! 🔥 ${streakText}\n\n${grid}\n\nPlay Daily Blurts today! www.WordBlurts.com`;
-
-    // 4. Copy to clipboard
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareText).then(() => {
-            alert("Results copied to clipboard!");
-        }).catch(err => {
-            console.error("Failed to copy results: ", err);
-        });
-    } else {
-        // Fallback for older mobile web views
-        const tempInput = document.createElement("textarea");
-        tempInput.value = shareText;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        alert("Results copied to clipboard!");
-    }
-}
-
-// ==========================================
-// 8. DAILY RESULTS & SHARING MODAL
-// ==========================================
-function generateShareText(score, timeSeconds, resultsArray) {
-  const { dateStr } = getDaySeed();
-  const streak = localStorage.getItem(STORAGE_KEYS.STREAK) || "1";
-  
-  let blocks = "";
-  if (resultsArray && resultsArray.length > 0) {
-    blocks = resultsArray.map(res => res === 'green' ? '🟩' : '🟥').join('');
-  } else {
-    for (let i = 0; i < 10; i++) {
-      blocks += i < score ? "🟩" : "🟥";
-    }
-  }
-
-  return `Word Blurts! Daily (${dateStr})\n` +
-         `Score: ${score}/10 | Time: ${timeSeconds}s\n` +
-         `Streak: 🔥 ${streak} Days\n` +
-         `${blocks}\n` +
-         `https://wordblurts.com`;
-}
-
 function showDailyResults(totalScore, streak, resultsArray) {
-    // 1. Format Score Display
     const scoreEl = document.getElementById('dailyScoreDisplay');
     if (scoreEl) scoreEl.innerText = `${totalScore} pts`;
 
-    // 2. Format Streak Display with "Day" (e.g., "9 Day Streak")
     const streakEl = document.getElementById('dailyStreakDisplay');
-    if (streakEl) {
-        streakEl.innerText = `🔥 ${streak} Day Streak`;
-    }
+    if (streakEl) streakEl.innerText = `🔥 ${streak} Day Streak`;
 
-    // 3. Render result indicators/dots if applicable
-    if (typeof renderResultDots === 'function') {
-        renderResultDots(resultsArray);
-    }
-
-    // 4. Attach Share Button Click Handler
-    const shareBtn = document.getElementById('shareBtn') || document.getElementById('shareResultsBtn');
-    if (shareBtn) {
-        shareBtn.onclick = function() {
-            copyDailyResults(totalScore, streak, resultsArray);
-        };
-    }
-
-    // 5. Show modal
-    const resultsModal = document.getElementById('dailyResultsModal') || document.getElementById('dailySummary');
+    const resultsModal = document.getElementById('dailyResultsModal') || document.getElementById('dailySummary') || document.getElementById('results-modal');
     if (resultsModal) resultsModal.style.display = 'block';
 }
 
 // ==========================================
-// 9. INITIALIZATION & LISTENERS
+// 8. AD & UTILITY MANAGEMENT
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-
-    // ------------------------------------------
-    // ABOUT BUTTON SMOOTH SCROLL WIRE-UP
-    // ------------------------------------------
-    const aboutBtn = document.getElementById('aboutBtn');
-    const aboutSection = document.getElementById('aboutSection');
-
-    if (aboutBtn && aboutSection) {
-        aboutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            aboutSection.scrollIntoView({ behavior: 'smooth' });
+function triggerInterstitialAd() {
+    if (window.googletag && googletag.apiReady) {
+        googletag.cmd.push(function() {
+            googletag.display('interstitial-ad-slot'); 
         });
-    }
-
-    // ------------------------------------------
-    // MODE TOGGLE WIRE-UP (Classic vs. Daily)
-    // ------------------------------------------
-    const randomModeBtn = document.getElementById('randomModeBtn');
-    const dailyModeBtn = document.getElementById('dailyModeBtn');
-
-    if (randomModeBtn) {
-        randomModeBtn.addEventListener('click', () => {
-            isDailyMode = false;
-            randomModeBtn.classList.add('active');
-            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
-
-            // Reset game board display for Classic mode
-            const promptDisplay = document.getElementById('promptDisplay');
-            const letterDisplay = document.getElementById('letterDisplay');
-            const timerDisplay = document.getElementById('timerDisplay');
-
-            if (promptDisplay) {
-                if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-                    promptDisplay.innerHTML = `
-                        <div style="font-size: 0.95rem; color: #fef08a; line-height: 1.3;">Modo Clásico: ¡Presiona el botón verde, Enter o la barra espaciadora para comenzar!</div>
-                        <div style="font-size: 0.95rem; color: #94a3b8; margin-top: 6px;">(Classic Mode: Press the green button or hit Enter or Spacebar to start!)</div>
-                    `;
-                } else {
-                    promptDisplay.textContent = 'Classic Mode: Press the green button or hit Enter or Spacebar to start!';
-                }
-            }
-            if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '15';
-
-            if (typeof resetTimer === 'function') resetTimer();
-        });
-    }
-
-    if (dailyModeBtn) {
-        dailyModeBtn.addEventListener('click', () => {
-            isDailyMode = true;
-            dailyModeBtn.classList.add('active');
-            if (typeof randomModeBtn !== 'undefined' && randomModeBtn) {
-                randomModeBtn.classList.remove('active');
-            }
-
-            // 1. Stop any timers/voice currently running from Classic mode
-            if (typeof stopEverything === 'function') stopEverything();
-
-            // 2. Initialize daily deck (resets dailyCurrentIndex to 0 and loads today's deck)
-            initDailyMode();
-
-            // 3. Prepare game board UI holding state
-            const promptDisplay = document.getElementById('promptDisplay');
-            const letterDisplay = document.getElementById('letterDisplay');
-            const timerDisplay = document.getElementById('timerDisplay') || document.getElementById('timer');
-
-            if (promptDisplay) promptDisplay.textContent = "Daily Blurts is not available at this time";
-            if (letterDisplay) letterDisplay.textContent = '-';
-            if (timerDisplay) timerDisplay.textContent = '15';
-
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) playBtn.innerText = "PLAY";
-        });
-    }
-
-}); // <--- Closes DOMContentLoaded
-
-    // Single PLAY button listener at root scope
-    const playBtn = document.getElementById('playBtn');
-    if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            playRound();
-        });
-    }
-
-    // 1. Check if player arrived via a friend's challenge link (?seed=XXXX)
-    const urlSeed = getURLSeed();
-    if (urlSeed) {
-        isDailyMode = false;
-        dailyDeckPrompts = getSeededPrompts(urlSeed);
-        console.log(`Loaded custom challenge seed: ${urlSeed}`);
-    }
-    // PWA SERVICE WORKER REGISTRATION
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker registered successfully.', reg))
-                .catch(err => console.log('Service Worker registration failed:', err));
-        });
-    }
-
-    // 2. Check if daily game was already completed today
-    const dailyStatus = getDailyStatus();
-    if (dailyStatus.isCompletedToday && !urlSeed) {
-        const storedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
-        if (typeof showDailyResults === 'function') {
-            showDailyResults(
-                storedData.score || 0,
-                dailyStatus.streak || 1,
-                storedData.resultsArray || []
-            );
-        }
-    }
-
-    // 3. Share Results Button Listener (Native Share or Clipboard Fallback)
-    const shareBtn = document.getElementById('share-results-btn') || document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
-            const status = getDailyStatus();
-            
-            const totalScore = savedData.score || 0;
-            const streak = status.streak || 1;
-            const resultsArray = savedData.resultsArray || [];
-
-            // Build 2x5 Emoji Grid
-            let grid = "";
-            resultsArray.forEach((res, index) => {
-                grid += (res > 0 || res === 'green') ? '🟩' : '🟥';
-                if (index === 4) grid += '\n';
-            });
-
-            const shareText = `Today's Score: ${totalScore} points! 🔥 ${streak} Day Streak\n\n${grid}\n\nPlay Daily Blurts today! www.WordBlurts.com`;
-
-            // Mobile Native Share Drawer
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Word Blurts! Daily Results',
-                        text: shareText
-                    });
-                    return;
-                } catch (err) {
-                    // Fall back to clipboard copy if share prompt is dismissed
-                }
-            }
-
-            // Clipboard Copy Fallback
-            try {
-                await navigator.clipboard.writeText(shareText);
-                const originalText = shareBtn.textContent;
-                shareBtn.textContent = '✅ Copied to Clipboard!';
-                setTimeout(() => {
-                    shareBtn.textContent = originalText;
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy results:', err);
-            }
-        });
-    }
-
-    // 4. Challenge Friend Button Listener
-    const challengeBtn = document.getElementById('challenge-friend-btn');
-    if (challengeBtn) {
-        challengeBtn.addEventListener('click', async () => {
-            const { seed } = getDaySeed();
-            const challengeURL = `https://wordblurts.com/?seed=${seed}`;
-            const challengeMessage = `Can you beat my Word Blurts! score? Play the exact same letter set here:\n${challengeURL}`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Word Blurts! Challenge',
-                        text: challengeMessage
-                    });
-                    return;
-                } catch (err) {
-                    // Fallback to clipboard if share drawer is canceled
-                }
-            }
-
-            try {
-                await navigator.clipboard.writeText(challengeMessage);
-                const originalText = challengeBtn.textContent;
-                challengeBtn.textContent = '🔗 Link Copied to Clipboard!';
-                setTimeout(() => {
-                    challengeBtn.textContent = originalText;
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy challenge link:', err);
-            }
-        });
-    }
-
-    // 5. Results Modal Overlay Click Listener (Close on outside tap)
-    const resultsModal = document.getElementById('results-modal') || document.getElementById('dailyResultsModal');
-    if (resultsModal) {
-        resultsModal.addEventListener('click', (e) => {
-            if (e.target === resultsModal) {
-                resultsModal.style.display = 'none';
-            }
-        });
-    }
-
-    // 6. About Modal Event Listeners
-    const openAboutBtn = document.getElementById('open-about-btn');
-    const closeAboutBtn = document.getElementById('close-about-btn');
-    const aboutModal = document.getElementById('about-modal');
-
-    if (openAboutBtn && aboutModal) {
-        openAboutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            aboutModal.style.display = 'flex';
-        });
-    }
-
-    if (closeAboutBtn && aboutModal) {
-        closeAboutBtn.addEventListener('click', () => {
-            aboutModal.style.display = 'none';
-        });
-    }
-if (aboutModal) {
-      aboutModal.addEventListener('click', (e) => {
-    // Close modal if clicked outside
-    if (e.target === aboutModal) {
-        aboutModal.style.display = 'none';
-    }
-});
-
-// ==========================================
-// PWA INSTALL PROMPT CONTROLLER
-// ==========================================
-let deferredPrompt = null;
-
-const pwaBanner = document.getElementById('pwaInstallBanner');
-const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-
-// 1. Android & Chrome Automatic Install Prompt
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
-        pwaBanner.classList.remove('hidden');
-    }
-});
-
-// Handle "Install" button click
-if (pwaInstallBtn) {
-    pwaInstallBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-
-        if (pwaBanner) pwaBanner.classList.add('hidden');
-        deferredPrompt.prompt();
-
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to install prompt: ${outcome}`);
-
-        deferredPrompt = null;
-    });
-}
-
-// Handle Close / Dismiss click
-if (pwaDismissBtn) {
-    pwaDismissBtn.addEventListener('click', () => {
-        if (pwaBanner) pwaBanner.classList.add('hidden');
-        localStorage.setItem('pwaPromptDismissed', Date.now());
-    });
-}
-
-// Hide banner if successfully installed
-window.addEventListener('appinstalled', () => {
-    if (pwaBanner) pwaBanner.classList.add('hidden');
-    deferredPrompt = null;
-    console.log('Word Blurts PWA installed successfully.');
-});
-
-// 2. iOS Safari Custom Detection
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-
-if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
-    if (pwaBanner) {
-        const bannerText = pwaBanner.querySelector('p') || pwaBanner;
-        bannerText.innerHTML = 'Tap the <strong>Share</strong> button <span style="font-size:1.2em;">⎋</span> and select <strong>"Add to Home Screen"</strong> to install Word Blurts!';
-        
-        if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
-        
-        pwaBanner.classList.remove('hidden');
     }
 }
 
-// ==========================================
-// LANGUAGE & UI MODAL CONTROLLERS
-// ==========================================
-
-function toggleLanguage() {
-    const newLang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'es' : 'en';
-    switchLanguage(newLang);
-}
-
-function switchLanguage(langCode) {
-    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[langCode]) return;
-
-    currentLang = langCode;
-    localStorage.setItem("wordblurts_lang", currentLang);
-
-    window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
-    window.topicsMaster = GAME_DATA[currentLang].topicsMaster;
-
-    const langBtn = document.getElementById("lang-toggle-btn");
-    if (langBtn) {
-        langBtn.innerHTML = currentLang === "es" ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
-    }
-}
-
-function toggleRules() {
-    const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
-    if (card) {
-        card.style.display = (card.style.display === 'flex' || card.style.display === 'block') ? 'none' : 'block';
-    }
-}
-
-function openAboutModal() {
-    const modal = document.getElementById('aboutModal') || document.getElementById('aboutCard');
-    if (modal) {
-        modal.style.display = 'block';
-    }
-}
-
-// Restore saved language on load
-document.addEventListener("DOMContentLoaded", () => {
-    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    if (typeof switchLanguage === "function") {
-        switchLanguage(savedLang);
-    }
-});
-
-// Expose UI functions to the global window object
-window.toggleLanguage = toggleLanguage;
-window.switchLanguage = switchLanguage;
-window.toggleRules = toggleRules;
-window.openAboutModal = openAboutModal;
+let lastAdRefreshTime = 0;
+const AD_REFRESH_INTERVAL = 35000;
