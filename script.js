@@ -1,3 +1,17 @@
+function setGameMode(mode) {
+    if (mode === 'daily') {
+        isDailyMode = true;
+        document.getElementById('dailyModeBtn').classList.add('active');
+        document.getElementById('randomModeBtn').classList.remove('active');
+        if (typeof initDailyMode === 'function' && initDailyMode()) {
+            if (typeof playRound === 'function') playRound();
+        }
+    } else {
+        isDailyMode = false;
+        document.getElementById('randomModeBtn').classList.add('active');
+        document.getElementById('dailyModeBtn').classList.remove('active');
+    }
+}
 // ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
