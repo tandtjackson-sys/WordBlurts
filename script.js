@@ -460,8 +460,8 @@ function updateStaticUI() {
             `;
         } else {
             about1.innerHTML = `
-                <h2>About Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> is a fast-paced, free online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+                <h2>What is Word Blurts!</h2>
+                <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
                 
                 <h3>How It Works</h3>
                 <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
