@@ -1566,9 +1566,13 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // Handle "Install" button click
 if (pwaInstallBtn) {
     pwaInstallBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
+        if (!deferredPrompt) {
+            return;
+        }
 
-        if (pwaBanner) pwaBanner.classList.add('hidden');
+        if (pwaBanner) {
+            pwaBanner.classList.add('hidden');
+        }
         deferredPrompt.prompt();
 
         const { outcome } = await deferredPrompt.userChoice;
@@ -1581,14 +1585,18 @@ if (pwaInstallBtn) {
 // Handle Close / Dismiss click
 if (pwaDismissBtn) {
     pwaDismissBtn.addEventListener('click', () => {
-        if (pwaBanner) pwaBanner.classList.add('hidden');
+        if (pwaBanner) {
+            pwaBanner.classList.add('hidden');
+        }
         localStorage.setItem('pwaPromptDismissed', Date.now());
     });
 }
 
 // Hide banner if successfully installed
 window.addEventListener('appinstalled', () => {
-    if (pwaBanner) pwaBanner.classList.add('hidden');
+    if (pwaBanner) {
+        pwaBanner.classList.add('hidden');
+    }
     deferredPrompt = null;
     console.log('Word Blurts PWA installed successfully.');
 });
@@ -1602,7 +1610,9 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwaPromptDismissed')) {
         const bannerText = pwaBanner.querySelector('p') || pwaBanner;
         bannerText.innerHTML = 'Tap the <strong>Share</strong> button <span style="font-size:1.2em;">⎋</span> and select <strong>"Add to Home Screen"</strong> to install Word Blurts!';
         
-        if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+        if (pwaInstallBtn) {
+            pwaInstallBtn.style.display = 'none';
+        }
         
         pwaBanner.classList.remove('hidden');
     }
@@ -1618,7 +1628,9 @@ function toggleLanguage() {
 }
 
 function switchLanguage(langCode) {
-    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[langCode]) return;
+    if (typeof GAME_DATA === 'undefined' || !GAME_DATA[langCode]) {
+        return;
+    }
 
     currentLang = langCode;
     localStorage.setItem("wordblurts_lang", currentLang);
