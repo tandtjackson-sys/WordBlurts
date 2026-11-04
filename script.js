@@ -1112,3 +1112,23 @@ window.playRound = playRound;
 window.startNewRound = startNewRound;
 window.adjustScore = adjustScore;
 window.resetScores = resetScores;
+function setGameMode(mode) {
+    if (mode === 'daily') {
+        // Check if daily mode can successfully initialize (returns true if ready, false/shows message if not)
+        if (typeof initDailyMode === 'function') {
+            const isAvailable = initDailyMode();
+            if (!isAvailable) {
+                // If not available, stop and don't force-start the game
+                return;
+            }
+        }
+        isDailyMode = true;
+        document.getElementById('dailyModeBtn').classList.add('active');
+        document.getElementById('randomModeBtn').classList.remove('active');
+        if (typeof playRound === 'function') playRound();
+    } else {
+        isDailyMode = false;
+        document.getElementById('randomModeBtn').classList.add('active');
+        document.getElementById('dailyModeBtn').classList.remove('active');
+    }
+}
