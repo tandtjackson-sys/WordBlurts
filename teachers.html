@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Classroom Word Game & Vocabulary Warm-Up | Word Blurts!</title>
+    <meta name="description" content="Word Blurts! is a free, no-login online word game for classrooms. Perfect for Smartboards, Chromebooks, 5-minute vocabulary warm-ups, and fun, brain breaks!">
+    <meta name="keywords" content="classroom word game, free smartboard games, vocabulary warm up, brain break games, middle school word games, ESL games no login, online team games for students">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wordblurts.com/teachers.html">
+    <meta property="og:title" content="Word Blurts! - Free Classroom Word Game & "Brain Break"">
+    <meta property="og:description" content="Zero setup, no student logins or personal data required. Fast-paced, 15-second category challenges for phones, Smartboards and Chromebooks.">
+    <meta property="og:image" content="https://wordblurts.com/assets/og-preview.png">
+
+    <!-- Favicon & PWA Tags -->
+    <meta name="theme-color" content="#7b2cbf">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        :root {
+            --primary-purple: #7b2cbf;
+            --accent-yellow: #f59e0b;
+            --accent-green: #10b981;
+            --card-bg: rgba(13, 16, 38, 0.85);
+            --card-border: rgba(0, 240, 255, 0.3);
+            --text-color: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #090d16;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+
+        .back-link {
+            color: #00f0ff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: var(--accent-yellow);
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(123, 44, 191, 0.3) 0%, rgba(13, 16, 38, 0.9) 100%);
+            border: 2px solid var(--accent-green);
+            border-radius: 20px;
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .play-now-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            padding: 14px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .play-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6);
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            color: #00f0ff;
+            font-size: 1.4rem;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            color: var(--accent-yellow);
+            font-size: 1.1rem;
+            margin: 16px 0 6px;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 12px;
+            padding-left: 28px;
+            position: relative;
+            color: var(--text-muted);
+        }
+
+        li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .use-case-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .use-case-box h4 {
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .use-case-box p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .faq-item strong {
+            color: var(--accent-yellow);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0 10px;
+            font-size: 0.85rem;
+            color: #8a99ad;
+        }
+
+        footer a {
+            color: #00f0ff;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.7rem; }
+            .hero-card { padding: 20px 15px; }
+            .play-now-btn { font-size: 1.1rem; padding: 12px 28px; }
+        }
+    </style>
+
+    <!-- Schema Markup for Educational Web Application & FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Word Blurts! Classroom Edition",
+          "url": "https://wordblurts.com/teachers.html",
+          "applicationCategory": "EducationalApplication",
+          "genre": "Classroom Vocabulary & "Brain Break" Game",
+          "operatingSystem": "All (Web Browser)",
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          },
+          "description": "No-login, fast-paced browser word game, designed for classroom Smartboards, Chromebooks, vocabulary practice, and quick brain breaks."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is Word Blurts! free for school classrooms?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, Word Blurts! is 100% free to use on Smartboards, Chromebooks, tablets, phones and desktop computers with no paid upgrades or accounts required."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do students need to create an account or sign in?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No! Word Blurts! requires zero student data, emails, or logins. Teachers can open the website in any browser and start playing instantly."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Word Blurts! support bilingual / ESL classrooms?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! The game features a one-click English/Spanish toggle that translates all categories, instructions, and audio voice prompts for ELL and dual-language classrooms."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <a href="index.html" class="back-link">← Back to Word Blurts! Game</a>
+            <h1>Free Classroom Word Game and "Brain Break"</h1>
+            <p class="subtitle">Fast-paced, no-login vocabulary warm-ups for Smartboards and Chromebooks.</p>
+        </header>
+
+        <!-- HERO SECTION -->
+        <section class="hero-card">
+            <h2>Instant Classroom Warm-Up</h2>
+            <p>Need a quick 5-minute activity to start class, review vocabulary, or give students a fun mental break? <strong>Word Blurts!</strong> runs directly in your browser with zero setup.</p>
+            <a href="index.html" class="play-now-btn">🎮 Launch Game in Classroom</a>
+        </section>
+
+        <!-- WHY TEACHERS LOVE IT -->
+        <section class="section-card">
+            <h2>Why Educators Love Word Blurts!</h2>
+            <ul>
+                <li><strong>Zero Student Accounts or Logins:</strong> Compliant with COPPA/FERPA student privacy standards. No student personal data, emails, or sign-ups required.</li>
+                <li><strong>Smartboard & Chromebook Optimized:</strong> Large, high-contrast text and simple controls make it easy to project from the teacher's screen or play on student devices.</li>
+                <li><strong>Built-In Team Scoreboard:</strong> Easily split your room into Team 1 vs. Team 2 for instant engagement.</li>
+                <li><strong>Bilingual (English & Spanish):</strong> Perfect for Dual Language, World Language, and ESL/ELL classrooms with full one-click translation and voice announcements.</li>
+                <li><strong>100% Free Forever:</strong> No paywalls, trial periods, or hidden subscriptions.</li>
+            </ul>
+        </section>
+
+        <!-- CLASSROOM USE CASES -->
+        <section class="section-card">
+            <h2>How to Use Word Blurts! in Your Classroom</h2>
+            <div class="use-case-grid">
+                <div class="use-case-box">
+                    <h4>🔔 5-Minute Bell Ringer</h4>
+                    <p>Get students engaged the moment they enter. Run 2-3 fast rounds to wake up their brains and practice active recall.</p>
+                </div>
+                <div class="use-case-box">
+                    <h4>🧠 Active Brain Break</h4>
+                    <p>Give students a quick high-energy reward between heavy-lesson blocks without losing control of the room.</p>
+                </div>
+                <div class="use-case-box">
+                    <h4>🏆 Friday Team Challenge</h4>
+                    <p>Split the classroom into competing teams. Pick a winning number (ie. "First team to reach 20 points, wins!)  Have students blurt out answers matching the letter and category before the 15-second timer runs out!  Teacher keeps track of correct answers as they are blurted out, and adjusts the scoreboard accordingly.</p>
+                </div>
+                <div class="use-case-box">
+                    <h4>📝 Zero-Prep Sub Plans</h4>
+                    <p>Keep a link on your substitute teacher emergency plans. Any guest teacher can project the site and run a fun game with zero training.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ FOR TEACHERS & SEO -->
+        <section class="section-card">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <strong>Q: Is Word Blurts! free for schools?</strong>
+                <p>Yes, Word Blurts! is 100% free for teachers, students, and educational institutions.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>Q: Do students need to download anything?</strong>
+                <p>No. Word Blurts! is a browser-based Web Application (PWA). It works on Google Chrome, Safari, Edge, Firefox, and all interactive display boards without downloading software.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>Q: How does the game help with learning?</strong>
+                <p>Category-based word association games encourage rapid lexical retrieval, expand vocabulary, reinforce initial letter sounds, and improve cognitive processing speed under light timer pressure.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Word Blurts! | <a href="index.html">Play Game</a> | <a href="privacy.html">Privacy Policy</a></p>
+    </footer>
+
+</body>
+</html>
