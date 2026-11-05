@@ -834,7 +834,7 @@ function getDaySeed() {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `year-{month}-${day}`;
+    const dateStr = `${year}-${month}-${day}`; // Fixed missing $ on year
     let hash = 0;
     for (let i = 0; i < dateStr.length; i++) {
         hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
