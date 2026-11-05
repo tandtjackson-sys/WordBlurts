@@ -867,7 +867,6 @@ function getDailyPrompts() {
 }
 
 function initDailyMode() {
-    isDailyMode = true;
     const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
         const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
@@ -876,6 +875,8 @@ function initDailyMode() {
         }
         return false;
     }
+
+    isDailyMode = true;
 
     const urlSeed = getURLSeed();
     if (urlSeed) {
