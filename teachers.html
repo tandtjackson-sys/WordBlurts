@@ -79,13 +79,14 @@
         }
 
         h1 {
-            color: var(--accent-yellow);
-            font-size: 2.2rem;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-        }
+    color: var(--accent-yellow);
+    font-size: 1.8rem; /* Scaled down slightly from 2.2rem so it fits on one line */
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    white-space: nowrap; /* Forces it to stay on one line */
+}
 
         .subtitle {
             color: var(--text-muted);
