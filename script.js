@@ -1013,17 +1013,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', (e) => {
-            // Stop the event from bubbling up to any other handlers
-            e.stopPropagation();
             e.preventDefault();
+            e.stopPropagation();
 
             // Check if it's already completed today
             if (typeof initDailyMode === 'function') {
                 const isAvailable = initDailyMode();
                 if (!isAvailable) {
-                    return; // Stops execution completely if already played today!
+                    // Force daily mode off or ensure we stay on results view, 
+                    // preventing any background playRound calls
+                    isDailyMode = false; 
+                    return; 
                 }
             }
+            
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
             if (randomModeBtn) randomModeBtn.classList.remove('active');
