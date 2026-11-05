@@ -1011,13 +1011,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (dailyModeBtn) {
+  if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
+            // Check if it's already completed today
+            if (typeof initDailyMode === 'function') {
+                const isAvailable = initDailyMode();
+                if (!isAvailable) {
+                    return; // Stops execution if already played today!
+                }
+            }
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
             if (randomModeBtn) randomModeBtn.classList.remove('active');
             stopEverything();
-            initDailyMode();
         });
     }
 
