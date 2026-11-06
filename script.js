@@ -598,6 +598,24 @@ function generateDeck() {
 }
 
 function drawNextCombo() {
+    // If we are in Daily Mode, pull from the fixed daily sequence
+    if (typeof isDailyMode !== 'undefined' && isDailyMode) {
+        if (typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts.length > 0) {
+            if (typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex < dailyDeckPrompts.length) {
+                const currentPrompt = dailyDeckPrompts[dailyCurrentIndex];
+                dailyCurrentIndex++;
+                return currentPrompt;
+            } else {
+                // Reached round 10 completion!
+                if (typeof handleDailyCompletion === 'function') {
+                    handleDailyCompletion();
+                }
+                return { topic: "Daily Complete!", letter: "★" };
+            }
+        }
+    }
+
+    // Standard Random Mode logic
     if (comboDeck.length === 0) {
         comboDeck = generateDeck();
     }
@@ -834,7 +852,7 @@ function getDaySeed() {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`; // Fixed missing $ on year
+    const dateStr = `year-{month}-${day}`;
     let hash = 0;
     for (let i = 0; i < dateStr.length; i++) {
         hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
@@ -867,25 +885,15 @@ function getDailyPrompts() {
 }
 
 function initDailyMode() {
+    isDailyMode = true;
     const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
         const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
         if (typeof showDailyResults === 'function') {
             showDailyResults(savedData.score || 0, status.streak || 0, savedData.resultsArray || []);
         }
-        
-        // Explicitly hide any active game board/timer elements so nothing starts playing!
-        const gameScreen = document.getElementById('game-screen') || document.getElementById('gameArea');
-        if (gameScreen) gameScreen.style.display = 'none';
-        
-        if (typeof stopEverything === 'function') {
-            stopEverything();
-        }
-        
         return false;
     }
-
-    isDailyMode = true;
 
     const urlSeed = getURLSeed();
     if (urlSeed) {
@@ -1021,26 +1029,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-if (dailyModeBtn) {
-        dailyModeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Check if it's already completed today
-            if (typeof initDailyMode === 'function') {
-                const isAvailable = initDailyMode();
-                if (!isAvailable) {
-                    // Force daily mode off or ensure we stay on results view, 
-                    // preventing any background playRound calls
-                    isDailyMode = false; 
-                    return; 
-                }
-            }
-            
+    if (dailyModeBtn) {
+        dailyModeBtn.addEventListener('click', () => {
             isDailyMode = true;
             dailyModeBtn.classList.add('active');
             if (randomModeBtn) randomModeBtn.classList.remove('active');
             stopEverything();
+            initDailyMode();
         });
     }
 
@@ -1155,3 +1150,4 @@ function setGameMode(mode) {
         document.getElementById('dailyModeBtn').classList.remove('active');
     }
 }
+
