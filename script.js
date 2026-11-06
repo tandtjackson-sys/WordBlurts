@@ -666,24 +666,22 @@ function startNewRound() {
     }
 
     const nextCard = drawNextCombo();
-const counterEl = document.getElementById('roundCounter');
+
+    // Round counter update
+    const counterEl = document.getElementById('roundCounter');
     if (counterEl) {
         if (typeof isDailyMode !== 'undefined' && isDailyMode) {
             const currentRoundNum = (typeof dailyCurrentIndex !== 'undefined') ? dailyCurrentIndex : 1;
             counterEl.innerText = (currentLang === 'es') 
                 ? `Ronda ${currentRoundNum} de 10` 
-                : `Round ${currentRoundNum} of 10`;
+                : `Round ${currentRoundNum} de 10`;
             counterEl.style.display = 'block';
         } else {
             counterEl.style.display = 'none';
         }
     }
-    // -----------------------------------------------
 
-    const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
-    const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
-    
-    // (Rest of your existing startNewRound code continues below...)
+    // Declared ONCE here safely:
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
 
