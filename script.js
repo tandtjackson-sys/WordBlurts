@@ -873,6 +873,15 @@ function initDailyMode() {
         if (typeof showDailyResults === 'function') {
             showDailyResults(savedData.score || 0, status.streak || 0, savedData.resultsArray || []);
         }
+        
+        // Explicitly hide any active game board/timer elements so nothing starts playing!
+        const gameScreen = document.getElementById('game-screen') || document.getElementById('gameArea');
+        if (gameScreen) gameScreen.style.display = 'none';
+        
+        if (typeof stopEverything === 'function') {
+            stopEverything();
+        }
+        
         return false;
     }
 
