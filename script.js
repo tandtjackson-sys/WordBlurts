@@ -852,7 +852,7 @@ function getDaySeed() {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const dateStr = `year-{month}-${day}`;
+    const dateStr = `${year}-${month}-${day}`;
     let hash = 0;
     for (let i = 0; i < dateStr.length; i++) {
         hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
@@ -863,8 +863,8 @@ function getDaySeed() {
 function getDailyPrompts() {
     const { seed, dateStr } = getDaySeed();
     const prompts = [];
-    const catList = topicsMaster.length ? topicsMaster : CATEGORIES;
-    const letList = lettersMaster.length ? lettersMaster : LETTERS;
+    const catList = (typeof topicsMaster !== 'undefined' && topicsMaster.length) ? topicsMaster : CATEGORIES;
+    const letList = (typeof lettersMaster !== 'undefined' && lettersMaster.length) ? lettersMaster : LETTERS;
 
     let currentSeed = seed;
     function nextRandom() {
@@ -885,7 +885,6 @@ function getDailyPrompts() {
 }
 
 function initDailyMode() {
-    isDailyMode = true;
     const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
         const savedData = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA) || '{}');
@@ -894,6 +893,8 @@ function initDailyMode() {
         }
         return false;
     }
+
+    isDailyMode = true;
 
     const urlSeed = getURLSeed();
     if (urlSeed) {
@@ -910,6 +911,36 @@ function initDailyMode() {
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
     return true;
+}
+
+function handleDailyCompletion() {
+    isRoundActive = false;
+    stopEverything();
+
+    const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+    const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
+
+    if (promptEl) {
+        promptEl.innerHTML = `
+            <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; text-align: center;">Daily Challenge Complete! 🎉</div>
+            <div style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 16px; text-align: center;">Finished adding your points with the buttons? Click below to save your score!</div>
+            <button id="saveDailyScoreBtn" style="background-color: #10b981; color: white; border: none; padding: 12px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">Save Daily Score & View Results</button>
+        `;
+    }
+
+    if (letterEl) {
+        letterEl.innerText = "★";
+    }
+
+    const saveBtn = document.getElementById('saveDailyScoreBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const scoreEl = document.getElementById('team1Score') || document.getElementById('scoreDisplay');
+            const finalScore = parseInt(scoreEl ? scoreEl.innerText : "0", 10) || 0;
+            const newStreak = saveDailyResults(finalScore, dailyResultsArray, 0);
+            showDailyResults(finalScore, newStreak, dailyResultsArray);
+        }, { once: true });
+    }
 }
 
 function getDailyStatus() {
@@ -1002,11 +1033,9 @@ function resetScores() {
 // 9. EVENT LISTENERS & INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Restore language preference
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
     switchLanguage(savedLang);
 
-    // About button smooth scroll
     const aboutBtn = document.getElementById('aboutBtn');
     const aboutSection = document.getElementById('aboutSection');
     if (aboutBtn && aboutSection) {
@@ -1016,7 +1045,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Mode toggles
     const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
@@ -1031,15 +1059,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
-            isDailyMode = true;
+            const isAvailable = initDailyMode();
+            if (!isAvailable) {
+                isDailyMode = false;
+                return;
+            }
             dailyModeBtn.classList.add('active');
             if (randomModeBtn) randomModeBtn.classList.remove('active');
             stopEverything();
-            initDailyMode();
         });
     }
 
-    // Main Play button
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.addEventListener('click', () => {
@@ -1047,7 +1077,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal listeners
     const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
     const openAboutBtn = document.getElementById('open-about-btn');
     const closeAboutBtn = document.getElementById('close-about-btn');
@@ -1112,7 +1141,6 @@ window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
 });
 
-// Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(err => {});
@@ -1130,13 +1158,13 @@ window.playRound = playRound;
 window.startNewRound = startNewRound;
 window.adjustScore = adjustScore;
 window.resetScores = resetScores;
+
 function setGameMode(mode) {
     if (mode === 'daily') {
-        // Check if daily mode can successfully initialize (returns true if ready, false/shows message if not)
         if (typeof initDailyMode === 'function') {
             const isAvailable = initDailyMode();
             if (!isAvailable) {
-                // If not available, stop and don't force-start the game
+                isDailyMode = false;
                 return;
             }
         }
