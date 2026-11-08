@@ -491,15 +491,20 @@ function updateStaticUI() {
         `;
     }
 
-  // Translate Rules Card
-    const rulesCard = document.getElementById('rulesCard');
-    if (rulesCard) {
-        if (isEs) {
-            rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, presiona el botón de Pantalla Completa para jugar en modo de pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!" y la luz verde parpadee, tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. El juego no escucha ni realiza un seguimiento de las respuestas correctas. Cualquier palabra que se diga debe ser acordada por los demás jugadores para determinar si es correcta o no. ¡En caso de duda, consulta a Google! Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Las palabras "Un", "Una", "El" y "La" no cuentan para nada. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta manualmente tus puntuaciones a continuación...`;
-        } else {
-            rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. On a laptop, press the Fullscreen button to play in full-screen mode. Players must first agree on how many points to play to before a winner is declared. After the announcer says "Blurt it out," and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out! The game does not listen for, or keep track of correct answers.  Any words that are blurted out must be agreed upon by the other players as to whether they are correct or not.  When in doubt, check Google!  Multiple answers are allowed per letter/round, and every correct answer earns a point. The words "A" "An" and "The" don't count for anything. Here's a helpful tip: being first to Blurt out a correct answer not only gives you extra points, but it keeps your opponent from using those same answers to score! After each round, manually adjust your scores below...`;
-        }
+ // Translate Rules Card (with default hidden display fix)
+const rulesCard = document.getElementById('rulesCard');
+if (rulesCard) {
+    // Ensure it's hidden by default if style wasn't set in HTML
+    if (!rulesCard.style.display) {
+        rulesCard.style.display = 'none';
     }
+    
+    if (isEs) {
+        rulesCard.innerHTML = `<strong>Cómo Jugar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. En una computadora portátil, presiona el botón de Pantalla Completa para jugar en modo de pantalla completa. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador! Después de que el locutor diga "¡Dilo ya!" y la luz verde parpadee, tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo. El juego no escucha ni realiza un seguimiento de las respuestas correctas. Cualquier palabra que se diga debe ser acordada por los demás jugadores para determinar si es correcta o no. ¡En caso de duda, consulta a Google! Se permiten múltiples respuestas por letra/ronda, y cada respuesta correcta vale un punto. Las palabras "Un", "Una", "El" y "La" no cuentan para nada. Un consejo útil: ser el primero en decir una respuesta correcta no solo te da puntos extra, ¡sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta manualmente tus puntuaciones a continuación...`;
+    } else {
+        rulesCard.innerHTML = `<strong>How to Play:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. On a laptop, press the Fullscreen button to play in full-screen mode. Players must first agree on how many points to play to before a winner is declared. After the announcer says "Blurt it out," and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out! The game does not listen for, or keep track of correct answers. Any words that are blurted out must be agreed upon by the other players as to whether they are correct or not. When in doubt, check Google! Multiple answers are allowed per letter/round, and every correct answer earns a point. The words "A" "An" and "The" don't count for anything. Here's a helpful tip: being first to Blurt out a correct answer not only gives you extra points, but it keeps your opponent from using those same answers to score! After each round, manually adjust your scores below...`;
+    }
+}
 
     // Translate SEO About Section (Bottom of Page)
 const about1 = document.getElementById('about-section-1');
