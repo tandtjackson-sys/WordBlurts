@@ -1061,24 +1061,24 @@
             </header>
 
 
-          <!-- HOW TO PLAY, LANGUAGE TOGGLE, ABOUT & FULLSCREEN -->
-            <div style="text-align: center; margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-                <button class="rules-toggle-btn" onclick="toggleRules()">
-                    <span>❓ How to Play</span>
-                </button>
+    <!-- HOW TO PLAY, LANGUAGE TOGGLE, ABOUT & FULLSCREEN -->
+<div style="text-align: center; margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+    <button id="rules-btn" class="rules-toggle-btn" onclick="toggleRules()">
+        <span>❓ How to Play</span>
+    </button>
 
-                <button id="lang-toggle-btn" class="rules-toggle-btn" onclick="toggleLanguage()">
-                    <span>🇪🇸 Español</span>
-                </button>
+    <button id="lang-toggle-btn" class="rules-toggle-btn" onclick="toggleLanguage()">
+        <span>🇪🇸 Español</span>
+    </button>
 
-                <button class="rules-toggle-btn" id="open-about-btn" onclick="openAboutModal()">
-                    <span>📖 About</span>
-                </button>
+    <button id="open-about-btn" class="rules-toggle-btn" onclick="openAboutModal(event)">
+        <span>📖 About</span>
+    </button>
 
-                <button class="rules-toggle-btn" id="fullscreenToggleBtn" onclick="toggleFullScreen()">
-                    <span>🖵 Fullscreen</span>
-                </button>
-            </div>
+    <button id="fullscreenToggleBtn" class="rules-toggle-btn" onclick="toggleFullScreen()">
+        <span>🖵 Fullscreen</span>
+    </button>
+</div>
 
 
             <!-- MAIN GAME CARD -->
