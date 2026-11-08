@@ -1,4 +1,23 @@
 // ==========================================
+// 0. GLOBAL ATTACHMENTS & STATE
+// ==========================================
+window.isDailyMode = window.isDailyMode || false;
+window.currentLang = window.currentLang || "en";
+
+window.toggleLanguage = function() {
+    const nextLang = (window.currentLang === "es") ? "en" : "es";
+    if (typeof switchLanguage === 'function') {
+        switchLanguage(nextLang);
+    }
+};
+
+window.toggleRules = function() {
+    const rulesCard = document.getElementById('rulesCard');
+    if (rulesCard) {
+        rulesCard.style.display = (rulesCard.style.display === 'none' || rulesCard.style.display === '') ? 'block' : 'none';
+    }
+};
+// ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
 const GAME_DATA = {
@@ -525,7 +544,7 @@ function updateStaticUI() {
                 </div>
             `;
         }
-    }
+    
 
     // Translate About Modal Pop-up (about-section-2)
     const about2 = document.getElementById('about-section-2');
