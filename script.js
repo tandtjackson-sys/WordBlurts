@@ -4,18 +4,35 @@
 window.isDailyMode = false;
 window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
 
+// Update Fullscreen button text based on current language and state
+function updateFullscreenBtnText() {
+    const fsBtn = document.getElementById('fullscreenToggleBtn');
+    if (fsBtn) {
+        const isEs = (window.currentLang === 'es');
+        const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        const label = fsBtn.querySelector('span') || fsBtn;
+        if (isFS) {
+            label.textContent = isEs ? '🖵 Salir de pantalla completa' : '🖵 Exit fullscreen';
+        } else {
+            label.textContent = isEs ? '🖵 Pantalla completa' : '🖵 Fullscreen';
+        }
+    }
+}
+
 window.toggleLanguage = function() {
     window.currentLang = (window.currentLang === "es") ? "en" : "es";
     localStorage.setItem("wordblurts_lang", window.currentLang);
     if (typeof switchLanguage === 'function') {
         switchLanguage(window.currentLang);
     }
+    updateFullscreenBtnText();
 };
 
 window.toggleRules = function() {
     const rulesCard = document.getElementById('rulesCard');
     if (rulesCard) {
-        rulesCard.style.display = (rulesCard.style.display === 'none' || rulesCard.style.display === '') ? 'block' : 'none';
+        const currentStyle = window.getComputedStyle(rulesCard).display;
+        rulesCard.style.display = (currentStyle === 'none') ? 'block' : 'none';
     }
 };
 
@@ -31,18 +48,8 @@ window.toggleFullScreen = function() {
     }
 };
 
-// Update Fullscreen button text based on current language and state
-document.addEventListener('fullscreenchange', () => {
-    const fsBtn = document.getElementById('fullscreenToggleBtn');
-    if (fsBtn) {
-        const isEs = (window.currentLang === 'es');
-        if (document.fullscreenElement) {
-            fsBtn.querySelector('span').textContent = isEs ? '🖵 Salir de pantalla completa' : '🖵 Exit fullscreen';
-        } else {
-            fsBtn.querySelector('span').textContent = isEs ? '🖵 Pantalla completa' : '🖵 Fullscreen';
-        }
-    }
-});
+document.addEventListener('fullscreenchange', updateFullscreenBtnText);
+document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
@@ -727,6 +734,12 @@ function startNewRound() {
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
+    // If we finished 10 rounds of Daily Mode, complete the challenge
+    if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
+        handleDailyCompletion();
+        return;
+    }
+
     stopEverything();
 
     // Disable and fade the PLAY button while the round is running
@@ -749,21 +762,33 @@ function startNewRound() {
         timerEl.classList.remove('flash-red');
     }
 
-    const nextCard = drawNextCombo();
-    window.currentActiveTopic = nextCard.topic; // Saves the active topic globally for instant language switching
+    // Determine next prompt card (Daily vs Classic)
+    let nextCard;
+    if (window.isDailyMode && typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts[dailyCurrentIndex]) {
+        nextCard = dailyDeckPrompts[dailyCurrentIndex];
+    } else {
+        nextCard = drawNextCombo();
+    }
+    
+    window.currentActiveTopic = nextCard.topic;
 
-    // Round counter update for Daily Mode
+    // Advance round counter & update display for Daily Mode (1-indexed display: 1 of 10, 2 of 10, etc.)
     const counterEl = document.getElementById('roundCounter');
     if (counterEl) {
-        if (typeof isDailyMode !== 'undefined' && isDailyMode) {
-            const currentRoundNum = (typeof dailyCurrentIndex !== 'undefined') ? dailyCurrentIndex : 1;
+        if (window.isDailyMode) {
+            const displayRoundNum = (typeof dailyCurrentIndex !== 'undefined') ? (dailyCurrentIndex + 1) : 1;
             counterEl.innerText = (currentLang === 'es') 
-                ? `Ronda ${currentRoundNum} de 10` 
-                : `Round ${currentRoundNum} of 10`;
+                ? `Ronda ${displayRoundNum} de 10` 
+                : `Round ${displayRoundNum} of 10`;
             counterEl.style.display = 'block';
         } else {
             counterEl.style.display = 'none';
         }
+    }
+
+    // Increment index for the NEXT round click
+    if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined') {
+        dailyCurrentIndex++;
     }
 
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
@@ -775,7 +800,7 @@ function startNewRound() {
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
-        if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
+        if (currentLang === 'es' && GAME_DATA && GAME_DATA['en'] && GAME_DATA['es']) {
             const esIndex = GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic);
             const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) ? GAME_DATA['en'].topicsMaster[esIndex] : "";
             promptEl.innerHTML = `
@@ -1018,7 +1043,7 @@ function initDailyMode() {
         dailyDeckPrompts = dailyData.prompts || [];
     }
 
-    dailyCurrentIndex = 0;
+    dailyCurrentIndex = 0; // Starts at index 0 for Round 1
     dailyResultsArray = [];
     dailyStartTime = null;
 
