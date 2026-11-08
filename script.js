@@ -1315,4 +1315,29 @@ function setGameMode(mode) {
         document.getElementById('dailyModeBtn').classList.remove('active');
     }
 }
+// ==========================================
+// FULL-SCREEN TOGGLE
+// ==========================================
+window.toggleFullScreen = function() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+};
 
+// Automatically update button text when fullscreen state changes
+document.addEventListener('fullscreenchange', () => {
+    const fsBtn = document.getElementById('fullscreenToggleBtn');
+    if (fsBtn) {
+        if (document.fullscreenElement) {
+            fsBtn.querySelector('span').textContent = '🖵 Exit Screen';
+        } else {
+            fsBtn.querySelector('span').textContent = '🖵 Fullscreen';
+        }
+    }
+});
