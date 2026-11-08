@@ -429,6 +429,16 @@ function updateStaticUI() {
         langToggleBtn.innerHTML = isEs ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
 
+    // Translate Prompt Area if no active round has started yet
+    const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+    if (promptEl && (!typeof currentActiveTopic !== 'undefined' || !window.currentActiveTopic)) {
+        promptEl.innerHTML = `
+            <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+                ${isEs ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+            </div>
+        `;
+    }
+
    // Translate Rules Card
     const rulesCard = document.getElementById('rulesCard');
     if (rulesCard) {
@@ -477,6 +487,10 @@ function updateStaticUI() {
                 </div>
             `;
         } else {
+            // Keep your existing English fallback structure for about1 here if you have it!
+        }
+    }
+}
             about1.innerHTML = `
                 <h2>What is Word Blurts!???</h2>
                 <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
@@ -771,17 +785,16 @@ function speakPrompt(topic, letter) {
             window.speechSynthesis.speak(utteranceHype);
         };
 
-        // Single, clean handler for when "Blurt it out!" finishes speaking:
         utteranceHype.onend = () => {
-            // --- Trigger the green light flash cue! ---
-            const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
+            // --- Green Light flash cue (1 full second) ---
+            const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
             if (mainContainer) {
                 mainContainer.style.borderColor = "#10b981"; // Vibrant green
-                mainContainer.style.boxShadow = "0 0 35px #10b981, inset 0 0 20px #10b981";
+                mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
                 setTimeout(() => {
                     mainContainer.style.borderColor = "";
                     mainContainer.style.boxShadow = "";
-                }, 400); // Flash green for 400ms then clear
+                }, 1000); // 1000ms = exactly 1 full second
             }
 
             startTimer();
@@ -809,12 +822,6 @@ function startTimer() {
         if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
     }
 
-    const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
-    if (mainContainer) {
-        mainContainer.style.boxShadow = "";
-        mainContainer.style.borderColor = "";
-    }
-
     let timeLeft = 15;
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
@@ -835,7 +842,16 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
-            isRoundActive = false;
+            isRoundActive = false; // Mark round as inactive so Play button unlocks!
+
+            // --- Re-enable PLAY button ---
+            const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+            if (playBtn) {
+                playBtn.disabled = false;
+                playBtn.style.opacity = "1";
+                playBtn.style.cursor = "pointer";
+            }
+            // -----------------------------
 
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playSting === 'function') {
                 gameAudio.playSting();
@@ -848,6 +864,7 @@ function startTimer() {
                 timerEl.style.color = "#ff0000";
             }
 
+            const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
             if (mainContainer) {
                 let flashCount = 0;
                 const flashInterval = setInterval(() => {
@@ -1101,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-   const randomModeBtn = document.getElementById('randomModeBtn');
+    const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
     if (randomModeBtn && dailyModeBtn) {
@@ -1116,9 +1133,20 @@ document.addEventListener('DOMContentLoaded', () => {
             randomModeBtn.style.opacity = "1";
             dailyModeBtn.style.opacity = "0.4"; // De-emphasize Daily
             stopEverything();
+
+            // Update prompt text for Classic ready state
+            const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+            if (promptEl) {
+                promptEl.innerHTML = `
+                    <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+                        ${currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+                    </div>
+                `;
+            }
         });
 
         dailyModeBtn.addEventListener('click', () => {
+            isDailyMode = true; // Ensure Daily Mode flag is enabled
             const isAvailable = initDailyMode();
             if (!isAvailable) {
                 isDailyMode = false;
@@ -1129,6 +1157,16 @@ document.addEventListener('DOMContentLoaded', () => {
             dailyModeBtn.style.opacity = "1";
             randomModeBtn.style.opacity = "0.4"; // De-emphasize Classic
             stopEverything();
+
+            // --- STOP AUTO-START: Set up ready state for Round 1 without firing round ---
+            const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+            if (promptEl) {
+                promptEl.innerHTML = `
+                    <div style="font-size: 1.5rem; color: #ffd700; text-align: center;">
+                        ${currentLang === 'es' ? '¡Blurt Diario listo! Presiona Jugar para empezar la Ronda 1.' : 'Daily Blurt Ready! Press Play to start Round 1.'}
+                    </div>
+                `;
+            }
         });
     }
 
@@ -1158,9 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (aboutModal) {
         aboutModal.addEventListener('click', (e) => {
-            if (e.target === aboutModal) {
-                aboutModal.style.display = 'none';
-            }
+            e.target === aboutModal && (aboutModal.style.display = 'none');
         });
     }
 });
