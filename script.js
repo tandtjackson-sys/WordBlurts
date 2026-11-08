@@ -1,8 +1,9 @@
 // ==========================================
-// 0. GLOBAL ATTACHMENTS & STATE
+// 0. GLOBAL WINDOW ATTACHMENTS FOR HTML ONCLICK
 // ==========================================
 window.isDailyMode = window.isDailyMode || false;
 window.currentLang = window.currentLang || "en";
+window.currentActiveTopic = window.currentActiveTopic || "";
 
 window.toggleLanguage = function() {
     const nextLang = (window.currentLang === "es") ? "en" : "es";
@@ -16,6 +17,29 @@ window.toggleRules = function() {
     if (rulesCard) {
         rulesCard.style.display = (rulesCard.style.display === 'none' || rulesCard.style.display === '') ? 'block' : 'none';
     }
+};
+
+window.playRound = function() {
+    if (typeof isRoundActive !== 'undefined' && isRoundActive) return;
+    if (typeof startNewRound === 'function') {
+        startNewRound();
+    }
+};
+
+window.initDailyMode = function() {
+    if (typeof initDailyMode === 'function' && window.initDailyMode !== initDailyMode) {
+        return initDailyMode();
+    }
+};
+
+window.openAboutModal = function() {
+    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
+    if (aboutModal) aboutModal.style.display = 'flex';
+};
+
+window.closeAboutModal = function() {
+    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
+    if (aboutModal) aboutModal.style.display = 'none';
 };
 // ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
@@ -469,82 +493,78 @@ function updateStaticUI() {
     }
 
     // Translate SEO About Section (Bottom of Page)
-    const about1 = document.getElementById('about-section-1');
-    if (about1) {
-        if (isEs) {
-            about1.innerHTML = `
-                <h2>Acerca de Word Blurts!</h2>
-                <p><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción. Ya sea que estés organizando una noche de juegos con amigos, jugando con la familia o poniendo a prueba tus propios conocimientos, ¡Word Blurts! ofrece diversión instantánea directamente en tu navegador web.</p>
-                
-                <h3>Cómo Funciona</h3>
-                <p>Cada ronda genera un tema aleatorio y una letra inicial. Una vez que el locutor da la señal, los jugadores compiten contra un cronómetro de 15 segundos para decir una palabra coincidente antes de que se acabe el tiempo. ¡Lleva la puntuación directamente en el marcador de equipo integrado y mira quién reina supremo!</p>
+const about1 = document.getElementById('about-section-1');
+if (about1) {
+    if (isEs) {
+        about1.innerHTML = `
+            <h2>Acerca de Word Blurts!</h2>
+            <p><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción. Ya sea que estés organizando una noche de juegos con amigos, jugando con la familia o poniendo a prueba tus propios conocimientos, ¡Word Blurts! ofrece diversión instantánea directamente en tu navegador web.</p>
+            
+            <h3>Cómo Funciona</h3>
+            <p>Cada ronda genera un tema aleatorio y una letra inicial. Una vez que el locutor da la señal, los jugadores compiten contra un cronómetro de 15 segundos para decir una palabra coincidente antes de que se acabe el tiempo. ¡Lleva la puntuación directamente en el marcador de equipo integrado y mira quién reina supremo!</p>
 
-                <h3>Características Principales</h3>
-                <ul>
-                    <li>⚡ <strong>Juego instantáneo en el navegador:</strong> No se requieren descargas, registros de cuenta ni instalaciones.</li>
-                    <li>⏱ <strong>Cuenta regresiva dinámica de 15 segundos:</strong> El temporizador visual y de audio integrado mantiene la presión.</li>
-                    <li>👥 <strong>Marcador interactivo:</strong> Lleva las puntuaciones del Jugador 1 y Jugador 2 o de equipos completos sin problemas.</li>
-                    <li>📱 <strong>Compatible con dispositivos móviles y de escritorio:</strong> Diseño totalmente receptivo con controles táctiles y de barra espaciadora.</li>
-                </ul>
+            <h3>Características Principales</h3>
+            <ul>
+                <li>⚡ <strong>Juego instantáneo en el navegador:</strong> No se requieren descargas, registros de cuenta ni instalaciones.</li>
+                <li>⏱ <strong>Cuenta regresiva dinámica de 15 segundos:</strong> El temporizador visual y de audio integrado mantiene la presión.</li>
+                <li>👥 <strong>Marcador interactivo:</strong> Lleva las puntuaciones del Jugador 1 y Jugador 2 o de equipos completos sin problemas.</li>
+                <li>📱 <strong>Compatible con dispositivos móviles y de escritorio:</strong> Diseño totalmente receptivo con controles táctiles y de barra espaciadora.</li>
+            </ul>
 
-                <h3>Preguntas Frecuentes</h3>
-                <div class="faq-item">
-                    <strong>P: ¿Word Blurts! es gratis para jugar?</strong>
-                    <p>Sí, ¡Word Blurts! es 100% gratuito para jugar en computadoras de escritorio, tabletas y dispositivos móviles.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>P: ¿Cuántos jugadores pueden participar?</strong>
-                    <p>¡Word Blurts! funciona muy bien para 1 o 2 jugadores, o hasta grupos grandes divididos en Equipo 1 y Equipo 2. Cuantos más jugadores, más respuestas divertidas escucharás y más hilarante se vuelve.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>P: ¿Puedo jugar en mi teléfono?</strong>
-                    <p>¡Absolutamente! El juego está optimizado para todos los tamaños de pantalla y navegadores móviles.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>P: ¿Las reglas son estrictas?</strong>
-                    <p>¡Absolutamente no! El juego fue creado para el disfrute máximo de todos. Solo asegúrate de que todos estén de acuerdo con cualquier regla modificada antes de empezar a jugar.</p>
-                </div>
-            `;
-        } else {
-            // Keep your existing English fallback structure for about1 here if you have it!
-        }
+            <h3>Preguntas Frecuentes</h3>
+            <div class="faq-item">
+                <strong>P: ¿Word Blurts! es gratis para jugar?</strong>
+                <p>Sí, ¡Word Blurts! es 100% gratuito para jugar en computadoras de escritorio, tabletas y dispositivos móviles.</p>
+            </div>
+            <div class="faq-item">
+                <strong>P: ¿Cuántos jugadores pueden participar?</strong>
+                <p>¡Word Blurts! funciona muy bien para 1 o 2 jugadores, o hasta grupos grandes divididos en Equipo 1 y Equipo 2. Cuantos más jugadores, más respuestas divertidas escucharás y más hilarante se vuelve.</p>
+            </div>
+            <div class="faq-item">
+                <strong>P: ¿Puedo jugar en mi teléfono?</strong>
+                <p>¡Absolutamente! El juego está optimizado para todos los tamaños de pantalla y navegadores móviles.</p>
+            </div>
+            <div class="faq-item">
+                <strong>P: ¿Las reglas son estrictas?</strong>
+                <p>¡Absolutamente no! El juego fue creado para el disfrute máximo de todos. Solo asegúrate de que todos estén de acuerdo con cualquier regla modificada antes de empezar a jugar.</p>
+            </div>
+        `;
+    } else {
+        about1.innerHTML = `
+            <h2>What is Word Blurts!???</h2>
+            <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+            
+            <h3>How It Works</h3>
+            <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
+                <li>⏱ <strong>Dynamic 15-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
+                <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
+                <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <strong>Q: Is Word Blurts! free to play?</strong>
+                <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Q: How many players can play?</strong>
+                <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
+            </div>
+            <div class="faq-item">
+                <strong>Q: Can I play on my phone?</strong>
+                <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Q: Are the rules strict?</strong>
+                <p>Absolutely not! The game was created for everyone's maximum enjoyment! Just make sure everyone agrees to any changed rules before beginning to play.</p>
+            </div>
+        `;
     }
 }
-            about1.innerHTML = `
-                <h2>What is Word Blurts!???</h2>
-                <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
-                
-                <h3>How It Works</h3>
-                <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to blurt out a matching word before time runs out. Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
-
-                <h3>Key Features</h3>
-                <ul>
-                    <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
-                    <li>⏱ <strong>Dynamic 15-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
-                    <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
-                    <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
-                </ul>
-
-                <h3>Frequently Asked Questions</h3>
-                <div class="faq-item">
-                    <strong>Q: Is Word Blurts! free to play?</strong>
-                    <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>Q: How many players can play?</strong>
-                    <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
-                </div>
-                <div class="faq-item">
-                    <strong>Q: Can I play on my phone?</strong>
-                    <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>Q: Are the rules strict?</strong>
-                    <p>Absolutely not! The game was created for everyone's maximum enjoyment! Just make sure everyone agrees to any changed rules before beginning to play.</p>
-                </div>
-            `;
-        }
-    
 
     // Translate About Modal Pop-up (about-section-2)
     const about2 = document.getElementById('about-section-2');
