@@ -1,15 +1,14 @@
 // ==========================================
-// 0. GLOBAL WINDOW ATTACHMENTS FOR HTML ONCLICK
+// 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
-window.isDailyMode = window.isDailyMode || false;
-window.currentLang = window.currentLang || "en";
-window.currentActiveTopic = window.currentActiveTopic || "";
+window.isDailyMode = false;
+window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
 
 window.toggleLanguage = function() {
-    const nextLang = (window.currentLang === "es") ? "en" : "es";
-    window.currentLang = nextLang; // Ensure global state updates immediately
+    window.currentLang = (window.currentLang === "es") ? "en" : "es";
+    localStorage.setItem("wordblurts_lang", window.currentLang);
     if (typeof switchLanguage === 'function') {
-        switchLanguage(nextLang);
+        switchLanguage(window.currentLang);
     }
 };
 
@@ -20,28 +19,30 @@ window.toggleRules = function() {
     }
 };
 
-window.playRound = function() {
-    if (typeof isRoundActive !== 'undefined' && isRoundActive) return;
-    if (typeof startNewRound === 'function') {
-        startNewRound();
+window.toggleFullScreen = function() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }
 };
 
-window.initDailyMode = function() {
-    if (typeof initDailyMode === 'function' && window.initDailyMode !== initDailyMode) {
-        return initDailyMode();
+// Update Fullscreen button text based on current language and state
+document.addEventListener('fullscreenchange', () => {
+    const fsBtn = document.getElementById('fullscreenToggleBtn');
+    if (fsBtn) {
+        const isEs = (window.currentLang === 'es');
+        if (document.fullscreenElement) {
+            fsBtn.querySelector('span').textContent = isEs ? '🖵 Salir de pantalla completa' : '🖵 Exit fullscreen';
+        } else {
+            fsBtn.querySelector('span').textContent = isEs ? '🖵 Pantalla completa' : '🖵 Fullscreen';
+        }
     }
-};
-
-window.openAboutModal = function() {
-    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
-    if (aboutModal) aboutModal.style.display = 'flex';
-};
-
-window.closeAboutModal = function() {
-    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
-    if (aboutModal) aboutModal.style.display = 'none';
-};
+});
 // ==========================================
 // 1. GAME DATA & LOCALIZATION STORE
 // ==========================================
