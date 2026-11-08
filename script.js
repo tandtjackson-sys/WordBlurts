@@ -396,6 +396,24 @@ function switchLanguage(langCode) {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     if (typeof stopEverything === 'function') stopEverything();
 
+    // --- INSTANT UI LANGUAGE UPDATE ---
+    const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+    if (promptEl && typeof currentActiveTopic !== 'undefined' && currentActiveTopic) {
+        if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
+            const esIndex = GAME_DATA['en'].topicsMaster.indexOf(currentActiveTopic);
+            const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster[esIndex]) ? GAME_DATA['es'].topicsMaster[esIndex] : currentActiveTopic;
+            promptEl.innerHTML = `
+                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
+                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${currentActiveTopic})</div>
+            `;
+        } else {
+            promptEl.innerHTML = `
+                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${currentActiveTopic}</div>
+            `;
+        }
+    }
+    // ----------------------------------
+
     updateStaticUI();
 }
 
@@ -647,11 +665,22 @@ function playRound() {
 }
 
 function startNewRound() {
+    // Block starting a new round if one is already active
+    if (typeof isRoundActive !== 'undefined' && isRoundActive) return;
+
     if (window.isTransitioning) return;
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
     stopEverything();
+
+    // Disable and fade the PLAY button while the round is running
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    if (playBtn) {
+        playBtn.disabled = true;
+        playBtn.style.opacity = "0.5";
+        playBtn.style.cursor = "not-allowed";
+    }
 
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
@@ -666,22 +695,22 @@ function startNewRound() {
     }
 
     const nextCard = drawNextCombo();
+    window.currentActiveTopic = nextCard.topic; // Saves the active topic globally for instant language switching
 
-    // Round counter update
+    // Round counter update for Daily Mode
     const counterEl = document.getElementById('roundCounter');
     if (counterEl) {
         if (typeof isDailyMode !== 'undefined' && isDailyMode) {
             const currentRoundNum = (typeof dailyCurrentIndex !== 'undefined') ? dailyCurrentIndex : 1;
             counterEl.innerText = (currentLang === 'es') 
                 ? `Ronda ${currentRoundNum} de 10` 
-                : `Round ${currentRoundNum} de 10`;
+                : `Round ${currentRoundNum} of 10`;
             counterEl.style.display = 'block';
         } else {
             counterEl.style.display = 'none';
         }
     }
 
-    // Declared ONCE here safely:
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
 
@@ -692,7 +721,7 @@ function startNewRound() {
         promptEl.style.justifyContent = 'center';
 
         if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
-            const esIndex = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
+            const esIndex = GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic);
             const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) ? GAME_DATA['en'].topicsMaster[esIndex] : "";
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
@@ -742,7 +771,19 @@ function speakPrompt(topic, letter) {
             window.speechSynthesis.speak(utteranceHype);
         };
 
+        // Single, clean handler for when "Blurt it out!" finishes speaking:
         utteranceHype.onend = () => {
+            // --- Trigger the green light flash cue! ---
+            const mainContainer = document.querySelector('.game-card') || document.querySelector('.card') || document.querySelector('main') || document.querySelector('.container');
+            if (mainContainer) {
+                mainContainer.style.borderColor = "#10b981"; // Vibrant green
+                mainContainer.style.boxShadow = "0 0 35px #10b981, inset 0 0 20px #10b981";
+                setTimeout(() => {
+                    mainContainer.style.borderColor = "";
+                    mainContainer.style.boxShadow = "";
+                }, 400); // Flash green for 400ms then clear
+            }
+
             startTimer();
         };
 
@@ -892,7 +933,7 @@ function getDailyPrompts() {
         const letterIndex = Math.floor(nextRandom() * letList.length);
         prompts.push({
             round: i + 1,
-            category: catList[catIndex],
+            topic: catList[catIndex], // <-- Changed from category to topic
             letter: letList[letterIndex]
         });
     }
@@ -1060,19 +1101,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const randomModeBtn = document.getElementById('randomModeBtn');
+   const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
-    if (randomModeBtn) {
+    if (randomModeBtn && dailyModeBtn) {
+        // Initial state
+        randomModeBtn.style.opacity = "1";
+        dailyModeBtn.style.opacity = "0.5"; // Start with daily faded if classic is default
+
         randomModeBtn.addEventListener('click', () => {
             isDailyMode = false;
             randomModeBtn.classList.add('active');
-            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
+            dailyModeBtn.classList.remove('active');
+            randomModeBtn.style.opacity = "1";
+            dailyModeBtn.style.opacity = "0.4"; // De-emphasize Daily
             stopEverything();
         });
-    }
 
-    if (dailyModeBtn) {
         dailyModeBtn.addEventListener('click', () => {
             const isAvailable = initDailyMode();
             if (!isAvailable) {
@@ -1080,7 +1125,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             dailyModeBtn.classList.add('active');
-            if (randomModeBtn) randomModeBtn.classList.remove('active');
+            randomModeBtn.classList.remove('active');
+            dailyModeBtn.style.opacity = "1";
+            randomModeBtn.style.opacity = "0.4"; // De-emphasize Classic
             stopEverything();
         });
     }
