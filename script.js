@@ -7,6 +7,7 @@ window.currentActiveTopic = window.currentActiveTopic || "";
 
 window.toggleLanguage = function() {
     const nextLang = (window.currentLang === "es") ? "en" : "es";
+    window.currentLang = nextLang; // Ensure global state updates immediately
     if (typeof switchLanguage === 'function') {
         switchLanguage(nextLang);
     }
