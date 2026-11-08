@@ -1171,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dailyModeBtn.classList.remove('active');
             randomModeBtn.style.opacity = "1";
             dailyModeBtn.style.opacity = "0.4"; // De-emphasize Daily
-            stopEverything();
+            if (typeof stopEverything === 'function') stopEverything();
 
             // Update prompt text for Classic ready state
             const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
@@ -1186,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         dailyModeBtn.addEventListener('click', () => {
             isDailyMode = true; // Ensure Daily Mode flag is enabled
-            const isAvailable = initDailyMode();
+            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
             if (!isAvailable) {
                 isDailyMode = false;
                 return;
@@ -1195,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             randomModeBtn.classList.remove('active');
             dailyModeBtn.style.opacity = "1";
             randomModeBtn.style.opacity = "0.4"; // De-emphasize Classic
-            stopEverything();
+            if (typeof stopEverything === 'function') stopEverything();
 
             // --- STOP AUTO-START: Set up ready state for Round 1 without firing round ---
             const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
@@ -1212,7 +1212,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.addEventListener('click', () => {
-            playRound();
+            if (isDailyMode && typeof initDailyMode === 'function') {
+                initDailyMode();
+            }
+            if (typeof playRound === 'function') {
+                playRound();
+            }
         });
     }
 
