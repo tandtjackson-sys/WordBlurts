@@ -483,13 +483,13 @@ function updateStaticUI() {
 
     // Translate Prompt Area if no active round has started yet
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
-    if (promptEl && (!typeof currentActiveTopic !== 'undefined' || !window.currentActiveTopic)) {
-        promptEl.innerHTML = `
-            <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
-                ${isEs ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
-            </div>
-        `;
-    }
+if (promptEl && (!window.currentActiveTopic)) {
+    promptEl.innerHTML = `
+        <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+            ${isEs ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+        </div>
+    `;
+}
 
  // Translate Rules Card (with default hidden display fix)
 const rulesCard = document.getElementById('rulesCard');
