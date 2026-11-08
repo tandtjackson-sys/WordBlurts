@@ -1145,106 +1145,73 @@ function resetScores() {
 // ==========================================
 // 9. EVENT LISTENERS & INITIALIZATION
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+function initWordBlurts() {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    switchLanguage(savedLang);
-
-    const aboutBtn = document.getElementById('aboutBtn');
-    const aboutSection = document.getElementById('aboutSection');
-    if (aboutBtn && aboutSection) {
-        aboutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            aboutSection.scrollIntoView({ behavior: 'smooth' });
-        });
+    window.currentLang = savedLang;
+    if (typeof switchLanguage === 'function') {
+        switchLanguage(savedLang);
     }
 
     const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
     if (randomModeBtn && dailyModeBtn) {
-        // Initial state
         randomModeBtn.style.opacity = "1";
-        dailyModeBtn.style.opacity = "0.5"; // Start with daily faded if classic is default
+        dailyModeBtn.style.opacity = "0.5";
 
-        randomModeBtn.addEventListener('click', () => {
-            isDailyMode = false;
+        randomModeBtn.onclick = () => {
+            window.isDailyMode = false;
             randomModeBtn.classList.add('active');
             dailyModeBtn.classList.remove('active');
             randomModeBtn.style.opacity = "1";
-            dailyModeBtn.style.opacity = "0.4"; // De-emphasize Daily
+            dailyModeBtn.style.opacity = "0.4";
             if (typeof stopEverything === 'function') stopEverything();
 
-            // Update prompt text for Classic ready state
-            const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+            const promptEl = document.getElementById('promptDisplay');
             if (promptEl) {
-                promptEl.innerHTML = `
-                    <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
-                        ${currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
-                    </div>
-                `;
+                promptEl.innerHTML = `<div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+                    ${window.currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+                </div>`;
             }
-        });
+        };
 
-        dailyModeBtn.addEventListener('click', () => {
-            isDailyMode = true; // Ensure Daily Mode flag is enabled
+        dailyModeBtn.onclick = () => {
+            window.isDailyMode = true;
             const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
             if (!isAvailable) {
-                isDailyMode = false;
+                window.isDailyMode = false;
                 return;
             }
             dailyModeBtn.classList.add('active');
             randomModeBtn.classList.remove('active');
             dailyModeBtn.style.opacity = "1";
-            randomModeBtn.style.opacity = "0.4"; // De-emphasize Classic
+            randomModeBtn.style.opacity = "0.4";
             if (typeof stopEverything === 'function') stopEverything();
 
-            // --- STOP AUTO-START: Set up ready state for Round 1 without firing round ---
-            const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+            const promptEl = document.getElementById('promptDisplay');
             if (promptEl) {
-                promptEl.innerHTML = `
-                    <div style="font-size: 1.5rem; color: #ffd700; text-align: center;">
-                        ${currentLang === 'es' ? '¡Blurt Diario listo! Presiona Jugar para empezar la Ronda 1.' : 'Daily Blurt Ready! Press Play to start Round 1.'}
-                    </div>
-                `;
+                promptEl.innerHTML = `<div style="font-size: 1.5rem; color: #ffd700; text-align: center;">
+                    ${window.currentLang === 'es' ? '¡Blurt Diario listo! Presiona Jugar para empezar la Ronda 1.' : 'Daily Blurt Ready! Press Play to start Round 1.'}
+                </div>`;
             }
-        });
+        };
     }
 
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            if (isDailyMode && typeof initDailyMode === 'function') {
+        playBtn.onclick = () => {
+            if (window.isDailyMode && typeof initDailyMode === 'function') {
                 initDailyMode();
             }
             if (typeof playRound === 'function') {
                 playRound();
             }
-        });
+        };
     }
+}
 
-    const aboutModal = document.getElementById('about-modal') || document.getElementById('aboutModal');
-    const openAboutBtn = document.getElementById('open-about-btn');
-    const closeAboutBtn = document.getElementById('close-about-btn');
-
-    if (openAboutBtn && aboutModal) {
-        openAboutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            aboutModal.style.display = 'flex';
-        });
-    }
-
-    if (closeAboutBtn && aboutModal) {
-        closeAboutBtn.addEventListener('click', () => {
-            aboutModal.style.display = 'none';
-        });
-    }
-
-    if (aboutModal) {
-        aboutModal.addEventListener('click', (e) => {
-            e.target === aboutModal && (aboutModal.style.display = 'none');
-        });
-    }
-});
+// Execute immediately since script is at the bottom of the body
+initWordBlurts();
 
 // ==========================================
 // 10. PWA INSTALL PROMPT & SERVICE WORKER
