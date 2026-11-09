@@ -864,7 +864,7 @@ function startNewRound() {
         <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
     `;
 }
-    }
+    
 
     if (letterEl) letterEl.innerText = nextCard.letter;
 
