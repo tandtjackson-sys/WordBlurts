@@ -510,9 +510,9 @@ if (rulesCard) {
     } else {
         rulesCard.innerHTML = `
             <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 12px; font-size: 1.3rem;">How to Play</h3>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Getting Started:</strong> Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. Players must first agree on how many points to play to before a winner is declared.</p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. The Round:</strong> After the announcer says "Blurt it out," and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out!</p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Scoring:</strong> The game does not track correct answers—players must agree if a blurt is correct. Multiple answers are allowed per round, and every correct answer earns a point (articles like "A", "An", and "The" don't count).</p>
+            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Getting Started:</strong> Players must first agree on how many points to play to before a winner is declared.  Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. </p>
+            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. The Round:</strong> After the announcer says "Blurt it out!" and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out!</p>
+            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Scoring:</strong> The game does not track correct answers—it's up to the players to agree whether a Blurt is correct. Multiple answers are allowed per round, and every correct answer earns a point (articles like "A", "An", and "The" don't count)</p>
             <p style="margin-bottom: 0; line-height: 1.5;"><strong>Pro Tip:</strong> Being first to Blurt out a correct answer gives you points and keeps your opponent from using those same answers! After each round, manually adjust your scores below.</p>
         `;
     }
