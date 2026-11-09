@@ -1049,6 +1049,7 @@ function initDailyMode() {
     }
 
     isDailyMode = true;
+    window.dailyCurrentIndex = 0; // <--- Add this line here to ensure it starts at Round 1!
 
     const urlSeed = getURLSeed();
     if (urlSeed) {
