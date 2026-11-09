@@ -761,13 +761,34 @@ function startNewRound() {
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
-    // If we finished 10 rounds of Daily Mode, complete the challenge
-    if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
-        handleDailyCompletion();
-        return;
+    // If we are in Daily Mode, advance and check progression
+    if (isDailyMode) {
+        if (typeof dailyCurrentIndex === 'undefined') {
+            dailyCurrentIndex = 0;
+        }
+
+        if (dailyCurrentIndex >= 10) {
+            handleDailyCompletion();
+            return;
+        }
+
+        // Pull the prompt for this specific daily round
+        const currentPrompt = dailyDeckPrompts[dailyCurrentIndex];
+        if (currentPrompt) {
+            window.nextCard = {
+                topic: currentPrompt.topic,
+                letter: currentPrompt.letter
+            };
+        }
+
+        // Increment the index so the NEXT click moves to the next round
+        dailyCurrentIndex++;
     }
 
     stopEverything();
+
+    // ... rest of your standard round logic ...
+}
 
     // Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
@@ -827,18 +848,22 @@ function startNewRound() {
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
-        if (currentLang === 'es' && GAME_DATA && GAME_DATA['en'] && GAME_DATA['es']) {
-            const esIndex = GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic);
-            const englishTopic = (esIndex !== -1 && GAME_DATA['en'].topicsMaster[esIndex]) ? GAME_DATA['en'].topicsMaster[esIndex] : "";
-            promptEl.innerHTML = `
-                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${nextCard.topic}</div>
-                ${englishTopic ? `<div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>` : ''}
-            `;
-        } else {
-            promptEl.innerHTML = `
-                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${nextCard.topic}</div>
-            `;
-        }
+     if (currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
+    const esIndex = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
+    const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
+        ? GAME_DATA['es'].topicsMaster[esIndex] 
+        : (nextCard.topicEs || nextCard.topic);
+
+    promptEl.style.display = 'flex';
+    promptEl.style.flexDirection = 'column';
+    promptEl.style.alignItems = 'center';
+    promptEl.style.justifyContent = 'center';
+
+    promptEl.innerHTML = `
+        <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
+        <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
+    `;
+}
     }
 
     if (letterEl) letterEl.innerText = nextCard.letter;
@@ -1061,7 +1086,7 @@ function initDailyMode() {
     }
 
     isDailyMode = true;
-    window.dailyCurrentIndex = 0; // <--- Add this line here to ensure it starts at Round 1!
+    window.dailyCurrentIndex = 0; // Starts at index 0 for Round 1
 
     const urlSeed = getURLSeed();
     if (urlSeed) {
@@ -1071,15 +1096,24 @@ function initDailyMode() {
         dailyDeckPrompts = dailyData.prompts || [];
     }
 
-    dailyCurrentIndex = 0; // Starts at index 0 for Round 1
+    dailyCurrentIndex = 0; 
     dailyResultsArray = [];
     dailyStartTime = null;
 
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
+
+    // Stacked Daily Blurts ready message placed right here inside the function!
+    const dailyMessageEl = document.getElementById('dailyMessage') || document.getElementById('promptDisplay'); 
+    if (dailyMessageEl) {
+        dailyMessageEl.innerHTML = `
+            <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 8px; text-align: center;">Daily Blurts are ready!</div>
+            <div style="font-size: 1.1rem; color: #cbd5e1; text-align: center;">Press Play to start Round 1.</div>
+        `;
+    }
+
     return true;
 }
-
 function handleDailyCompletion() {
     isRoundActive = false;
     stopEverything();
