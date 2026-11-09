@@ -653,10 +653,20 @@ if (about1) {
     }
 }
 
+// ==========================================
+// HOW TO PLAY / RULES TOGGLE
+// ==========================================
 function toggleRules() {
-    const card = document.getElementById('rulesCard') || document.getElementById('rulesModal');
-    if (card) {
-        card.style.display = (card.style.display === 'flex' || card.style.display === 'block') ? 'none' : 'block';
+    const rulesCard = document.getElementById('rulesCard');
+    if (!rulesCard) return;
+
+    // Check its current display state (fallback to computed style if needed)
+    const currentDisplay = rulesCard.style.display || window.getComputedStyle(rulesCard).display;
+
+    if (currentDisplay === 'none' || currentDisplay === '') {
+        rulesCard.style.display = 'block';
+    } else {
+        rulesCard.style.display = 'none';
     }
 }
 
@@ -1335,13 +1345,19 @@ window.toggleFullScreen = function() {
 };
 
 // Automatically update button text when fullscreen state changes
-document.addEventListener('fullscreenchange', () => {
+function updateFullscreenBtnText() {
     const fsBtn = document.getElementById('fullscreenToggleBtn');
-    if (fsBtn) {
-        if (document.fullscreenElement) {
-            fsBtn.querySelector('span').textContent = '🖵 Exit Screen';
-        } else {
-            fsBtn.querySelector('span').textContent = '🖵 Fullscreen';
-        }
+    if (!fsBtn) return;
+    
+    const span = fsBtn.querySelector('span') || fsBtn;
+    const isFull = !!document.fullscreenElement;
+    
+    if (typeof currentLang !== 'undefined' && currentLang === 'es') {
+        span.textContent = isFull ? '🖵 Salir de Pantalla Completa' : '🖵 Pantalla Completa';
+    } else {
+        span.textContent = isFull ? '🖵 Exit Fullscreen' : '🖵 Fullscreen';
     }
-});
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenBtnText);
+document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
