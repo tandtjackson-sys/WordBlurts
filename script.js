@@ -1244,14 +1244,14 @@ function initWordBlurts() {
 
     if (randomModeBtn && dailyModeBtn) {
         randomModeBtn.style.opacity = "1";
-        dailyModeBtn.style.opacity = "0.5";
+        dailyModeBtn.style.opacity = "0.7"; // Balanced inactive state
 
         randomModeBtn.onclick = () => {
             window.isDailyMode = false;
             randomModeBtn.classList.add('active');
             dailyModeBtn.classList.remove('active');
             randomModeBtn.style.opacity = "1";
-            dailyModeBtn.style.opacity = "0.4";
+            dailyModeBtn.style.opacity = "0.7";
             if (typeof stopEverything === 'function') stopEverything();
 
             const promptEl = document.getElementById('promptDisplay');
@@ -1262,37 +1262,38 @@ function initWordBlurts() {
             }
         };
 
-     dailyModeBtn.onclick = () => {
-        window.isDailyMode = true;
-        const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
-        if (!isAvailable) {
-            window.isDailyMode = false;
-            return;
-        }
-        dailyModeBtn.classList.add('active');
-        randomModeBtn.classList.remove('active');
-        dailyModeBtn.style.opacity = "1";
-        randomModeBtn.style.opacity = "0.4";
-        if (typeof stopEverything === 'function') stopEverything();
+        dailyModeBtn.onclick = () => {
+            window.isDailyMode = true;
+            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
+            if (!isAvailable) {
+                window.isDailyMode = false;
+                return;
+            }
+            dailyModeBtn.classList.add('active');
+            randomModeBtn.classList.remove('active');
+            dailyModeBtn.style.opacity = "1";
+            randomModeBtn.style.opacity = "0.7";
+            if (typeof stopEverything === 'function') stopEverything();
 
-        const promptEl = document.getElementById('promptDisplay');
-        if (promptEl) {
-            promptEl.style.display = 'flex';
-            promptEl.style.flexDirection = 'column';
-            promptEl.style.alignItems = 'center';
-            promptEl.style.justifyContent = 'center';
-            
-            const line1 = window.currentLang === 'es' ? '¡Blurt Diario listo!' : 'Daily Blurts are ready!';
-            const line2 = window.currentLang === 'es' ? 'Presiona Jugar para empezar la Ronda 1.' : 'Press Play to start Round 1.';
+            const promptEl = document.getElementById('promptDisplay');
+            if (promptEl) {
+                promptEl.style.display = 'flex';
+                promptEl.style.flexDirection = 'column';
+                promptEl.style.alignItems = 'center';
+                promptEl.style.justifyContent = 'center';
+                
+                const line1 = window.currentLang === 'es' ? '¡Blurt Diario listo!' : 'Daily Blurts are ready!';
+                const line2 = window.currentLang === 'es' ? 'Presiona Jugar para empezar la Ronda 1.' : 'Press Play to start Round 1.';
 
-            promptEl.innerHTML = `
-                <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${line1}</div>
-                <div style="font-size: 1.2rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">${line2}</div>
-            `;
-        }
-    };
+                promptEl.innerHTML = `
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${line1}</div>
+                    <div style="font-size: 1.2rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">${line2}</div>
+                `;
+            }
+        };
+    }
 
- const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.onclick = () => {
             if (typeof playRound === 'function') {
@@ -1380,6 +1381,7 @@ function setGameMode(mode) {
         document.getElementById('dailyModeBtn').classList.remove('active');
     }
 }
+
 // ==========================================
 // FULL-SCREEN TOGGLE
 // ==========================================
