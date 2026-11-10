@@ -705,23 +705,6 @@ function generateDeck() {
 }
 
 function drawNextCombo() {
-    // If we are in Daily Mode, pull from the fixed daily sequence
-    if (typeof isDailyMode !== 'undefined' && isDailyMode) {
-        if (typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts.length > 0) {
-            if (typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex < dailyDeckPrompts.length) {
-                const currentPrompt = dailyDeckPrompts[dailyCurrentIndex];
-                dailyCurrentIndex++;
-                return currentPrompt;
-            } else {
-                // Reached round 10 completion!
-                if (typeof handleDailyCompletion === 'function') {
-                    handleDailyCompletion();
-                }
-                return { topic: "Daily Complete!", letter: "★" };
-            }
-        }
-    }
-
     // Standard Random Mode logic
     if (comboDeck.length === 0) {
         comboDeck = generateDeck();
@@ -836,15 +819,15 @@ function startNewRound() {
                 <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
             `;
             
-            // Speak bilingual announcer sequence
+            // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
             if (typeof speakPrompt === 'function') {
                 speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
             }
         } else {
-            promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%;">${nextCard.topic}</div>`;
+            promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
             
             if (typeof speakPrompt === 'function') {
-                speakPrompt(nextCard.topic, nextCard.topic, nextCard.letter);
+                speakPrompt(nextCard.topic, '', nextCard.letter);
             }
         }
     }
@@ -863,17 +846,26 @@ function startNewRound() {
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
 // ==========================================
-function speakPrompt(topic, letter) {
+function speakPrompt(primaryTopic, secondaryTopic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        let introText = `${topic}, starting with the letter... ${letter}.`;
-        let hypeText = "Blurt it out!";
-        let langCode = 'en-US';
+        
+        let introText, secondaryText, letterText, hypeText, langCode, secondaryLangCode;
 
         if (currentLang === 'es') {
-            introText = `${topic}, empezando con la letra... ${letter}.`;
+            introText = primaryTopic; // Spanish topic
+            secondaryText = secondaryTopic ? secondaryTopic : ''; // English translation
+            letterText = `Empezando con la letra... ${letter}.`;
             hypeText = "¡Dilo ya!";
             langCode = 'es-MX';
+            secondaryLangCode = 'en-US';
+        } else {
+            introText = primaryTopic;
+            secondaryText = '';
+            letterText = `Starting with the letter... ${letter}.`;
+            hypeText = "Blurt it out!";
+            langCode = 'en-US';
+            secondaryLangCode = 'en-US';
         }
 
         const utteranceIntro = new SpeechSynthesisUtterance(introText);
@@ -881,12 +873,32 @@ function speakPrompt(topic, letter) {
         utteranceIntro.rate = 1.05;
         utteranceIntro.pitch = 1.1;
 
+        const utteranceSecondary = secondaryText ? new SpeechSynthesisUtterance(secondaryText) : null;
+        if (utteranceSecondary) {
+            utteranceSecondary.lang = secondaryLangCode;
+            utteranceSecondary.rate = 1.05;
+            utteranceSecondary.pitch = 1.0;
+        }
+
+        const utteranceLetter = new SpeechSynthesisUtterance(letterText);
+        utteranceLetter.lang = langCode;
+        utteranceLetter.rate = 1.05;
+        utteranceLetter.pitch = 1.1;
+
         const utteranceHype = new SpeechSynthesisUtterance(hypeText);
         utteranceHype.lang = langCode;
         utteranceHype.rate = 1.15;
         utteranceHype.pitch = 1.35;
 
-        utteranceIntro.onend = () => {
+        // Chain the utterances sequentially
+        if (utteranceSecondary) {
+            utteranceIntro.onend = () => { window.speechSynthesis.speak(utteranceSecondary); };
+            utteranceSecondary.onend = () => { window.speechSynthesis.speak(utteranceLetter); };
+        } else {
+            utteranceIntro.onend = () => { window.speechSynthesis.speak(utteranceLetter); };
+        }
+
+        utteranceLetter.onend = () => {
             window.speechSynthesis.speak(utteranceHype);
         };
 
@@ -1250,27 +1262,35 @@ function initWordBlurts() {
             }
         };
 
-        dailyModeBtn.onclick = () => {
-            window.isDailyMode = true;
-            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
-            if (!isAvailable) {
-                window.isDailyMode = false;
-                return;
-            }
-            dailyModeBtn.classList.add('active');
-            randomModeBtn.classList.remove('active');
-            dailyModeBtn.style.opacity = "1";
-            randomModeBtn.style.opacity = "0.4";
-            if (typeof stopEverything === 'function') stopEverything();
+     dailyModeBtn.onclick = () => {
+        window.isDailyMode = true;
+        const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
+        if (!isAvailable) {
+            window.isDailyMode = false;
+            return;
+        }
+        dailyModeBtn.classList.add('active');
+        randomModeBtn.classList.remove('active');
+        dailyModeBtn.style.opacity = "1";
+        randomModeBtn.style.opacity = "0.4";
+        if (typeof stopEverything === 'function') stopEverything();
 
-            const promptEl = document.getElementById('promptDisplay');
-            if (promptEl) {
-                promptEl.innerHTML = `<div style="font-size: 1.5rem; color: #ffd700; text-align: center;">
-                    ${window.currentLang === 'es' ? '¡Blurt Diario listo! Presiona Jugar para empezar la Ronda 1.' : 'Daily Blurt Ready! Press Play to start Round 1.'}
-                </div>`;
-            }
-        };
-    }
+        const promptEl = document.getElementById('promptDisplay');
+        if (promptEl) {
+            promptEl.style.display = 'flex';
+            promptEl.style.flexDirection = 'column';
+            promptEl.style.alignItems = 'center';
+            promptEl.style.justifyContent = 'center';
+            
+            const line1 = window.currentLang === 'es' ? '¡Blurt Diario listo!' : 'Daily Blurts are ready!';
+            const line2 = window.currentLang === 'es' ? 'Presiona Jugar para empezar la Ronda 1.' : 'Press Play to start Round 1.';
+
+            promptEl.innerHTML = `
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${line1}</div>
+                <div style="font-size: 1.2rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">${line2}</div>
+            `;
+        }
+    };
 
  const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
