@@ -754,43 +754,15 @@ function playRound() {
 }
 
 function startNewRound() {
-    // Block starting a new round if one is already active
+    // 1. Guard clauses: block if already active or transitioning
     if (typeof isRoundActive !== 'undefined' && isRoundActive) return;
-
     if (window.isTransitioning) return;
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
-    // If we are in Daily Mode, advance and check progression
-    if (isDailyMode) {
-        if (typeof dailyCurrentIndex === 'undefined') {
-            dailyCurrentIndex = 0;
-        }
-
-        if (dailyCurrentIndex >= 10) {
-            handleDailyCompletion();
-            return;
-        }
-
-        // Pull the prompt for this specific daily round
-        const currentPrompt = dailyDeckPrompts[dailyCurrentIndex];
-        if (currentPrompt) {
-            window.nextCard = {
-                topic: currentPrompt.topic,
-                letter: currentPrompt.letter
-            };
-        }
-
-        // Increment the index so the NEXT click moves to the next round
-        dailyCurrentIndex++;
-    }
-
     stopEverything();
 
-    // ... rest of your standard round logic ...
-}
-
-    // Disable and fade the PLAY button while the round is running
+    // 2. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.disabled = true;
@@ -798,6 +770,7 @@ function startNewRound() {
         playBtn.style.cursor = "not-allowed";
     }
 
+    // 3. Reset timer display
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = "15";
@@ -810,21 +783,29 @@ function startNewRound() {
         timerEl.classList.remove('flash-red');
     }
 
-    // Determine next prompt card (Daily vs Classic)
+    // 4. Determine next prompt card (Daily vs Classic)
     let nextCard;
-    if (window.isDailyMode && typeof dailyDeckPrompts !== 'undefined' && dailyDeckPrompts[dailyCurrentIndex]) {
+    if (window.isDailyMode && typeof dailyDeckPrompts !== 'undefined') {
+        if (typeof dailyCurrentIndex === 'undefined') dailyCurrentIndex = 0;
+        
+        if (dailyCurrentIndex >= 10) {
+            if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
+            return;
+        }
+
         nextCard = dailyDeckPrompts[dailyCurrentIndex];
+        dailyCurrentIndex++; // Advance index for the next round
     } else {
         nextCard = drawNextCombo();
     }
     
     window.currentActiveTopic = nextCard.topic;
 
-    // Advance round counter & update display for Daily Mode (1-indexed display: 1 of 10, 2 of 10, etc.)
+    // 5. Update round counter display for Daily Mode
     const counterEl = document.getElementById('roundCounter');
     if (counterEl) {
         if (window.isDailyMode) {
-            const displayRoundNum = (typeof dailyCurrentIndex !== 'undefined') ? (dailyCurrentIndex + 1) : 1;
+            const displayRoundNum = dailyCurrentIndex; // Already incremented, so 1-10 matches current round
             counterEl.innerText = (currentLang === 'es') 
                 ? `Ronda ${displayRoundNum} de 10` 
                 : `Round ${displayRoundNum} of 10`;
@@ -834,11 +815,7 @@ function startNewRound() {
         }
     }
 
-    // Increment index for the NEXT round click
-    if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined') {
-        dailyCurrentIndex++;
-    }
-
+    // 6. Update UI displays for topic and letter
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
 
@@ -848,28 +825,38 @@ function startNewRound() {
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
-     if (currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
-    const esIndex = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
-    const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
-        ? GAME_DATA['es'].topicsMaster[esIndex] 
-        : (nextCard.topicEs || nextCard.topic);
+        if (currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
+            const esIndex = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
+            const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
+                ? GAME_DATA['es'].topicsMaster[esIndex] 
+                : (nextCard.topicEs || nextCard.topic);
 
-    promptEl.style.display = 'flex';
-    promptEl.style.flexDirection = 'column';
-    promptEl.style.alignItems = 'center';
-    promptEl.style.justifyContent = 'center';
+            promptEl.innerHTML = `
+                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
+                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
+            `;
+            
+            // Speak bilingual announcer sequence
+            if (typeof speakPrompt === 'function') {
+                speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
+            }
+        } else {
+            promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%;">${nextCard.topic}</div>`;
+            
+            if (typeof speakPrompt === 'function') {
+                speakPrompt(nextCard.topic, nextCard.topic, nextCard.letter);
+            }
+        }
+    }
 
-    promptEl.innerHTML = `
-        <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
-        <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
-    `;
-}
+    if (letterEl) {
+        letterEl.innerText = nextCard.letter;
+    }
+
+    if (typeof refreshAds === 'function') {
+        refreshAds();
+    }
     
-
-    if (letterEl) letterEl.innerText = nextCard.letter;
-
-    speakPrompt(nextCard.topic, nextCard.letter);
-    if (typeof refreshAds === 'function') refreshAds();
     isRoundActive = true;
 }
 
