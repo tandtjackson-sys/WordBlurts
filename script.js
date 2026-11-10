@@ -1285,12 +1285,9 @@ function initWordBlurts() {
         };
     }
 
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+ const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.onclick = () => {
-            if (window.isDailyMode && typeof initDailyMode === 'function') {
-                initDailyMode();
-            }
             if (typeof playRound === 'function') {
                 playRound();
             }
