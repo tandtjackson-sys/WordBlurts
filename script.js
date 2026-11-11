@@ -832,7 +832,6 @@ function startNewRound() {
                 <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
             `;
             
-            // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
             if (typeof speakPrompt === 'function') {
                 speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
             }
@@ -854,7 +853,7 @@ function startNewRound() {
     }
     
     isRoundActive = true;
-}
+} // <-- This correctly closes the function
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
