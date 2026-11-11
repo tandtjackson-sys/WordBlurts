@@ -753,7 +753,7 @@ function startNewRound() {
     stopEverything();
 
     // ... rest of your normal round setup code goes here ...
-}
+
 
     // 2. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
@@ -854,7 +854,7 @@ function startNewRound() {
     }
     
     isRoundActive = true;
- // <-- This is the ONLY closing brace for the function itself. Ensure there is not another one right below it!
+}// <-- This is the ONLY closing brace for the function itself. Ensure there is not another one right below it!
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
