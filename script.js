@@ -737,13 +737,22 @@ function playRound() {
 }
 
 function startNewRound() {
-    // 1. Guard clauses: block if already active or transitioning
+    // 1. Check if Daily Mode just finished its 10 rounds
+    if (window.isDailyMode && currentRound > 10) {
+        showDailyResultsModal();
+        return;
+    }
+
+    // 2. Guard clauses: block if already active or transitioning
     if (typeof isRoundActive !== 'undefined' && isRoundActive) return;
     if (window.isTransitioning) return;
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
     stopEverything();
+
+    // ... rest of your normal round setup code goes here ...
+}
 
     // 2. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
@@ -1361,7 +1370,7 @@ window.playRound = playRound;
 window.startNewRound = startNewRound;
 window.adjustScore = adjustScore;
 window.resetScores = resetScores;
-
+window.showDailyResultsModal = showDailyResultsModal;
 function setGameMode(mode) {
     if (mode === 'daily') {
         if (typeof initDailyMode === 'function') {
@@ -1381,7 +1390,95 @@ function setGameMode(mode) {
         document.getElementById('dailyModeBtn').classList.remove('active');
     }
 }
+function showDailyResultsModal() {
+    const modal = document.getElementById('results-modal');
+    if (!modal) return;
 
+    // 1. Retrieve or calculate actual game stats
+    const totalScore = window.dailyScore || 0; 
+    const totalTime = window.dailyTotalTime || 0; // seconds
+    const streak = parseInt(localStorage.getItem('wb_daily_streak') || '1', 10);
+
+    // 2. Build the Emoji Matrix
+    // Example: 🟩 for scored points, 🟨 for missed
+    let emojiRow = "";
+    if (Array.isArray(window.dailyRoundResults)) {
+        emojiRow = window.dailyRoundResults.map(res => res ? "🟩" : "🟨").join("");
+    } else {
+        emojiRow = "🟩".repeat(totalScore) + "🟨".repeat(Math.max(0, 10 - totalScore));
+    }
+
+    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10 | Time: ${totalTime}s\nPlay free at WordBlurts.com`;
+    const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my time of ${totalTime}s?\nPlay free at WordBlurts.com`;
+
+    // 3. Update DOM Stats
+    document.getElementById('res-score').textContent = `${totalScore}/10`;
+    document.getElementById('res-time').textContent = `${totalTime}s`;
+    document.getElementById('res-streak').textContent = `🔥 ${streak}`;
+    document.getElementById('emoji-grid-display').textContent = emojiRow;
+
+    // 4. Display Modal
+    modal.style.display = 'flex';
+
+    // 5. Wire Close/Dismiss Logic
+    const closeBtn = document.getElementById('close-modal-btn');
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+    }
+
+    // Dismiss when clicking background outside modal-card
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // 6. Share Results Button Logic
+    const shareBtn = document.getElementById('share-results-btn');
+    if (shareBtn) {
+        shareBtn.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Word Blurts! Daily',
+                        text: shareText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Share dismissed or failed:", err);
+                }
+            } else {
+                await navigator.clipboard.writeText(shareText);
+                const originalText = shareBtn.textContent;
+                shareBtn.textContent = "📋 Copied to Clipboard!";
+                setTimeout(() => { shareBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+
+    // 7. Challenge a Friend Button Logic
+    const challengeBtn = document.getElementById('challenge-friend-btn');
+    if (challengeBtn) {
+        challengeBtn.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Challenge - Word Blurts!',
+                        text: challengeText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Challenge dismissed or failed:", err);
+                }
+            } else {
+                await navigator.clipboard.writeText(challengeText);
+                const originalText = challengeBtn.textContent;
+                challengeBtn.textContent = "⚔️ Challenge Copied!";
+                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+}
 // ==========================================
 // FULL-SCREEN TOGGLE
 // ==========================================
