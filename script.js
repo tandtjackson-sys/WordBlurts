@@ -823,21 +823,22 @@ function startNewRound() {
                 ? GAME_DATA['es'].topicsMaster[esIndex] 
                 : (nextCard.topicEs || nextCard.topic);
 
-            promptEl.innerHTML = `
-                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
-                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
-            `;
-            
-            // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
-            if (typeof speakPrompt === 'function') {
-                speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
-            }
-        } else {
-            promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
-            
-            if (typeof speakPrompt === 'function') {
-                speakPrompt(nextCard.topic, '', nextCard.letter);
-            }
+      // Check language mode and update prompt display
+    if (window.currentLanguage === 'es' && spanishTopic) {
+        promptEl.innerHTML = `
+            <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
+            <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
+        `;
+        
+        // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
+        if (typeof speakPrompt === 'function') {
+            speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
+        }
+    } else {
+        promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
+        
+        if (typeof speakPrompt === 'function') {
+            speakPrompt(nextCard.topic, '', nextCard.letter);
         }
     }
 
