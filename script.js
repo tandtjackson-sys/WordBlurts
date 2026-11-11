@@ -853,7 +853,7 @@ function startNewRound() {
     }
     
     isRoundActive = true;
-} // <-- This correctly closes the function
+}
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
