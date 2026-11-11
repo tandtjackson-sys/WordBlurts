@@ -807,7 +807,7 @@ function startNewRound() {
         }
     }
 
-    // 6. Update UI displays for topic and letter
+// 6. Update UI displays for topic and letter
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
 
@@ -817,28 +817,31 @@ function startNewRound() {
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
+        let spanishTopic = nextCard.topic;
         if (currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
             const esIndex = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
-            const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
+            spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
                 ? GAME_DATA['es'].topicsMaster[esIndex] 
                 : (nextCard.topicEs || nextCard.topic);
-
-      // Check language mode and update prompt display
-    if (window.currentLanguage === 'es' && spanishTopic) {
-        promptEl.innerHTML = `
-            <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
-            <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
-        `;
-        
-        // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
-        if (typeof speakPrompt === 'function') {
-            speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
         }
-    } else {
-        promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
-        
-        if (typeof speakPrompt === 'function') {
-            speakPrompt(nextCard.topic, '', nextCard.letter);
+
+        // Check language mode and update prompt display
+        if (currentLang === 'es' && spanishTopic) {
+            promptEl.innerHTML = `
+                <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
+                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
+            `;
+            
+            // Speak bilingual announcer sequence: Spanish topic -> English topic -> Letter -> Hype
+            if (typeof speakPrompt === 'function') {
+                speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
+            }
+        } else {
+            promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
+            
+            if (typeof speakPrompt === 'function') {
+                speakPrompt(nextCard.topic, '', nextCard.letter);
+            }
         }
     }
 
