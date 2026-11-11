@@ -782,7 +782,7 @@ function startNewRound() {
         
         if (dailyCurrentIndex >= 10) {
             if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
-            return;
+            
         }
 
         nextCard = dailyDeckPrompts[dailyCurrentIndex];
@@ -1480,19 +1480,18 @@ function showDailyResultsModal() {
     }
 }
 // ==========================================
-// FULL-SCREEN TOGGLE
+// 11. GLOBAL WINDOW EXPORTS
 // ==========================================
-window.toggleFullScreen = function() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((err) => {
-            console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-};
+window.toggleLanguage = toggleLanguage;
+window.switchLanguage = switchLanguage;
+window.toggleRules = toggleRules;
+window.openAboutModal = openAboutModal;
+window.playRound = playRound;
+window.startNewRound = startNewRound;
+window.adjustScore = adjustScore;
+window.resetScores = resetScores;
+window.showDailyResultsModal = showDailyResultsModal;
+window.toggleFullScreen = toggleFullScreen; // <-- Make sure this is here!
 
 // Automatically update button text when fullscreen state changes
 function updateFullscreenBtnText() {
