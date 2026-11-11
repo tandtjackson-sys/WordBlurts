@@ -853,7 +853,7 @@ function startNewRound() {
     }
     
     isRoundActive = true;
-} // <-- This is the ONLY closing brace for the function itself. Ensure there is not another one right below it!
+ // <-- This is the ONLY closing brace for the function itself. Ensure there is not another one right below it!
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
