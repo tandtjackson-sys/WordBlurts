@@ -3,7 +3,8 @@
 // ==========================================
 window.isDailyMode = false;
 window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
-
+let lastAdRefreshTime = 0;
+const AD_REFRESH_INTERVAL = 35000;
 // Update Fullscreen button text based on current language and state
 function updateFullscreenBtnText() {
     const fsBtn = document.getElementById('fullscreenToggleBtn');
@@ -1208,8 +1209,7 @@ function triggerInterstitialAd() {
     }
 }
 
-let lastAdRefreshTime = 0;
-const AD_REFRESH_INTERVAL = 35000;
+
 
 function refreshAds() {
     const now = Date.now();
