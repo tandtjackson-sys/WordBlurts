@@ -436,6 +436,7 @@ function toggleLanguage() {
 function switchLanguage(langCode) {
     if (!GAME_DATA[langCode]) return;
     currentLang = langCode;
+    window.currentLang = langCode;
     localStorage.setItem("wordblurts_lang", currentLang);
 
     window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
@@ -453,15 +454,24 @@ function switchLanguage(langCode) {
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     if (promptEl && typeof currentActiveTopic !== 'undefined' && currentActiveTopic) {
         if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
-            const esIndex = GAME_DATA['en'].topicsMaster.indexOf(currentActiveTopic);
-            const spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster[esIndex]) ? GAME_DATA['es'].topicsMaster[esIndex] : currentActiveTopic;
+            // Find matching index whether currentActiveTopic is currently English or Spanish
+            let idx = GAME_DATA['en'].topicsMaster.indexOf(currentActiveTopic);
+            if (idx === -1) idx = GAME_DATA['es'].topicsMaster.indexOf(currentActiveTopic);
+
+            const englishTopic = (idx !== -1 && GAME_DATA['en'].topicsMaster[idx]) ? GAME_DATA['en'].topicsMaster[idx] : currentActiveTopic;
+            const spanishTopic = (idx !== -1 && GAME_DATA['es'].topicsMaster[idx]) ? GAME_DATA['es'].topicsMaster[idx] : currentActiveTopic;
+
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
-                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${currentActiveTopic})</div>
+                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>
             `;
         } else {
+            // Switching back to English: translate if currentActiveTopic is in Spanish
+            let idx = GAME_DATA['es'] ? GAME_DATA['es'].topicsMaster.indexOf(currentActiveTopic) : -1;
+            const englishTopic = (idx !== -1 && GAME_DATA['en'].topicsMaster[idx]) ? GAME_DATA['en'].topicsMaster[idx] : currentActiveTopic;
+
             promptEl.innerHTML = `
-                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${currentActiveTopic}</div>
+                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${englishTopic}</div>
             `;
         }
     }
@@ -469,6 +479,7 @@ function switchLanguage(langCode) {
 
     updateStaticUI();
 }
+
 
 function updateStaticUI() {
     const isEs = (currentLang === "es");
@@ -739,8 +750,9 @@ function playRound() {
 
 function startNewRound() {
     // 1. Check if Daily Mode just finished its 10 rounds
-    if (window.isDailyMode && currentRound > 10) {
-        showDailyResultsModal();
+    if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
+        if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
+        if (typeof showDailyResultsModal === 'function') showDailyResultsModal();
         return;
     }
 
@@ -752,10 +764,7 @@ function startNewRound() {
 
     stopEverything();
 
-    // ... rest of your normal round setup code goes here ...
-
-
-    // 2. Disable and fade the PLAY button while the round is running
+    // 3. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.disabled = true;
@@ -763,7 +772,7 @@ function startNewRound() {
         playBtn.style.cursor = "not-allowed";
     }
 
-    // 3. Reset timer display
+    // 4. Reset timer display
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     if (timerEl) {
         timerEl.innerText = "15";
@@ -776,31 +785,42 @@ function startNewRound() {
         timerEl.classList.remove('flash-red');
     }
 
-    // 4. Determine next prompt card (Daily vs Classic)
+    // 5. Determine next prompt card (Daily vs Classic)
     let nextCard;
-    if (window.isDailyMode && typeof dailyDeckPrompts !== 'undefined') {
-        if (typeof dailyCurrentIndex === 'undefined') dailyCurrentIndex = 0;
-        
-        if (dailyCurrentIndex >= 10) {
-            if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
-            
+    if (window.isDailyMode) {
+        // Ensure daily deck is populated
+        if (typeof dailyDeckPrompts === 'undefined' || !Array.isArray(dailyDeckPrompts) || dailyDeckPrompts.length === 0) {
+            if (typeof getDailyPrompts === 'function') {
+                const dailyData = getDailyPrompts();
+                dailyDeckPrompts = Array.isArray(dailyData) ? dailyData : (dailyData.prompts || []);
+            }
         }
+        if (typeof dailyCurrentIndex === 'undefined') dailyCurrentIndex = 0;
 
-        nextCard = dailyDeckPrompts[dailyCurrentIndex];
-        dailyCurrentIndex++; // Advance index for the next round
+        if (dailyDeckPrompts && dailyDeckPrompts.length > 0 && dailyCurrentIndex < dailyDeckPrompts.length) {
+            nextCard = dailyDeckPrompts[dailyCurrentIndex];
+            dailyCurrentIndex++;
+        } else {
+            // Fallback if daily deck couldn't load
+            nextCard = drawNextCombo();
+        }
     } else {
         nextCard = drawNextCombo();
     }
-    
+
+    if (!nextCard) {
+        nextCard = { topic: "Animals", letter: "A" };
+    }
+
     window.currentActiveTopic = nextCard.topic;
 
-    // 5. Update round counter display for Daily Mode
+    // 6. Update round counter display for Daily Mode
     const counterEl = document.getElementById('roundCounter');
     if (counterEl) {
         if (window.isDailyMode) {
-            const displayRoundNum = dailyCurrentIndex; // Already incremented, so 1-10 matches current round
-            counterEl.innerText = (currentLang === 'es') 
-                ? `Ronda ${displayRoundNum} de 10` 
+            const displayRoundNum = dailyCurrentIndex;
+            counterEl.innerText = (window.currentLang === 'es')
+                ? `Ronda ${displayRoundNum} de 10`
                 : `Round ${displayRoundNum} of 10`;
             counterEl.style.display = 'block';
         } else {
@@ -808,7 +828,7 @@ function startNewRound() {
         }
     }
 
-// 6. Update UI displays for topic and letter
+    // 7. Update UI displays for topic and letter
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter-display') || document.getElementById('letter');
 
@@ -818,27 +838,32 @@ function startNewRound() {
         promptEl.style.alignItems = 'center';
         promptEl.style.justifyContent = 'center';
 
-        let spanishTopic = nextCard.topic;
-        if (currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
-            const esIndex = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
-            spanishTopic = (esIndex !== -1 && GAME_DATA['es'].topicsMaster && GAME_DATA['es'].topicsMaster[esIndex]) 
-                ? GAME_DATA['es'].topicsMaster[esIndex] 
-                : (nextCard.topicEs || nextCard.topic);
-        }
+        if (window.currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
+            // Find the matching index in either English or Spanish list
+            let idx = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
+            if (idx === -1 && GAME_DATA['es'].topicsMaster) {
+                idx = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
+            }
 
-        // Check language mode and update prompt display
-        if (currentLang === 'es' && spanishTopic) {
+            const spanishTopic = (idx !== -1 && GAME_DATA['es'].topicsMaster[idx])
+                ? GAME_DATA['es'].topicsMaster[idx]
+                : (nextCard.topicEs || nextCard.topic);
+
+            const englishTopic = (idx !== -1 && GAME_DATA['en'].topicsMaster[idx])
+                ? GAME_DATA['en'].topicsMaster[idx]
+                : (nextCard.topicEn || nextCard.topic);
+
             promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
-                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${nextCard.topic})</div>
+                <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>
             `;
-            
+
             if (typeof speakPrompt === 'function') {
-                speakPrompt(spanishTopic, nextCard.topic, nextCard.letter);
+                speakPrompt(spanishTopic, englishTopic, nextCard.letter);
             }
         } else {
             promptEl.innerHTML = `<div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${nextCard.topic}</div>`;
-            
+
             if (typeof speakPrompt === 'function') {
                 speakPrompt(nextCard.topic, '', nextCard.letter);
             }
@@ -852,9 +877,10 @@ function startNewRound() {
     if (typeof refreshAds === 'function') {
         refreshAds();
     }
-    
+
     isRoundActive = true;
-}// <-- This is the ONLY closing brace for the function itself. Ensure there is not another one right below it!
+}
+
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
@@ -1308,6 +1334,11 @@ function initWordBlurts() {
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.onclick = () => {
+            if (window.isDailyMode && typeof initDailyMode === 'function') {
+                if (typeof dailyDeckPrompts === 'undefined' || !dailyDeckPrompts || dailyDeckPrompts.length === 0) {
+                    if (!initDailyMode()) return;
+                }
+            }
             if (typeof playRound === 'function') {
                 playRound();
             }
@@ -1317,6 +1348,7 @@ function initWordBlurts() {
 
 // Execute immediately since script is at the bottom of the body
 initWordBlurts();
+
 
 // ==========================================
 // 10. PWA INSTALL PROMPT & SERVICE WORKER
