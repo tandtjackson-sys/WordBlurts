@@ -1265,7 +1265,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
     // Build Spoiler-Free Emoji Matrix (🟩 for points, 🟨 for zero)
     let emojiRow = "";
     if (Array.isArray(resultsArray) && resultsArray.length > 0) {
-        // If resultsArray holds answers or booleans, evaluate score per round
         emojiRow = resultsArray.map(ans => (ans && ans.trim() !== "") ? "🟩" : "🟨").join("");
     }
     if (emojiRow.length === 0) {
@@ -1275,11 +1274,11 @@ function showDailyResults(totalScore, streak, resultsArray) {
     const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10\nPlay free at WordBlurts.com`;
     const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay free at WordBlurts.com`;
 
-    // Update DOM Stats (Note: #res-time is removed to eliminate the timer box)
+    // Update DOM Stats (Hide the time stat box completely)
     document.getElementById('res-score').textContent = `${totalScore}/10`;
     const timeEl = document.getElementById('res-time');
     if (timeEl && timeEl.parentElement) {
-        timeEl.parentElement.style.display = 'none'; // Hide time stat box completely
+        timeEl.parentElement.style.display = 'none';
     }
     document.getElementById('res-streak').textContent = `🔥 ${streakVal}`;
     document.getElementById('emoji-grid-display').textContent = emojiRow;
@@ -1294,7 +1293,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
     }
     
     if (breakdownContainer && Array.isArray(dailyDeckPrompts) && dailyDeckPrompts.length > 0) {
-        let breakdownHTML = '<div style="font-weight: bold; margin-bottom: 6px; color: #ffd700; text-align: center;">Tell us what you blurted! (Compare with other players tomorrow)</div>';
+        let breakdownHTML = '<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; text-align: center;">Tell us what you Blurted! (Compare with other players tomorrow)</div>';
         dailyDeckPrompts.forEach((p, idx) => {
             const topicText = p.topic || p.prompt || `Round ${idx + 1}`;
             const letterText = p.letter || "";
@@ -1302,7 +1301,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             breakdownHTML += `
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px;">
                     <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">R${idx+1}: ${topicText} (${letterText})</span>
-                    <input type="text" class="round-answer-input" data-round="${idx}" value="${savedAns}" placeholder="Your blurt..." style="width: 120px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;" />
+                    <input type="text" class="round-answer-input" data-round="${idx}" value="${savedAns}" placeholder="Tell us what you Blurted! (Optional)" style="width: 170px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;" />
                 </div>
             `;
         });
@@ -1355,6 +1354,30 @@ function showDailyResults(totalScore, streak, resultsArray) {
             }
         };
     }
+
+    // Challenge a Friend Button Logic
+    const challengeBtn = document.getElementById('challenge-friend-btn');
+    if (challengeBtn) {
+        challengeBtn.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Challenge - Word Blurts!',
+                        text: challengeText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Challenge dismissed or failed:", err);
+                }
+            } else {
+                await navigator.clipboard.writeText(challengeText);
+                const originalText = challengeBtn.textContent;
+                challengeBtn.textContent = "⚔️ Challenge Copied!";
+                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+}
 
     // Challenge a Friend Button Logic
     const challengeBtn = document.getElementById('challenge-friend-btn');
