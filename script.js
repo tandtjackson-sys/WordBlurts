@@ -1415,7 +1415,7 @@ function adjustScore(team, delta) {
 
             // If in Daily Mode and points were added (+), instantly inject/reveal the per-round answer input box!
             if (typeof isDailyMode !== 'undefined' && isDailyMode && typeof dailyCurrentIndex !== 'undefined') {
-                const currentIndex = Math.max(0, (window.dailyCurrentIndex || 1) - 1);
+                const currentIndex = Math.max(0, (window.dailyRoundAnswers || 1) - 1);
                 if (!window.dailyRoundAnswers) window.dailyRoundAnswers = {};
                 
                 // Check if prompt container already has the answer input box for this round
