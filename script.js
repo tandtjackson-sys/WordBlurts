@@ -1113,6 +1113,41 @@ function getDailyPrompts() {
     return { prompts, dateStr };
 }
 
+// ==========================================
+// DAILY MODE & SCOREBOARD LOGIC
+// ==========================================
+
+function setGameMode(mode) {
+    const team2Card = document.querySelector('.team-score-card:nth-child(2)'); // Target Team 2 scoreboard card
+    
+    if (mode === 'daily') {
+        isDailyMode = true;
+        
+        // Hide Team 2 card in Daily mode for a clean solo layout
+        if (team2Card) team2Card.style.display = 'none';
+
+        if (typeof initDailyMode === 'function') {
+            const isAvailable = initDailyMode();
+            if (!isAvailable) {
+                isDailyMode = false;
+                if (team2Card) team2Card.style.display = 'flex';
+                return;
+            }
+        }
+        document.getElementById('dailyModeBtn').classList.add('active');
+        document.getElementById('randomModeBtn').classList.remove('active');
+        if (typeof playRound === 'function') playRound();
+    } else {
+        isDailyMode = false;
+        
+        // Restore Team 2 card for Classic mode
+        if (team2Card) team2Card.style.display = 'flex';
+
+        document.getElementById('randomModeBtn').classList.add('active');
+        document.getElementById('dailyModeBtn').classList.remove('active');
+    }
+}
+
 function initDailyMode() {
     const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
@@ -1135,13 +1170,13 @@ function initDailyMode() {
     }
 
     dailyCurrentIndex = 0; 
+    window.dailyRoundAnswers = {}; // Stores answers per round index: { 0: "toaster", 1: "tennis" }
     dailyResultsArray = [];
     dailyStartTime = null;
 
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
 
-    // Stacked Daily Blurts ready message placed right here inside the function!
     const dailyMessageEl = document.getElementById('dailyMessage') || document.getElementById('promptDisplay'); 
     if (dailyMessageEl) {
         dailyMessageEl.innerHTML = `
@@ -1152,6 +1187,7 @@ function initDailyMode() {
 
     return true;
 }
+
 function handleDailyCompletion() {
     isRoundActive = false;
     stopEverything();
@@ -1162,7 +1198,7 @@ function handleDailyCompletion() {
     if (promptEl) {
         promptEl.innerHTML = `
             <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; text-align: center;">Daily Challenge Complete! 🎉</div>
-            <div style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 16px; text-align: center;">Finished adding your points with the buttons? Click below to save your score!</div>
+            <div style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 16px; text-align: center;">Finished adding your points? Click below to save your score!</div>
             <button id="saveDailyScoreBtn" style="background-color: #10b981; color: white; border: none; padding: 12px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">Save Daily Score & View Results</button>
         `;
     }
@@ -1176,8 +1212,15 @@ function handleDailyCompletion() {
         saveBtn.addEventListener('click', () => {
             const scoreEl = document.getElementById('team1Score') || document.getElementById('scoreDisplay');
             const finalScore = parseInt(scoreEl ? scoreEl.innerText : "0", 10) || 0;
-            const newStreak = saveDailyResults(finalScore, dailyResultsArray, 0);
-            showDailyResults(finalScore, newStreak, dailyResultsArray);
+            
+            // Bundle final round answers into an array aligned with dailyResultsArray
+            const finalAnswersArray = [];
+            for (let i = 0; i < 10; i++) {
+                finalAnswersArray.push(window.dailyRoundAnswers && window.dailyRoundAnswers[i] ? window.dailyRoundAnswers[i] : "");
+            }
+
+            const newStreak = saveDailyResults(finalScore, finalAnswersArray, 0);
+            showDailyResults(finalScore, newStreak, finalAnswersArray);
         }, { once: true });
     }
 }
@@ -1214,18 +1257,131 @@ function saveDailyResults(score, resultsArray, timeSpent = 0) {
 }
 
 function showDailyResults(totalScore, streak, resultsArray) {
-    const scoreEl = document.getElementById('dailyScoreDisplay');
-    if (scoreEl) scoreEl.innerText = `${totalScore} pts`;
+    const modal = document.getElementById('results-modal');
+    if (!modal) return;
 
-    const streakEl = document.getElementById('dailyStreakDisplay');
-    if (streakEl) streakEl.innerText = `🔥 ${streak} Day Streak`;
+    const streakVal = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || streak || '1', 10);
 
-    const resultsModal = document.getElementById('dailyResultsModal') || document.getElementById('dailySummary') || document.getElementById('results-modal');
-    if (resultsModal) resultsModal.style.display = 'block';
+    // Build Spoiler-Free Emoji Matrix (🟩 for points, 🟨 for zero)
+    let emojiRow = "";
+    if (Array.isArray(resultsArray) && resultsArray.length > 0) {
+        // If resultsArray holds answers or booleans, evaluate score per round
+        emojiRow = resultsArray.map(ans => (ans && ans.trim() !== "") ? "🟩" : "🟨").join("");
+    }
+    if (emojiRow.length === 0) {
+        emojiRow = "🟩".repeat(totalScore) + "🟨".repeat(Math.max(0, 10 - totalScore));
+    }
+
+    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10\nPlay free at WordBlurts.com`;
+    const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay free at WordBlurts.com`;
+
+    // Update DOM Stats (Note: #res-time is removed to eliminate the timer box)
+    document.getElementById('res-score').textContent = `${totalScore}/10`;
+    const timeEl = document.getElementById('res-time');
+    if (timeEl && timeEl.parentElement) {
+        timeEl.parentElement.style.display = 'none'; // Hide time stat box completely
+    }
+    document.getElementById('res-streak').textContent = `🔥 ${streakVal}`;
+    document.getElementById('emoji-grid-display').textContent = emojiRow;
+
+    // Optional topic breakdown and answer review list container inside modal
+    let breakdownContainer = document.getElementById('daily-breakdown-container');
+    if (!breakdownContainer && modal.querySelector('.modal-card')) {
+        breakdownContainer = document.createElement('div');
+        breakdownContainer.id = 'daily-breakdown-container';
+        breakdownContainer.style.cssText = "margin: 15px 0; max-height: 180px; overflow-y: auto; text-align: left; font-size: 0.9rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 0;";
+        modal.querySelector('.modal-card').insertBefore(breakdownContainer, document.getElementById('share-results-btn'));
+    }
+    
+    if (breakdownContainer && Array.isArray(dailyDeckPrompts) && dailyDeckPrompts.length > 0) {
+        let breakdownHTML = '<div style="font-weight: bold; margin-bottom: 6px; color: #ffd700; text-align: center;">Tell us what you blurted! (Compare with other players tomorrow)</div>';
+        dailyDeckPrompts.forEach((p, idx) => {
+            const topicText = p.topic || p.prompt || `Round ${idx + 1}`;
+            const letterText = p.letter || "";
+            const savedAns = (window.dailyRoundAnswers && window.dailyRoundAnswers[idx]) ? window.dailyRoundAnswers[idx] : "";
+            breakdownHTML += `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px;">
+                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">R${idx+1}: ${topicText} (${letterText})</span>
+                    <input type="text" class="round-answer-input" data-round="${idx}" value="${savedAns}" placeholder="Your blurt..." style="width: 120px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;" />
+                </div>
+            `;
+        });
+        breakdownContainer.innerHTML = breakdownHTML;
+
+        // Save inputs on change
+        breakdownContainer.querySelectorAll('.round-answer-input').forEach(input => {
+            input.oninput = (e) => {
+                const rIdx = e.target.getAttribute('data-round');
+                if (!window.dailyRoundAnswers) window.dailyRoundAnswers = {};
+                window.dailyRoundAnswers[rIdx] = e.target.value;
+                localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score: totalScore, resultsArray: Object.values(window.dailyRoundAnswers), timeSpent: 0 }));
+            };
+        });
+    }
+
+    modal.style.display = 'flex';
+
+    // Wire Close/Dismiss Logic
+    const closeBtn = document.getElementById('close-modal-btn');
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+    }
+
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Share Results Button Logic
+    const shareBtn = document.getElementById('share-results-btn');
+    if (shareBtn) {
+        shareBtn.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Word Blurts! Daily',
+                        text: shareText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Share dismissed or failed:", err);
+                }
+            } else {
+                await navigator.clipboard.writeText(shareText);
+                const originalText = shareBtn.textContent;
+                shareBtn.textContent = "📋 Copied to Clipboard!";
+                setTimeout(() => { shareBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+
+    // Challenge a Friend Button Logic
+    const challengeBtn = document.getElementById('challenge-friend-btn');
+    if (challengeBtn) {
+        challengeBtn.onclick = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Challenge - Word Blurts!',
+                        text: challengeText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Challenge dismissed or failed:", err);
+                }
+            } else {
+                await navigator.clipboard.writeText(challengeText);
+                const originalText = challengeBtn.textContent;
+                challengeBtn.textContent = "⚔️ Challenge Copied!";
+                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
 }
 
 // ==========================================
-// 8. AD & UTILITY MANAGEMENT
+- // AD & UTILITY MANAGEMENT
 // ==========================================
 function triggerInterstitialAd() {
     if (window.googletag && googletag.apiReady) {
@@ -1234,8 +1390,6 @@ function triggerInterstitialAd() {
         });
     }
 }
-
-
 
 function refreshAds() {
     const now = Date.now();
@@ -1253,9 +1407,38 @@ function adjustScore(team, delta) {
     const el = document.getElementById(team + "Score");
     if (el) {
         let current = parseInt(el.innerText, 10) || 0;
-        el.innerText = Math.max(0, current + delta);
-        if (delta > 0) playSlideUp();
-        else if (delta < 0 && current > 0) playSlideDown();
+        const newScore = Math.max(0, current + delta);
+        el.innerText = newScore;
+        
+        if (delta > 0) {
+            playSlideUp();
+
+            // If in Daily Mode and points were added (+), instantly inject/reveal the per-round answer input box!
+            if (typeof isDailyMode !== 'undefined' && isDailyMode && typeof dailyCurrentIndex !== 'undefined') {
+                const currentIndex = Math.max(0, (window.dailyCurrentIndex || 1) - 1);
+                if (!window.dailyRoundAnswers) window.dailyRoundAnswers = {};
+                
+                // Check if prompt container already has the answer input box for this round
+                let promptArea = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
+                if (promptArea && !document.getElementById('live-round-answer-input')) {
+                    const inputWrapper = document.createElement('div');
+                    inputWrapper.id = 'live-round-answer-input-wrapper';
+                    inputWrapper.style.cssText = "margin-top: 14px; text-align: center;";
+                    inputWrapper.innerHTML = `
+                        <input type="text" id="live-round-answer-input" placeholder="Tell us what you Blurted! (Optional)" value="${window.dailyRoundAnswers[currentIndex] || ''}" style="width: 80%; max-width: 280px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 1rem; text-align: center;" />
+                    `;
+                    promptArea.appendChild(inputWrapper);
+
+                    const liveInput = document.getElementById('live-round-answer-input');
+                    liveInput.oninput = (e) => {
+                        window.dailyRoundAnswers[currentIndex] = e.target.value;
+                    };
+                }
+            }
+
+        } else if (delta < 0 && current > 0) {
+            playSlideDown();
+        }
     }
 }
 
