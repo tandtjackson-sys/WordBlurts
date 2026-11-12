@@ -64,7 +64,7 @@ const GAME_DATA = {
             "A part of a car!", "Something that makes noise!", "A title of a TV show!",
             "A movie title!", "A breakfast food!", "Something in a hardware store!",
             "A musical instrument!", "A sport or game!", "A state in the U S A!",
-            "Any animal!", "A pizza topping!", "A brand of car!",
+            "Any animal!", "A pizza topping!", "A brand or name of a car!",
             "Something you shouldn't touch with your bare hands!", "A Halloween costume!", "Something that makes you tired or exhausted!",
             "A board game or video game!", "A profession or job!", "A country!",
             "A flavor of ice cream!", "Something found in a classroom!", "A candy!",
