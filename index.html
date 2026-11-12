@@ -1096,30 +1096,29 @@
               <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY</button>
           </main>
 
-            <!-- SCOREBOARD -->
-            <div class="scoreboard-container">
-                <section class="scoreboard">
-                    <div class="team-score-card">
-                        <span class="team-label">Player / Team 1</span>
-                        <div class="score-display" id="team1Score">0</div>
-                        <div class="score-controls">
-                            <button class="btn-score btn-minus" onclick="adjustScore('team1', -1)" aria-label="Decrease score">−</button>
-                            <button class="btn-score btn-plus" onclick="adjustScore('team1', 1)" aria-label="Increase score">+</button>
-                        </div>
-                    </div>
-
-
-                    <div class="team-score-card">
-                        <span class="team-label">Player / Team 2</span>
-                        <div class="score-display" id="team2Score">0</div>
-                        <div class="score-controls">
-                            <button class="btn-score btn-minus" onclick="adjustScore('team2', -1)" aria-label="Decrease score">−</button>
-                            <button class="btn-score btn-plus" onclick="adjustScore('team2', 1)" aria-label="Increase score">+</button>
-                        </div>
-                    </div>
-                </section>
-                <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
+           <!-- SCOREBOARD -->
+<div class="scoreboard-container">
+    <section class="scoreboard">
+        <div class="team-score-card">
+            <span class="team-label">Total score so far:</span>
+            <div class="score-display" id="team1Score">0</div>
+            <div class="score-controls">
+                <button class="btn-score btn-minus" onclick="adjustScore('team1', -1)" aria-label="Decrease score">−</button>
+                <button class="btn-score btn-plus" onclick="adjustScore('team1', 1)" aria-label="Increase score">+</button>
             </div>
+        </div>
+
+        <div class="team-score-card">
+            <span class="team-label">Player / Team 2</span>
+            <div class="score-display" id="team2Score">0</div>
+            <div class="score-controls">
+                <button class="btn-score btn-minus" onclick="adjustScore('team2', -1)" aria-label="Decrease score">−</button>
+                <button class="btn-score btn-plus" onclick="adjustScore('team2', 1)" aria-label="Increase score">+</button>
+            </div>
+        </div>
+    </section>
+    <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
+</div>
 
 
             <!-- SEO & INFO SECTION -->
