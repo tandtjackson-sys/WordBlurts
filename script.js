@@ -1400,7 +1400,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
                 setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
             }
         };
-    }
+    
 }
 
 // ==========================================
