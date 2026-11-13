@@ -1,23 +1,3 @@
-// Automatically clean up scoreboard based on the active game mode
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are currently in Daily mode or Classic mode
-    const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
-    
-    const team2Card = document.getElementById('team2Score')?.closest('.scoreboard-card') || 
-                      document.querySelector('.score-card:nth-child(2)');
-                      
-    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
-
-    if (isDaily) {
-        // Daily Mode: Hide Team 2 card and use solo label
-        if (team2Card) team2Card.style.display = 'none';
-        if (scoreLabel) scoreLabel.textContent = "Total score so far:";
-    } else {
-        // Classic Mode: Keep Team 2 visible and use multiplayer label
-        if (team2Card) team2Card.style.display = 'block'; // or 'flex' depending on your CSS
-        if (scoreLabel) scoreLabel.textContent = "Player / Team 1"; // adjust to whatever your original Classic label was
-    }
-});
 // ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
@@ -25,6 +5,7 @@ window.isDailyMode = false;
 window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
 let lastAdRefreshTime = 0;
 const AD_REFRESH_INTERVAL = 35000;
+
 // Update Fullscreen button text based on current language and state
 function updateFullscreenBtnText() {
     const fsBtn = document.getElementById('fullscreenToggleBtn');
@@ -45,6 +26,9 @@ window.toggleLanguage = function() {
     localStorage.setItem("wordblurts_lang", window.currentLang);
     if (typeof switchLanguage === 'function') {
         switchLanguage(window.currentLang);
+    }
+    if (typeof updateStaticUI === 'function') {
+        updateStaticUI();
     }
     updateFullscreenBtnText();
 };
@@ -68,6 +52,7 @@ window.toggleFullScreen = function() {
         }
     }
 };
+
 
 document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
