@@ -1775,36 +1775,20 @@ document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     
+    // Find the Team 2 scorecard container directly by its contents and structure
     const team2ScoreEl = document.getElementById('team2Score');
+    const team2Card = team2ScoreEl ? team2ScoreEl.closest('div').parentElement : null;
     
-    // Walk up the DOM tree to find the outer framed card box
-    let team2Card = null;
-    if (team2ScoreEl) {
-        let curr = team2ScoreEl.parentElement;
-        while (curr && curr !== document.body) {
-            const style = window.getComputedStyle(curr);
-            // Look for the container that has the card border and background styling
-            if (style.borderColor !== 'rgba(0, 0, 0, 0)' && style.borderWidth !== '0px') {
-                team2Card = curr;
-                break;
-            }
-            curr = curr.parentElement;
-        }
-        // Fallback if traversal needs a deeper parent
-        if (!team2Card) {
-            team2Card = team2ScoreEl.parentElement.parentElement;
-        }
-    }
-    
+    // Find the primary score label
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
 
     if (isDaily) {
-        // Daily Mode: Hide the entire framed Player 2 card box and set solo label
+        // Daily Mode: Hide the entire Player 2 card box and set solo label
         if (team2Card) team2Card.style.display = 'none';
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
         // Classic Mode: Ensure Player 2 card is visible and use multiplayer label
-        if (team2Card) team2Card.style.display = 'block';
+        if (team2Card) team2Card.style.display = ''; // resets to default CSS display
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
 }
