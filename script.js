@@ -1,3 +1,20 @@
+// Automatically clean up scoreboard and remove Team 2 on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Hide Team 2 scorecard entirely across all game modes
+    const team2Card = document.getElementById('team2Score')?.closest('.scoreboard-card') || 
+                      document.querySelector('.score-card:nth-child(2)') ||
+                      document.getElementById('Team 2')?.parentElement;
+                      
+    if (team2Card) {
+        team2Card.style.display = 'none';
+    }
+
+    // Ensure single player container spans nicely if needed
+    const scoreContainer = document.getElementById('score-container') || document.querySelector('.scoreboard-container');
+    if (scoreContainer) {
+        scoreContainer.style.justifyContent = 'center';
+    }
+});
 // ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
