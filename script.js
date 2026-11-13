@@ -1781,7 +1781,7 @@ function applyWordBlurtsFixes() {
     const allScoreCards = document.querySelectorAll('.team-score-card');
 
     if (isDaily) {
-        // Daily Mode: Hide Team 2, center and constrain solo card, update label
+        // Daily Mode: Hide Team 2 completely, center/constrain solo card, update label
         if (team2Card) team2Card.style.setProperty('display', 'none', 'important');
         
         allScoreCards.forEach(card => {
@@ -1794,8 +1794,11 @@ function applyWordBlurtsFixes() {
 
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic Mode: Force restore Team 2 card and reset sizing
-        if (team2Card) team2Card.style.setProperty('display', '', 'important');
+        // Classic Mode: Properly restore Team 2 card and reset sizing
+        if (team2Card) {
+            team2Card.style.removeProperty('display');
+            team2Card.style.display = '';
+        }
         
         allScoreCards.forEach(card => {
             card.style.maxWidth = '';
@@ -1806,19 +1809,19 @@ function applyWordBlurtsFixes() {
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
 
-    // Fix the "Tell us what you Blurt" input box text clipping
+    // Fix the "Tell us what you Blurted! (Optional)" input box text clipping
     const guessInput = document.querySelector('input[type="text"]') || document.querySelector('.guess-input') || document.getElementById('guessInput');
     if (guessInput) {
         guessInput.style.width = '100%';
-        guessInput.style.maxWidth = '280px'; // Wide enough for the full placeholder text
-        guessInput.style.minWidth = '240px';
+        guessInput.style.maxWidth = '340px'; // Widened further so full placeholder fits
+        guessInput.style.minWidth = '280px';
         guessInput.style.boxSizing = 'border-box';
         guessInput.style.padding = '10px 16px';
         guessInput.style.fontSize = '14px';
     }
 }
 
-// Run frequently on load, and set up a lightweight interval loop so mode switching is 100% reactive
+// Run frequently on load
 document.addEventListener('DOMContentLoaded', () => {
     applyWordBlurtsFixes();
     setTimeout(applyWordBlurtsFixes, 200);
@@ -1827,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Continuously sync in the background so mode changes (Daily <-> Classic) apply instantly
 setInterval(applyWordBlurtsFixes, 300);
 
-// Also trigger immediately on any click on the page
+// Also trigger immediately on any click
 document.addEventListener('click', () => {
     setTimeout(applyWordBlurtsFixes, 50);
 });
