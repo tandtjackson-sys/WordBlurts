@@ -1773,10 +1773,9 @@ document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // Force clean and toggle scoreboards correctly based on game mode
 function applyModeScoreboardStyling() {
+    // Check if isDailyMode exists globally, default to false if undefined
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
-    
-    // Find Team 2's container using its exact class name and internal ID
     const team2Card = document.querySelector('#team2Score') ? document.querySelector('#team2Score').closest('.team-score-card') : null;
 
     if (isDaily) {
@@ -1790,8 +1789,16 @@ function applyModeScoreboardStyling() {
     }
 }
 
-// Run on load and check again shortly after in case the game renderer overrides it
+// Run on initial load and short delay for async rendering
 document.addEventListener('DOMContentLoaded', () => {
     applyModeScoreboardStyling();
     setTimeout(applyModeScoreboardStyling, 250);
+});
+
+// Also hook into your mode toggle buttons so it updates instantly when clicked!
+document.addEventListener('click', (e) => {
+    // Check if the click was on a mode selection button or tab
+    if (e.target.closest('#classicBtn') || e.target.closest('#dailyBtn') || e.target.closest('[class*="mode"]')) {
+        setTimeout(applyModeScoreboardStyling, 50);
+    }
 });
