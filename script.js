@@ -1771,34 +1771,65 @@ function updateFullscreenBtnText() {
 
 document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
-// Force clean and toggle scoreboards correctly based on game mode
-function applyModeScoreboardStyling() {
-    // Check if isDailyMode exists globally, default to false if undefined
+// Comprehensive UI fix for Word Blurts! (Daily vs. Classic modes & input sizing)
+function applyWordBlurtsFixes() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
-    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
-    const team2Card = document.querySelector('#team2Score') ? document.querySelector('#team2Score').closest('.team-score-card') : null;
+    
+    // Find scoreboard elements
+    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.team-label') || document.querySelector('.score-label');
+    const team2ScoreEl = document.getElementById('team2Score');
+    const team2Card = team2ScoreEl ? team2ScoreEl.closest('.team-score-card') : null;
+    const allScoreCards = document.querySelectorAll('.team-score-card');
 
     if (isDaily) {
-        // Daily Mode: Hide the entire Player 2 card box and update solo label
+        // 1. Hide Player 2 card in Daily mode
         if (team2Card) team2Card.style.display = 'none';
+        
+        // 2. Fix scoring box width so it doesn't stretch too wide
+        allScoreCards.forEach(card => {
+            if (card !== team2Card) {
+                card.style.maxWidth = '380px';
+                card.style.margin = '0 auto';
+                card.style.width = '100%';
+            }
+        });
+
+        // 3. Update label for solo play
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic Mode: Restore Player 2 card and multiplayer label
+        // Classic mode: Restore Player 2 card and reset custom widths
         if (team2Card) team2Card.style.display = '';
+        allScoreCards.forEach(card => {
+            card.style.maxWidth = '';
+            card.style.margin = '';
+            card.style.width = '';
+        });
+
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
+    }
+
+    // 4. Fix "Tell us what you Blurt" input box text clipping
+    const guessInput = document.querySelector('input[type="text"]') || document.querySelector('.guess-input') || document.getElementById('guessInput');
+    if (guessInput) {
+        guessInput.style.width = '90%';
+        guessInput.style.maxWidth = '320px';
+        guessInput.style.boxSizing = 'border-box';
+        guessInput.style.padding = '8px 14px';
     }
 }
 
-// Run on initial load and short delay for async rendering
+// Run on initial load and handle async renders
 document.addEventListener('DOMContentLoaded', () => {
-    applyModeScoreboardStyling();
-    setTimeout(applyModeScoreboardStyling, 250);
+    applyWordBlurtsFixes();
+    setTimeout(applyWordBlurtsFixes, 150);
+    setTimeout(applyWordBlurtsFixes, 500);
 });
 
-// Also hook into your mode toggle buttons so it updates instantly when clicked!
+// Listen for mode button clicks to update layout instantly without refreshing
 document.addEventListener('click', (e) => {
-    // Check if the click was on a mode selection button or tab
-    if (e.target.closest('#classicBtn') || e.target.closest('#dailyBtn') || e.target.closest('[class*="mode"]')) {
-        setTimeout(applyModeScoreboardStyling, 50);
+    const targetText = e.target.innerText ? e.target.innerText.toLowerCase() : '';
+    if (targetText.includes('classic') || targetText.includes('daily') || e.target.closest('button')) {
+        setTimeout(applyWordBlurtsFixes, 50);
+        setTimeout(applyWordBlurtsFixes, 250);
     }
 });
