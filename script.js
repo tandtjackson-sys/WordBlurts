@@ -1787,11 +1787,16 @@ document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // Bulletproof Word Blurts! UI synchronization
 function applyWordBlurtsFixes() {
-    const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
-    
+    // Detect Daily Mode reliably via variable OR active Daily button state
+    const dailyBtn = document.getElementById('daily-mode-btn') || document.getElementById('dailyModeBtn') || document.querySelector('[data-mode="daily"]');
+    const isDaily = (typeof isDailyMode !== 'undefined' && Boolean(isDailyMode)) || 
+                    (typeof window.isDailyMode !== 'undefined' && Boolean(window.isDailyMode)) ||
+                    (dailyBtn && (dailyBtn.classList.contains('active') || dailyBtn.getAttribute('aria-pressed') === 'true'));
+
+    const isEs = (window.currentLang === 'es') || (typeof currentLang !== 'undefined' && currentLang === 'es');
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.team-label') || document.querySelector('.score-label');
-    const team2ScoreEl = document.getElementById('team2Score');
-    const team2Card = team2ScoreEl ? team2ScoreEl.closest('.team-score-card') : null;
+    const team2ScoreEl = document.getElementById('team2Score') || document.getElementById('score2') || document.getElementById('player2Score');
+    const team2Card = team2ScoreEl ? (team2ScoreEl.closest('.team-score-card') || team2ScoreEl.parentElement) : document.querySelectorAll('.team-score-card')[1];
     const allScoreCards = document.querySelectorAll('.team-score-card');
 
     if (isDaily) {
@@ -1806,28 +1811,30 @@ function applyWordBlurtsFixes() {
             }
         });
 
-        if (scoreLabel) scoreLabel.textContent = "Total score so far:";
+        if (scoreLabel) scoreLabel.textContent = isEs ? "Puntuación total hasta ahora:" : "Total score so far:";
     } else {
-        // Classic Mode: Properly restore Team 2 card and reset sizing
+        // Classic Mode: Force-restore Team 2 card and reset sizing
         if (team2Card) {
             team2Card.style.removeProperty('display');
-            team2Card.style.display = '';
+            team2Card.hidden = false;
+            team2Card.classList.remove('hidden');
         }
         
         allScoreCards.forEach(card => {
+            card.style.removeProperty('display');
             card.style.maxWidth = '';
             card.style.margin = '';
             card.style.width = '';
         });
 
-        if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
+        if (scoreLabel) scoreLabel.textContent = isEs ? "Jugador / Equipo 1" : "Player / Team 1";
     }
 
     // Fix the "Tell us what you Blurted! (Optional)" input box text clipping
     const guessInput = document.querySelector('input[type="text"]') || document.querySelector('.guess-input') || document.getElementById('guessInput');
     if (guessInput) {
         guessInput.style.width = '100%';
-        guessInput.style.maxWidth = '340px'; // Widened further so full placeholder fits
+        guessInput.style.maxWidth = '340px';
         guessInput.style.minWidth = '280px';
         guessInput.style.boxSizing = 'border-box';
         guessInput.style.padding = '10px 16px';
@@ -1835,8 +1842,24 @@ function applyWordBlurtsFixes() {
     }
 }
 
-// Run frequently on load
+// Run on load and restore saved Spanish language automatically
 document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
+    window.currentLang = savedLang;
+    if (typeof currentLang !== 'undefined') {
+        currentLang = savedLang;
+    }
+    if (savedLang === 'es') {
+        if (typeof switchLanguage === 'function') {
+            switchLanguage('es');
+        }
+        if (typeof updateStaticUI === 'function') {
+            updateStaticUI();
+        }
+        if (typeof updateFullscreenBtnText === 'function') {
+            updateFullscreenBtnText();
+        }
+    }
     applyWordBlurtsFixes();
     setTimeout(applyWordBlurtsFixes, 200);
 });
@@ -1848,3 +1871,5 @@ setInterval(applyWordBlurtsFixes, 300);
 document.addEventListener('click', () => {
     setTimeout(applyWordBlurtsFixes, 50);
 });
+
+
