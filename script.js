@@ -497,7 +497,7 @@ function switchLanguage(langCode) {
     }
     // ----------------------------------
 
-    updateStaticUI();
+     updateStaticUI();
 }
 
 
@@ -515,40 +515,54 @@ function updateStaticUI() {
 
     // Translate Prompt Area if no active round has started yet
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
-if (promptEl && (!window.currentActiveTopic)) {
-    promptEl.innerHTML = `
-        <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
-            ${isEs ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
-        </div>
-    `;
-}
+    if (promptEl && (!window.currentActiveTopic)) {
+        promptEl.innerHTML = `
+            <div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+                ${isEs ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+            </div>
+        `;
+    }
 
- // Translate Rules Card (with default hidden display fix)
-const rulesCard = document.getElementById('rulesCard');
-if (rulesCard) {
-    // Ensure it's hidden by default if style wasn't set in HTML
-    if (!rulesCard.style.display) {
-        rulesCard.style.display = 'none';
+    // Translate Rules Card (with default hidden display fix)
+    const rulesCard = document.getElementById('rulesCard');
+    if (rulesCard) {
+        // Ensure it's hidden by default if style wasn't set in HTML
+        if (!rulesCard.style.display) {
+            rulesCard.style.display = 'none';
+        }
+        
+        if (isEs) {
+            rulesCard.innerHTML = `
+                <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 12px; font-size: 1.3rem;">Cómo Jugar</h3>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Comenzar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador!</p>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. El Reto:</strong> Después de que el locutor diga "¡Dilo ya!" y la luz verde parpadee, tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo.</p>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Reglas y Puntuación:</strong> El juego no escucha ni realiza un seguimiento de las respuestas. Las palabras deben ser acordadas por los demás jugadores. ¡Se permiten múltiples respuestas, y cada una vale un punto (las palabras "Un", "Una", "El" y "La" no cuentan)!</p>
+                <p style="margin-bottom: 0; line-height: 1.5;"><strong>Consejo Útil:</strong> ¡Ser el primero en decir una respuesta correcta no solo te da puntos, sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta manualmente tus puntuaciones a continuación.</p>
+            `;
+        } else {
+            rulesCard.innerHTML = `
+                <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 12px; font-size: 1.3rem;">How to Play</h3>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Getting Started:</strong> Players must first agree on how many points to play to before a winner is declared.  Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. </p>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. The Round:</strong> After the announcer says "Blurt it out!" and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out!</p>
+                <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Scoring:</strong> The game does not track correct answers—it's up to the players to agree whether a Blurt is correct. Multiple answers are allowed per round, and every correct answer earns a point (articles like "A", "An", and "The" don't count)</p>
+                <p style="margin-bottom: 0; line-height: 1.5;"><strong>Pro Tip:</strong> Being first to Blurt out a correct answer gives you points and keeps your opponent from using those same answers! After each round, manually adjust your scores below.</p>
+            `;
+        }
     }
-    
-  if (isEs) {
-        rulesCard.innerHTML = `
-            <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 12px; font-size: 1.3rem;">Cómo Jugar</h3>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Comenzar:</strong> Presiona <kbd>PLAY</kbd>, <kbd>Enter</kbd> o la barra espaciadora para obtener un tema y una letra. ¡Los jugadores deben acordar cuántos puntos alcanzar antes de declarar un ganador!</p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. El Reto:</strong> Después de que el locutor diga "¡Dilo ya!" y la luz verde parpadee, tienes 15 segundos para decir una o más respuestas coincidentes antes de que se acabe el tiempo.</p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Reglas y Puntuación:</strong> El juego no escucha ni realiza un seguimiento de las respuestas. Las palabras deben ser acordadas por los demás jugadores. ¡Se permiten múltiples respuestas, y cada una vale un punto (las palabras "Un", "Una", "El" y "La" no cuentan)!</p>
-            <p style="margin-bottom: 0; line-height: 1.5;"><strong>Consejo Útil:</strong> ¡Ser el primero en decir una respuesta correcta no solo te da puntos, sino que evita que tu oponente use esas mismas respuestas para anotar! Después de cada ronda, ajusta manualmente tus puntuaciones a continuación.</p>
-        `;
-    } else {
-        rulesCard.innerHTML = `
-            <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 12px; font-size: 1.3rem;">How to Play</h3>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>1. Getting Started:</strong> Players must first agree on how many points to play to before a winner is declared.  Press <kbd>PLAY</kbd>, <kbd>Enter</kbd>, or <kbd>Spacebar</kbd> to draw a topic and letter. </p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>2. The Round:</strong> After the announcer says "Blurt it out!" and the green light flashes, you have 15 seconds to Blurt out a matching answer(s) before time runs out!</p>
-            <p style="margin-bottom: 10px; line-height: 1.5;"><strong>3. Scoring:</strong> The game does not track correct answers—it's up to the players to agree whether a Blurt is correct. Multiple answers are allowed per round, and every correct answer earns a point (articles like "A", "An", and "The" don't count)</p>
-            <p style="margin-bottom: 0; line-height: 1.5;"><strong>Pro Tip:</strong> Being first to Blurt out a correct answer gives you points and keeps your opponent from using those same answers! After each round, manually adjust your scores below.</p>
-        `;
-    }
-}
+
+    // Translate Footer Copyright & Links
+    const footerCopy = document.getElementById('footer-copyright');
+    const footerAbout = document.getElementById('open-about-btn');
+    const footerTeachers = document.getElementById('footer-teachers-link');
+    const footerPrivacy = document.getElementById('footer-privacy-link');
+    const footerAds = document.getElementById('footer-ads-link');
+
+    if (footerCopy) footerCopy.innerHTML = isEs ? '&copy; 2026 Word Blurts! Todos los derechos reservados.' : '&copy; 2026 Word Blurts! All rights reserved.';
+    if (footerAbout) footerAbout.textContent = isEs ? 'Acerca de' : 'About';
+    if (footerTeachers) footerTeachers.textContent = isEs ? 'Para maestros' : 'For Teachers';
+    if (footerPrivacy) footerPrivacy.textContent = isEs ? 'Política de privacidad' : 'Privacy Policy';
+    if (footerAds) footerAds.textContent = isEs ? 'Configuración de anuncios' : 'Ad Settings';
+
 
     // Translate SEO About Section (Bottom of Page)
 const about1 = document.getElementById('about-section-1');
