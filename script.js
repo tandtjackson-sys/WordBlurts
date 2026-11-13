@@ -1771,21 +1771,19 @@ function updateFullscreenBtnText() {
 
 document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
-// Comprehensive UI fix for Word Blurts! (Daily vs. Classic modes & input sizing)
+// Bulletproof Word Blurts! UI synchronization
 function applyWordBlurtsFixes() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     
-    // Find scoreboard elements
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.team-label') || document.querySelector('.score-label');
     const team2ScoreEl = document.getElementById('team2Score');
     const team2Card = team2ScoreEl ? team2ScoreEl.closest('.team-score-card') : null;
     const allScoreCards = document.querySelectorAll('.team-score-card');
 
     if (isDaily) {
-        // 1. Hide Player 2 card in Daily mode
-        if (team2Card) team2Card.style.display = 'none';
+        // Daily Mode: Hide Team 2, center and constrain solo card, update label
+        if (team2Card) team2Card.style.setProperty('display', 'none', 'important');
         
-        // 2. Fix scoring box width so it doesn't stretch too wide
         allScoreCards.forEach(card => {
             if (card !== team2Card) {
                 card.style.maxWidth = '380px';
@@ -1794,11 +1792,11 @@ function applyWordBlurtsFixes() {
             }
         });
 
-        // 3. Update label for solo play
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic mode: Restore Player 2 card and reset custom widths
-        if (team2Card) team2Card.style.display = '';
+        // Classic Mode: Force restore Team 2 card and reset sizing
+        if (team2Card) team2Card.style.setProperty('display', '', 'important');
+        
         allScoreCards.forEach(card => {
             card.style.maxWidth = '';
             card.style.margin = '';
@@ -1808,28 +1806,28 @@ function applyWordBlurtsFixes() {
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
 
-    // 4. Fix "Tell us what you Blurt" input box text clipping
+    // Fix the "Tell us what you Blurt" input box text clipping
     const guessInput = document.querySelector('input[type="text"]') || document.querySelector('.guess-input') || document.getElementById('guessInput');
     if (guessInput) {
-        guessInput.style.width = '90%';
-        guessInput.style.maxWidth = '320px';
+        guessInput.style.width = '100%';
+        guessInput.style.maxWidth = '280px'; // Wide enough for the full placeholder text
+        guessInput.style.minWidth = '240px';
         guessInput.style.boxSizing = 'border-box';
-        guessInput.style.padding = '8px 14px';
+        guessInput.style.padding = '10px 16px';
+        guessInput.style.fontSize = '14px';
     }
 }
 
-// Run on initial load and handle async renders
+// Run frequently on load, and set up a lightweight interval loop so mode switching is 100% reactive
 document.addEventListener('DOMContentLoaded', () => {
     applyWordBlurtsFixes();
-    setTimeout(applyWordBlurtsFixes, 150);
-    setTimeout(applyWordBlurtsFixes, 500);
+    setTimeout(applyWordBlurtsFixes, 200);
 });
 
-// Listen for mode button clicks to update layout instantly without refreshing
-document.addEventListener('click', (e) => {
-    const targetText = e.target.innerText ? e.target.innerText.toLowerCase() : '';
-    if (targetText.includes('classic') || targetText.includes('daily') || e.target.closest('button')) {
-        setTimeout(applyWordBlurtsFixes, 50);
-        setTimeout(applyWordBlurtsFixes, 250);
-    }
+// Continuously sync in the background so mode changes (Daily <-> Classic) apply instantly
+setInterval(applyWordBlurtsFixes, 300);
+
+// Also trigger immediately on any click on the page
+document.addEventListener('click', () => {
+    setTimeout(applyWordBlurtsFixes, 50);
 });
