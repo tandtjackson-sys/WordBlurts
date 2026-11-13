@@ -1,18 +1,21 @@
-// Automatically clean up scoreboard and remove Team 2 on page load
+// Automatically clean up scoreboard based on the active game mode
 document.addEventListener('DOMContentLoaded', () => {
-    // Hide Team 2 scorecard entirely across all game modes
+    // Check if we are currently in Daily mode or Classic mode
+    const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
+    
     const team2Card = document.getElementById('team2Score')?.closest('.scoreboard-card') || 
-                      document.querySelector('.score-card:nth-child(2)') ||
-                      document.getElementById('Team 2')?.parentElement;
+                      document.querySelector('.score-card:nth-child(2)');
                       
-    if (team2Card) {
-        team2Card.style.display = 'none';
-    }
+    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
 
-    // Ensure single player container spans nicely if needed
-    const scoreContainer = document.getElementById('score-container') || document.querySelector('.scoreboard-container');
-    if (scoreContainer) {
-        scoreContainer.style.justifyContent = 'center';
+    if (isDaily) {
+        // Daily Mode: Hide Team 2 card and use solo label
+        if (team2Card) team2Card.style.display = 'none';
+        if (scoreLabel) scoreLabel.textContent = "Total score so far:";
+    } else {
+        // Classic Mode: Keep Team 2 visible and use multiplayer label
+        if (team2Card) team2Card.style.display = 'block'; // or 'flex' depending on your CSS
+        if (scoreLabel) scoreLabel.textContent = "Player / Team 1"; // adjust to whatever your original Classic label was
     }
 });
 // ==========================================
