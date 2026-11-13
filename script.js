@@ -1772,19 +1772,34 @@ function updateFullscreenBtnText() {
 document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // Force clean and toggle scoreboards correctly based on game mode
-// Force clean and toggle scoreboards correctly based on game mode
 function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     
-    // Find the entire Player 2 card container (the parent box holding the score and buttons)
     const team2ScoreEl = document.getElementById('team2Score');
-    const team2Card = team2ScoreEl ? team2ScoreEl.closest('.score-card, .scoreboard-card') || team2ScoreEl.parentElement.parentElement : null;
     
-    // Find the primary score label
+    // Walk up the DOM tree to find the outer framed card box
+    let team2Card = null;
+    if (team2ScoreEl) {
+        let curr = team2ScoreEl.parentElement;
+        while (curr && curr !== document.body) {
+            const style = window.getComputedStyle(curr);
+            // Look for the container that has the card border and background styling
+            if (style.borderColor !== 'rgba(0, 0, 0, 0)' && style.borderWidth !== '0px') {
+                team2Card = curr;
+                break;
+            }
+            curr = curr.parentElement;
+        }
+        // Fallback if traversal needs a deeper parent
+        if (!team2Card) {
+            team2Card = team2ScoreEl.parentElement.parentElement;
+        }
+    }
+    
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
 
     if (isDaily) {
-        // Daily Mode: Hide the entire Player 2 card box and set solo label
+        // Daily Mode: Hide the entire framed Player 2 card box and set solo label
         if (team2Card) team2Card.style.display = 'none';
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
