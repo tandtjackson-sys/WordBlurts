@@ -1775,20 +1775,35 @@ document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     
-    // Find the Team 2 scorecard container directly by its contents and structure
-    const team2ScoreEl = document.getElementById('team2Score');
-    const team2Card = team2ScoreEl ? team2ScoreEl.closest('div').parentElement : null;
-    
-    // Find the primary score label
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
+    const team2ScoreEl = document.getElementById('team2Score');
+    
+    // Walk up the DOM to find the actual styled card container box
+    let team2Card = null;
+    if (team2ScoreEl) {
+        let curr = team2ScoreEl;
+        while (curr && curr !== document.body) {
+            const style = window.getComputedStyle(curr);
+            const bg = style.backgroundColor;
+            const border = style.borderStyle;
+            
+            // Look for the element that forms the dark card box with a border
+            if ((bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') || (border && border !== 'none')) {
+                team2Card = curr;
+                break;
+            }
+            curr = curr.parentElement;
+        }
+        if (!team2Card) team2Card = team2ScoreEl.parentElement.parentElement;
+    }
 
     if (isDaily) {
-        // Daily Mode: Hide the entire Player 2 card box and set solo label
+        // Daily Mode: Hide the entire card container and update label
         if (team2Card) team2Card.style.display = 'none';
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic Mode: Ensure Player 2 card is visible and use multiplayer label
-        if (team2Card) team2Card.style.display = ''; // resets to default CSS display
+        // Classic Mode: Restore card container and label
+        if (team2Card) team2Card.style.display = '';
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
 }
