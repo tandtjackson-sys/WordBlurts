@@ -1776,25 +1776,8 @@ function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
     
-    // Find the Team 2 score element and walk up to its outer card wrapper box
-    const team2ScoreEl = document.getElementById('team2Score');
-    let team2Card = null;
-    
-    if (team2ScoreEl) {
-        // Traverse upward until we find a container that holds both the label/score and buttons (usually 2 or 3 levels up)
-        let curr = team2ScoreEl;
-        for (let i = 0; i < 4; i++) {
-            if (curr && curr.parentElement && curr.parentElement !== document.body) {
-                curr = curr.parentElement;
-                // If this container holds multiple children or looks like a card wrapper, target it
-                if (curr.children.length >= 2 || curr.querySelector('button')) {
-                    team2Card = curr;
-                }
-            }
-        }
-        // Fallback to a safe structural parent if traversal needs a anchor
-        if (!team2Card) team2Card = team2ScoreEl.parentElement.parentElement;
-    }
+    // Find Team 2's container using its exact class name and internal ID
+    const team2Card = document.querySelector('#team2Score') ? document.querySelector('#team2Score').closest('.team-score-card') : null;
 
     if (isDaily) {
         // Daily Mode: Hide the entire Player 2 card box and update solo label
