@@ -1772,25 +1772,24 @@ function updateFullscreenBtnText() {
 document.addEventListener('fullscreenchange', updateFullscreenBtnText);
 document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // Force clean and toggle scoreboards correctly based on game mode
+// Force clean and toggle scoreboards correctly based on game mode
 function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
     
-    // Find Team 2 scoreboard container or element
-    const team2Element = document.getElementById('team2Score');
-    const team2Card = team2Element ? team2Element.closest('.scoreboard-card, .score-card, div') : null;
+    // Find the entire Player 2 card container (the parent box holding the score and buttons)
+    const team2ScoreEl = document.getElementById('team2Score');
+    const team2Card = team2ScoreEl ? team2ScoreEl.closest('.score-card, .scoreboard-card') || team2ScoreEl.parentElement.parentElement : null;
     
     // Find the primary score label
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
 
     if (isDaily) {
-        // Daily Mode: Hide Team 2 completely and set solo label
-        if (team2Element) team2Element.style.display = 'none';
-        if (team2Card && team2Card !== team2Element) team2Card.style.display = 'none';
+        // Daily Mode: Hide the entire Player 2 card box and set solo label
+        if (team2Card) team2Card.style.display = 'none';
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic Mode: Ensure Team 2 is visible and use multiplayer label
-        if (team2Element) team2Element.style.display = 'block';
-        if (team2Card && team2Card !== team2Element) team2Card.style.display = 'block';
+        // Classic Mode: Ensure Player 2 card is visible and use multiplayer label
+        if (team2Card) team2Card.style.display = 'block';
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
 }
@@ -1798,5 +1797,5 @@ function applyModeScoreboardStyling() {
 // Run on load and check again shortly after in case the game renderer overrides it
 document.addEventListener('DOMContentLoaded', () => {
     applyModeScoreboardStyling();
-    setTimeout(applyModeScoreboardStyling, 250); // catches delayed template renders
+    setTimeout(applyModeScoreboardStyling, 250);
 });
