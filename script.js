@@ -1774,35 +1774,34 @@ document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
 // Force clean and toggle scoreboards correctly based on game mode
 function applyModeScoreboardStyling() {
     const isDaily = typeof isDailyMode !== 'undefined' && isDailyMode;
-    
     const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.score-label');
-    const team2ScoreEl = document.getElementById('team2Score');
     
-    // Walk up the DOM to find the actual styled card container box
+    // Find the Team 2 score element and walk up to its outer card wrapper box
+    const team2ScoreEl = document.getElementById('team2Score');
     let team2Card = null;
+    
     if (team2ScoreEl) {
+        // Traverse upward until we find a container that holds both the label/score and buttons (usually 2 or 3 levels up)
         let curr = team2ScoreEl;
-        while (curr && curr !== document.body) {
-            const style = window.getComputedStyle(curr);
-            const bg = style.backgroundColor;
-            const border = style.borderStyle;
-            
-            // Look for the element that forms the dark card box with a border
-            if ((bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') || (border && border !== 'none')) {
-                team2Card = curr;
-                break;
+        for (let i = 0; i < 4; i++) {
+            if (curr && curr.parentElement && curr.parentElement !== document.body) {
+                curr = curr.parentElement;
+                // If this container holds multiple children or looks like a card wrapper, target it
+                if (curr.children.length >= 2 || curr.querySelector('button')) {
+                    team2Card = curr;
+                }
             }
-            curr = curr.parentElement;
         }
+        // Fallback to a safe structural parent if traversal needs a anchor
         if (!team2Card) team2Card = team2ScoreEl.parentElement.parentElement;
     }
 
     if (isDaily) {
-        // Daily Mode: Hide the entire card container and update label
+        // Daily Mode: Hide the entire Player 2 card box and update solo label
         if (team2Card) team2Card.style.display = 'none';
         if (scoreLabel) scoreLabel.textContent = "Total score so far:";
     } else {
-        // Classic Mode: Restore card container and label
+        // Classic Mode: Restore Player 2 card and multiplayer label
         if (team2Card) team2Card.style.display = '';
         if (scoreLabel) scoreLabel.textContent = "Player / Team 1";
     }
