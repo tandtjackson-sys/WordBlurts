@@ -1857,4 +1857,60 @@ document.addEventListener('click', () => {
     setTimeout(applyWordBlurtsFixes, 50);
 });
 
+// ==========================================
+// iOS Audio & Speech Synthesis Safety Net
+// ==========================================
 
+let iosAudioUnlocked = false;
+
+function unlockIOSAudioAndSpeech() {
+    if (iosAudioUnlocked) return;
+
+    // 1. Unlock Web Audio API context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+        const audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    // 2. Prime Speech Synthesis with a zero-volume dummy utterance
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const dummy = new SpeechSynthesisUtterance('');
+        dummy.volume = 0;
+        window.speechSynthesis.speak(dummy);
+    }
+
+    iosAudioUnlocked = true;
+}
+
+// Hook it directly into your game's Play button
+document.addEventListener('DOMContentLoaded', () => {
+    const playButton = document.getElementById('playButton') || document.querySelector('.play-btn') || document.querySelector('#play-btn');
+    if (playButton) {
+        playButton.addEventListener('click', () => {
+            unlockIOSAudioAndSpeech();
+        }, { once: true });
+    }
+});
+
+// 3. Automatic iOS Speech Interceptor
+(function() {
+    if (!('speechSynthesis' in window)) return;
+
+    const originalSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+
+    window.speechSynthesis.speak = function(utterance) {
+        try {
+            window.speechSynthesis.cancel();
+            utterance.onerror = function(e) {
+                console.warn("iOS Speech error caught safely:", e);
+            };
+            originalSpeak(utterance);
+        } catch (err) {
+            console.log("Speech blocked or unsupported on this device:", err);
+        }
+    };
+})();
