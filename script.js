@@ -1866,53 +1866,41 @@ let iosAudioUnlocked = false;
 function unlockIOSAudioAndSpeech() {
     if (iosAudioUnlocked) return;
 
-    // 1. Unlock Web Audio API context
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) {
-        const audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
+    try {
+        // 1. Unlock Web Audio API context safely
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
-    }
 
-    // 2. Prime Speech Synthesis with a zero-volume dummy utterance
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const dummy = new SpeechSynthesisUtterance('');
-        dummy.volume = 0;
-        window.speechSynthesis.speak(dummy);
+        // 2. Prime Speech Synthesis ONLY on iOS Safari (protects Android/Windows)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const dummy = new SpeechSynthesisUtterance('');
+            dummy.volume = 0;
+            window.speechSynthesis.speak(dummy);
+        }
+    } catch (err) {
+        console.log("Audio unlock safe fallback:", err);
     }
 
     iosAudioUnlocked = true;
 }
 
-// Hook it directly into your game's Play button
+// Hook it directly into your game's Play button safely
 document.addEventListener('DOMContentLoaded', () => {
-    const playButton = document.getElementById('playButton') || document.querySelector('.play-btn') || document.querySelector('#play-btn');
-    if (playButton) {
-        playButton.addEventListener('click', () => {
-            unlockIOSAudioAndSpeech();
-        }, { once: true });
+    try {
+        const playButton = document.getElementById('playButton') || document.querySelector('.play-btn') || document.querySelector('#play-btn');
+        if (playButton) {
+            playButton.addEventListener('click', () => {
+                unlockIOSAudioAndSpeech();
+            }, { once: true });
+        }
+    } catch (e) {
+        console.warn("Play button listener warning:", e);
     }
 });
-
-// ==========================================
-// Corrected Automatic Speech Interceptor
-// ==========================================
-(function() {
-    if (!('speechSynthesis' in window)) return;
-
-    const originalSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
-
-    window.speechSynthesis.speak = function(utterance) {
-        try {
-            // Do NOT call .cancel() here—Android Chrome will swallow the new speech!
-            utterance.onerror = function(e) {
-                console.warn("Speech error caught safely:", e);
-            };
-            originalSpeak(utterance);
-        } catch (err) {
-            console.log("Speech blocked or unsupported on this device:", err);
-        }
-    };
-})();
