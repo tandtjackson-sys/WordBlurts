@@ -987,15 +987,25 @@ function startTimer() {
         countdownInterval = null;
     }
 
-    if (typeof gameAudio !== 'undefined') {
-        gameAudio.unlock();
-        const t0 = gameAudio.ctx.currentTime;
-        const roundDuration = 15;
-        if (typeof gameAudio.layerDrone === 'function') gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        if (typeof gameAudio.layerOstinato === 'function') gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        if (typeof gameAudio.layerHeartbeat === 'function') gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-        if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+    // --- PROTECTED AUDIO BLOCK ---
+    try {
+        if (typeof gameAudio !== 'undefined') {
+            if (typeof gameAudio.unlock === 'function') {
+                gameAudio.unlock();
+            }
+            if (gameAudio.ctx) {
+                const t0 = gameAudio.ctx.currentTime;
+                const roundDuration = 15;
+                if (typeof gameAudio.layerDrone === 'function') gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+                if (typeof gameAudio.layerOstinato === 'function') gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+                if (typeof gameAudio.layerHeartbeat === 'function') gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+                if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
+            }
+        }
+    } catch (audioErr) {
+        console.warn("Audio layering safe fallback caught:", audioErr);
     }
+    // -----------------------------
 
     let timeLeft = 15;
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
