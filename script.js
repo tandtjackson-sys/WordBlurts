@@ -1906,7 +1906,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.speechSynthesis.speak = function(utterance) {
         try {
-            // Attach safety error logging without killing the active queue on desktop
+            // Do NOT call .cancel() here—Android Chrome will swallow the new speech!
             utterance.onerror = function(e) {
                 console.warn("Speech error caught safely:", e);
             };
