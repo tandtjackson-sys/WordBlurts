@@ -1896,7 +1896,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 3. Automatic iOS Speech Interceptor
+// ==========================================
+// Corrected Automatic Speech Interceptor
+// ==========================================
 (function() {
     if (!('speechSynthesis' in window)) return;
 
@@ -1904,9 +1906,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.speechSynthesis.speak = function(utterance) {
         try {
-            window.speechSynthesis.cancel();
+            // Attach safety error logging without killing the active queue on desktop
             utterance.onerror = function(e) {
-                console.warn("iOS Speech error caught safely:", e);
+                console.warn("Speech error caught safely:", e);
             };
             originalSpeak(utterance);
         } catch (err) {
