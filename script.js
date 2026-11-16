@@ -1914,3 +1914,35 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn("Play button listener warning:", e);
     }
 });
+// ==========================================
+// Game State Reset Helper (Fixes Mode Switch Lockups)
+// ==========================================
+function resetGameState() {
+    if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+
+    if (typeof isRoundActive !== 'undefined') {
+        isRoundActive = false;
+    }
+
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    if (playBtn) {
+        playBtn.disabled = false;
+        playBtn.style.opacity = "1";
+        playBtn.style.cursor = "pointer";
+    }
+
+    console.log("Game state successfully reset for clean mode switch.");
+}
+
+// Hook this reset into your mode buttons safely once DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const modeButtons = document.querySelectorAll('.mode-btn, #classicBtn, #dailyBtn');
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            resetGameState();
+        });
+    });
+});
