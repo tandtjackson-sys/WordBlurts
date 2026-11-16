@@ -1056,10 +1056,10 @@
             </header>
 
 
-    <!-- HOW TO PLAY, LANGUAGE TOGGLE, ABOUT & FULLSCREEN -->
+  <!-- HOW TO PLAY, LANGUAGE TOGGLE, ABOUT & FULLSCREEN -->
 <div style="text-align: center; margin: 15px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
    <button id="rules-btn" class="rules-toggle-btn" onclick="toggleRules()">
-    <span>❓ How to Play</span>
+    <span id="rulesText">❓ How to Play</span>
 </button>
 
 <!-- Paste the rules card right here -->
@@ -1072,13 +1072,14 @@
     </button>
 
     <button id="open-about-btn" class="rules-toggle-btn" onclick="openAboutModal()">
-        <span>📖 About</span>
+        <span id="aboutText">📖 About</span>
     </button>
 
     <button class="rules-toggle-btn" id="fullscreenToggleBtn" onclick="toggleFullScreen()">
         <span>🖵 Fullscreen</span>
     </button>
 </div>
+
 
 
             <!-- MAIN GAME CARD -->
@@ -1088,6 +1089,7 @@
     <button id="randomModeBtn" class="mode-btn active">✨ Classic</button>
     <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
 </div>
+
 
 
                <div id="roundCounter" style="display: none; font-size: 1.1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 8px;"></div>
@@ -1110,7 +1112,7 @@
         </div>
 
         <div class="team-score-card">
-            <span class="team-label">Player / Team 2</span>
+            <span class="team-label" id="team2Label">Player / Team 2</span>
             <div class="score-display" id="team2Score">0</div>
             <div class="score-controls">
                 <button class="btn-score btn-minus" onclick="adjustScore('team2', -1)" aria-label="Decrease score">−</button>
@@ -1118,7 +1120,7 @@
             </div>
         </div>
     </section>
-    <button class="reset-score-btn" onclick="resetScores()">RESET SCORES</button>
+    <button class="reset-score-btn" id="resetBtn" onclick="resetScores()">RESET SCORES</button>
 </div>
 
 
