@@ -902,125 +902,60 @@ function startNewRound() {
 
 
 // ==========================================
-// 6. ANNOUNCER & TIMER ENGINE
+// 6. ANNOUNCER & TIMER ENGINE (Strict Sequence Edition)
 // ==========================================
-
-// Global reference array to prevent iOS Safari garbage collection bug from killing onend
-window.iosSpeechQueue = [];
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.iosSpeechQueue = []; // Clear previous references
         
-        let introText, secondaryText, letterText, hypeText, langCode, secondaryLangCode;
+        let fullAnnouncement = "";
+        let langCode = (currentLang === 'es') ? 'es-MX' : 'en-US';
 
         if (currentLang === 'es') {
-            introText = primaryTopic;
-            secondaryText = secondaryTopic ? secondaryTopic : '';
-            letterText = `Empezando con la letra... ${letter}.`;
-            hypeText = "¡Dilo ya!";
-            langCode = 'es-MX';
-            secondaryLangCode = 'en-US';
+            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Empezando con la letra... ${letter}. ¡Dilo ya!`;
         } else {
-            introText = primaryTopic;
-            secondaryText = '';
-            letterText = `Starting with the letter... ${letter}.`;
-            hypeText = "Blurt it out!";
-            langCode = 'en-US';
-            secondaryLangCode = 'en-US';
+            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Starting with the letter... ${letter}. Blurt it out!`;
         }
 
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
+        utterance.lang = langCode;
+        utterance.rate = 1.05;
+        utterance.pitch = 1.1;
 
-        // --- iOS SAFARI SAFETY NET: GC-Protected Staggered Queue ---
-        if (isIOS) {
-            window.speechSynthesis.cancel();
+        let hasStartedGame = false;
 
-            const textSteps = [introText];
-            if (secondaryText) textSteps.push(secondaryText);
-            textSteps.push(letterText);
-            textSteps.push(hypeText);
-
-            let stepIndex = 0;
-
-            function playNextIOSStep() {
-                if (stepIndex < textSteps.length) {
-                    const utter = new SpeechSynthesisUtterance(textSteps[stepIndex]);
-                    utter.lang = langCode;
-                    utter.rate = 1.05;
-
-                    // CRITICAL: Push to global array so Safari GC doesn't delete it mid-speech
-                    window.iosSpeechQueue.push(utter);
-
-                    utter.onend = () => {
-                        stepIndex++;
-                        // Clean 250ms pause between lines so it never rushes or cuts off
-                        setTimeout(playNextIOSStep, 250);
-                    };
-
-                    utter.onerror = () => {
-                        window.iosSpeechQueue = [];
-                        triggerGameStart();
-                    };
-
-                    window.speechSynthesis.speak(utter);
-                } else {
-                    // All steps finished successfully — NOW release queue and start game/music
-                    window.iosSpeechQueue = [];
-                    triggerGameStart();
-                }
+        const safeTrigger = () => {
+            if (!hasStartedGame) {
+                hasStartedGame = true;
+                clearTimeout(fallbackTimer);
+                triggerGameStart();
             }
-
-            playNextIOSStep();
-            return;
-        }
-
-        // --- WINDOWS & ANDROID: Your original chained logic (100% untouched) ---
-        const utteranceIntro = new SpeechSynthesisUtterance(introText);
-        utteranceIntro.lang = langCode;
-        utteranceIntro.rate = 1.05;
-        utteranceIntro.pitch = 1.1;
-
-        const utteranceSecondary = secondaryText ? new SpeechSynthesisUtterance(secondaryText) : null;
-        if (utteranceSecondary) {
-            utteranceSecondary.lang = secondaryLangCode;
-            utteranceSecondary.rate = 1.05;
-            utteranceSecondary.pitch = 1.0;
-        }
-
-        const utteranceLetter = new SpeechSynthesisUtterance(letterText);
-        utteranceLetter.lang = langCode;
-        utteranceLetter.rate = 1.05;
-        utteranceLetter.pitch = 1.1;
-
-        const utteranceHype = new SpeechSynthesisUtterance(hypeText);
-        utteranceHype.lang = langCode;
-        utteranceHype.rate = 1.15;
-        utteranceHype.pitch = 1.35;
-
-        if (utteranceSecondary) {
-            utteranceIntro.onend = () => { window.speechSynthesis.speak(utteranceSecondary); };
-            utteranceSecondary.onend = () => { window.speechSynthesis.speak(utteranceLetter); };
-        } else {
-            utteranceIntro.onend = () => { window.speechSynthesis.speak(utteranceLetter); };
-        }
-
-        utteranceLetter.onend = () => {
-            window.speechSynthesis.speak(utteranceHype);
         };
 
-        utteranceHype.onend = () => {
-            triggerGameStart();
+        // CRITICAL: Game only starts AFTER the announcer is completely finished speaking!
+        utterance.onend = () => {
+            safeTrigger();
         };
 
-        window.speechSynthesis.speak(utteranceIntro);
+        utterance.onerror = () => {
+            safeTrigger();
+        };
+
+        // Safety fallback: if speech synthesis hangs for any reason, force game start after 5 seconds
+        const fallbackTimer = setTimeout(() => {
+            safeTrigger();
+        }, 5000);
+
+        window.speechSynthesis.speak(utterance);
     } else {
         triggerGameStart();
     }
 }
 
-// Helper function to handle the green flash and startTimer cleanly
+// Helper function to handle the green flash and startTimer cleanly (Fires ONLY after speech ends)
 function triggerGameStart() {
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
     if (mainContainer) {
