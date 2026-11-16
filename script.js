@@ -1,3 +1,39 @@
+// Keep a global reference so iOS Safari doesn't garbage-collect the voice mid-stream
+window.activeUtterance = null;
+
+function speakGameText(text) {
+    if (!('speechSynthesis' in window)) {
+        console.log("Speech synthesis not supported in this browser.");
+        return;
+    }
+
+    // 1. Clear any stuck queues or overlapping speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 2. Dynamically set language (es-MX for Spanish, en-US for English)
+    utterance.lang = (currentLang === 'es') ? 'es-MX' : 'en-US';
+    utterance.rate = 1.1;  // Snappy pacing for gameplay
+    utterance.pitch = 1.0;
+
+    // 3. CRITICAL iOS FIX: Hold a global reference to prevent garbage collection
+    window.activeUtterance = utterance;
+
+    // Optional event listeners for debugging on mobile
+    utterance.onend = () => {
+        window.activeUtterance = null;
+    };
+    
+    utterance.onerror = (e) => {
+        console.log("Speech error on iOS:", e);
+        window.activeUtterance = null;
+    };
+
+    // 4. Fire speech
+    window.speechSynthesis.speak(utterance);
+}
+
 // 1. File-free iOS audio unlock and initialization (No missing MP3 errors!)
 let iosAudioUnlocked = false;
 
