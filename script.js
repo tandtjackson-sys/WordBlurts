@@ -904,15 +904,20 @@ function startNewRound() {
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE
 // ==========================================
+
+// Global reference array to prevent iOS Safari garbage collection bug from killing onend
+window.iosSpeechQueue = [];
+
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+        window.iosSpeechQueue = []; // Clear previous references
         
         let introText, secondaryText, letterText, hypeText, langCode, secondaryLangCode;
 
         if (currentLang === 'es') {
-            introText = primaryTopic; // Spanish topic
-            secondaryText = secondaryTopic ? secondaryTopic : ''; // English translation
+            introText = primaryTopic;
+            secondaryText = secondaryTopic ? secondaryTopic : '';
             letterText = `Empezando con la letra... ${letter}.`;
             hypeText = "¡Dilo ya!";
             langCode = 'es-MX';
@@ -928,7 +933,7 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-        // --- iOS SAFARI SAFETY NET: Immediate synchronous execution (No outer delay) ---
+        // --- iOS SAFARI SAFETY NET: GC-Protected Staggered Queue ---
         if (isIOS) {
             window.speechSynthesis.cancel();
 
@@ -945,24 +950,28 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
                     utter.lang = langCode;
                     utter.rate = 1.05;
 
+                    // CRITICAL: Push to global array so Safari GC doesn't delete it mid-speech
+                    window.iosSpeechQueue.push(utter);
+
                     utter.onend = () => {
                         stepIndex++;
-                        // Natural pause between lines so it never sounds rushed or cuts off
+                        // Clean 250ms pause between lines so it never rushes or cuts off
                         setTimeout(playNextIOSStep, 250);
                     };
 
                     utter.onerror = () => {
+                        window.iosSpeechQueue = [];
                         triggerGameStart();
                     };
 
                     window.speechSynthesis.speak(utter);
                 } else {
-                    // All text lines finished cleanly — NOW trigger music and timer safely
+                    // All steps finished successfully — NOW release queue and start game/music
+                    window.iosSpeechQueue = [];
                     triggerGameStart();
                 }
             }
 
-            // Fire IMMEDIATELY synchronously so Safari grants the audio/speech gesture token
             playNextIOSStep();
             return;
         }
@@ -990,7 +999,6 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         utteranceHype.rate = 1.15;
         utteranceHype.pitch = 1.35;
 
-        // Chain the utterances sequentially
         if (utteranceSecondary) {
             utteranceIntro.onend = () => { window.speechSynthesis.speak(utteranceSecondary); };
             utteranceSecondary.onend = () => { window.speechSynthesis.speak(utteranceLetter); };
@@ -1021,7 +1029,7 @@ function triggerGameStart() {
         setTimeout(() => {
             mainContainer.style.borderColor = "";
             mainContainer.style.boxShadow = "";
-        }, 1000); // 1000ms = exactly 1 full second
+        }, 1000);
     }
     startTimer();
 }
@@ -1072,22 +1080,18 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
-            isRoundActive = false; // Mark round as inactive so Play button unlocks!
+            isRoundActive = false;
 
-            // --- LOCK DAILY PROGRESS WHEN ROUND ENDS ---
             if (typeof completeDailyChallenge === 'function') {
                 completeDailyChallenge();
             }
-            // -------------------------------------------
 
-            // --- Re-enable PLAY button ---
             const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
             if (playBtn) {
                 playBtn.disabled = false;
                 playBtn.style.opacity = "1";
                 playBtn.style.cursor = "pointer";
             }
-            // -----------------------------
 
             if (typeof gameAudio !== 'undefined' && typeof gameAudio.playSting === 'function') {
                 gameAudio.playSting();
