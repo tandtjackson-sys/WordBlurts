@@ -928,42 +928,42 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-        // --- iOS SAFARI SAFETY NET: Staggered speech with natural pauses ---
+        // --- iOS SAFARI SAFETY NET: Bulletproof staggered speech queue with startup delay ---
         if (isIOS) {
             window.speechSynthesis.cancel();
 
-            const utterances = [];
-            utterances.push(new SpeechSynthesisUtterance(introText));
-            if (secondaryText) utterances.push(new SpeechSynthesisUtterance(secondaryText));
-            utterances.push(new SpeechSynthesisUtterance(letterText));
-            utterances.push(new SpeechSynthesisUtterance(hypeText));
+            const textSteps = [introText];
+            if (secondaryText) textSteps.push(secondaryText);
+            textSteps.push(letterText);
+            textSteps.push(hypeText);
 
-            let currentIndex = 0;
+            let stepIndex = 0;
 
-            function speakNextIOS() {
-                if (currentIndex < utterances.length) {
-                    const u = utterances[currentIndex];
-                    u.lang = langCode;
-                    u.rate = 1.05;
-                    
-                    // Natural pause between words/phrases
-                    u.onend = () => {
-                        currentIndex++;
-                        setTimeout(speakNextIOS, 300); 
+            function playNextIOSStep() {
+                if (stepIndex < textSteps.length) {
+                    const utter = new SpeechSynthesisUtterance(textSteps[stepIndex]);
+                    utter.lang = langCode;
+                    utter.rate = 1.05;
+
+                    utter.onend = () => {
+                        stepIndex++;
+                        // Natural pause between lines so it never sounds rushed or cuts off
+                        setTimeout(playNextIOSStep, 250);
                     };
-                    
-                    u.onerror = () => {
+
+                    utter.onerror = () => {
                         triggerGameStart();
                     };
 
-                    window.speechSynthesis.speak(u);
+                    window.speechSynthesis.speak(utter);
                 } else {
-                    // Speech finished completely—now trigger the green flash, music, and timer safely
+                    // All text lines finished cleanly — NOW trigger music and timer safely
                     triggerGameStart();
                 }
             }
 
-            speakNextIOS();
+            // 100ms startup delay to ensure iOS has fully registered the click gesture
+            setTimeout(playNextIOSStep, 100);
             return;
         }
 
