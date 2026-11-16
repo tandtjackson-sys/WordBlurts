@@ -1967,3 +1967,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+const translations = {
+    en: {
+        rulesText: "❓ How to Play",
+        aboutText: "📖 About",
+        team2Label: "Player / Team 2",
+        resetBtn: "RESET SCORES",
+        randomModeBtn: "✨ Classic",
+        dailyModeBtn: "📅 Daily Blurts"
+    },
+    es: {
+        rulesText: "❓ Cómo jugar",
+        aboutText: "📖 Acerca de",
+        team2Label: "Jugador / Equipo 2",
+        resetBtn: "Reiniciar marcador",
+        randomModeBtn: "✨ Clásico",
+        dailyModeBtn: "📅 Blurts Diarios"
+    }
+};
+
+let currentLang = 'en';
+
+function updateLanguage(lang) {
+    const t = translations[lang];
+    if (!t) return;
+
+    // Update all target elements instantly
+    document.getElementById('rulesText').textContent = t.rulesText;
+    document.getElementById('aboutText').textContent = t.aboutText;
+    document.getElementById('team2Label').textContent = t.team2Label;
+    document.getElementById('resetBtn').textContent = t.resetBtn;
+    document.getElementById('randomModeBtn').textContent = t.randomModeBtn;
+    document.getElementById('dailyModeBtn').textContent = t.dailyModeBtn;
+}
+
+function toggleLanguage() {
+    // Toggle between English and Spanish
+    currentLang = (currentLang === 'en') ? 'es' : 'en';
+    
+    // Apply the translation updates
+    updateLanguage(currentLang);
+    
+    // Update the button label itself to show the alternate language option
+    const langBtn = document.getElementById('lang-toggle-btn');
+    if (langBtn) {
+        langBtn.querySelector('span').textContent = (currentLang === 'en') ? '🇪🇸 Español' : '🇺🇸 English';
+    }
+}
