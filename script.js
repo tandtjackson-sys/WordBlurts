@@ -928,30 +928,42 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-        // --- iOS SAFARI SAFETY NET: Single utterance to bypass gesture expiration ---
+        // --- iOS SAFARI SAFETY NET: Staggered speech with natural pauses ---
         if (isIOS) {
-            const fullText = `${introText}. ${secondaryText ? secondaryText + '.' : ''} ${letterText} ${hypeText}`;
-            const iosUtterance = new SpeechSynthesisUtterance(fullText);
-            iosUtterance.lang = langCode;
-            iosUtterance.rate = 1.05;
+            window.speechSynthesis.cancel();
 
-            const executeStart = () => {
-                const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
-                if (mainContainer) {
-                    mainContainer.style.borderColor = "#10b981"; // Vibrant green
-                    mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
-                    setTimeout(() => {
-                        mainContainer.style.borderColor = "";
-                        mainContainer.style.boxShadow = "";
-                    }, 1000);
+            const utterances = [];
+            utterances.push(new SpeechSynthesisUtterance(introText));
+            if (secondaryText) utterances.push(new SpeechSynthesisUtterance(secondaryText));
+            utterances.push(new SpeechSynthesisUtterance(letterText));
+            utterances.push(new SpeechSynthesisUtterance(hypeText));
+
+            let currentIndex = 0;
+
+            function speakNextIOS() {
+                if (currentIndex < utterances.length) {
+                    const u = utterances[currentIndex];
+                    u.lang = langCode;
+                    u.rate = 1.05;
+                    
+                    // Natural pause between words/phrases
+                    u.onend = () => {
+                        currentIndex++;
+                        setTimeout(speakNextIOS, 300); 
+                    };
+                    
+                    u.onerror = () => {
+                        triggerGameStart();
+                    };
+
+                    window.speechSynthesis.speak(u);
+                } else {
+                    // Speech finished completely—now trigger the green flash, music, and timer safely
+                    triggerGameStart();
                 }
-                startTimer();
-            };
+            }
 
-            iosUtterance.onend = executeStart;
-            iosUtterance.onerror = executeStart;
-
-            window.speechSynthesis.speak(iosUtterance);
+            speakNextIOS();
             return;
         }
 
@@ -991,24 +1003,27 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         };
 
         utteranceHype.onend = () => {
-            // --- Green Light flash cue (1 full second) ---
-            const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
-            if (mainContainer) {
-                mainContainer.style.borderColor = "#10b981"; // Vibrant green
-                mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
-                setTimeout(() => {
-                    mainContainer.style.borderColor = "";
-                    mainContainer.style.boxShadow = "";
-                }, 1000); // 1000ms = exactly 1 full second
-            }
-
-            startTimer();
+            triggerGameStart();
         };
 
         window.speechSynthesis.speak(utteranceIntro);
     } else {
-        startTimer();
+        triggerGameStart();
     }
+}
+
+// Helper function to handle the green flash and startTimer cleanly
+function triggerGameStart() {
+    const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.style.borderColor = "#10b981"; // Vibrant green
+        mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
+        setTimeout(() => {
+            mainContainer.style.borderColor = "";
+            mainContainer.style.boxShadow = "";
+        }, 1000); // 1000ms = exactly 1 full second
+    }
+    startTimer();
 }
 
 function startTimer() {
