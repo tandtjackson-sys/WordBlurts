@@ -902,79 +902,75 @@ function startNewRound() {
 
 
 // ==========================================
-// 6. ANNOUNCER & TIMER ENGINE (Strict Sequential Flow)
+// 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
 // ==========================================
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
+    // 1. Immediately ensure Web Audio is unlocked on tap (satisfies mobile gesture rules)
+    if (typeof gameAudio !== 'undefined' && typeof gameAudio.unlock === 'function') {
+        gameAudio.unlock();
+    }
+
     if ('speechSynthesis' in window) {
+        // Clear any stuck utterances from previous rounds
         window.speechSynthesis.cancel();
-        
-        let introText, secondaryText, letterText, hypeText, langCode, secondaryLangCode;
+
+        let fullAnnouncement = "";
+        let langCode = (currentLang === 'es') ? 'es-MX' : 'en-US';
 
         if (currentLang === 'es') {
-            introText = primaryTopic;
-            secondaryText = secondaryTopic ? secondaryTopic : '';
-            letterText = `Empezando con la letra... ${letter}.`;
-            hypeText = "¡Dilo ya!";
-            langCode = 'es-MX';
-            secondaryLangCode = 'en-US';
+            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Letra... ${letter}. ¡Dilo ya!`;
         } else {
-            introText = primaryTopic;
-            secondaryText = '';
-            letterText = `Starting with the letter... ${letter}.`;
-            hypeText = "Blurt it out!";
-            langCode = 'en-US';
-            secondaryLangCode = 'en-US';
+            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Starting with... ${letter}. Blurt it out!`;
         }
 
-        // Build distinct steps with intentional pauses between them
-        let steps = [introText];
-        if (secondaryText) steps.push(secondaryText);
-        steps.push(letterText);
-        steps.push(hypeText);
+        const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
+        utterance.lang = langCode;
+        utterance.rate = 1.05;
 
-        let currentStep = 0;
-        let hasStartedGame = false;
+        let gameStarted = false;
 
-        const executeStep = () => {
-            if (hasStartedGame) return;
-
-            if (currentStep < steps.length) {
-                const utter = new SpeechSynthesisUtterance(steps[currentStep]);
-                utter.lang = langCode;
-                utter.rate = 1.05;
-
-                // When this specific chunk finishes speaking...
-                utter.onend = () => {
-                    currentStep++;
-                    // Insert a natural 350ms pause before speaking the next piece
-                    setTimeout(executeStep, 350);
-                };
-
-                utter.onerror = () => {
-                    currentStep++;
-                    setTimeout(executeStep, 350);
-                };
-
-                window.speechSynthesis.speak(utter);
-            } else {
-                // ALL announcer steps are 100% finished — NOW trigger the game, green flash, music, and timer!
-                hasStartedGame = true;
+        // Failsafe trigger wrapper ensuring it can only fire once per round
+        const triggerStartOnce = () => {
+            if (!gameStarted) {
+                gameStarted = true;
+                clearTimeout(failsafeTimer);
                 triggerGameStart();
             }
         };
 
-        // Small initial breath after cancel() so iOS Safari doesn't choke on round transitions
+        // Normal path: Safari finishes speaking and triggers the game start
+        utterance.onend = () => {
+            triggerStartOnce();
+        };
+
+        utterance.onerror = () => {
+            triggerStartOnce();
+        };
+
+        // Bulletproof Safety Net: If Safari drops the event or hangs, 
+        // force the game to start after 3.5 seconds so play never locks up.
+        const failsafeTimer = setTimeout(() => {
+            if (!gameStarted) {
+                window.speechSynthesis.cancel();
+                triggerStartOnce();
+            }
+        }, 3500);
+
+        // Give iOS a tiny 50ms breath after cancel() before speaking
         setTimeout(() => {
-            executeStep();
-        }, 150);
+            window.speechSynthesis.speak(utterance);
+        }, 50);
 
     } else {
+        // Fallback for non-speech environments
         triggerGameStart();
     }
 }
 
-// Helper function to handle the green flash and startTimer cleanly (Fires ONLY after speech completely finishes)
+// Helper function to handle the green flash and startTimer cleanly
 function triggerGameStart() {
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
     if (mainContainer) {
@@ -986,104 +982,6 @@ function triggerGameStart() {
         }, 1000);
     }
     startTimer();
-}
-
-function startTimer() {
-    if (countdownInterval !== null) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-
-    // --- PROTECTED AUDIO BLOCK ---
-    try {
-        if (typeof gameAudio !== 'undefined') {
-            if (typeof gameAudio.unlock === 'function') {
-                gameAudio.unlock();
-            }
-            if (gameAudio.ctx) {
-                const t0 = gameAudio.ctx.currentTime;
-                const roundDuration = 15;
-                if (typeof gameAudio.layerDrone === 'function') gameAudio.layerDrone(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-                if (typeof gameAudio.layerOstinato === 'function') gameAudio.layerOstinato(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-                if (typeof gameAudio.layerHeartbeat === 'function') gameAudio.layerHeartbeat(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-                if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, t0 + roundDuration, gameAudio.music, () => {});
-            }
-        }
-    } catch (audioErr) {
-        console.warn("Audio layering safe fallback caught:", audioErr);
-    }
-    // -----------------------------
-
-    let timeLeft = 15;
-    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
-    if (timerEl) {
-        timerEl.innerText = timeLeft;
-        timerEl.style.color = "";
-        timerEl.style.fontSize = "";
-    }
-
-    countdownInterval = setInterval(() => {
-        timeLeft--;
-        if (timerEl) {
-            timerEl.innerText = timeLeft;
-            if (timeLeft <= 4 && timeLeft > 0) {
-                timerEl.style.color = "#ff4444";
-            }
-        }
-
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-            isRoundActive = false;
-
-            if (typeof completeDailyChallenge === 'function') {
-                completeDailyChallenge();
-            }
-
-            const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
-            if (playBtn) {
-                playBtn.disabled = false;
-                playBtn.style.opacity = "1";
-                playBtn.style.cursor = "pointer";
-            }
-
-            if (typeof gameAudio !== 'undefined' && typeof gameAudio.playSting === 'function') {
-                gameAudio.playSting();
-            }
-
-            if (timerEl) {
-                timerEl.innerText = (currentLang === 'es') ? "¡TIEMPO!" : "TIME'S UP!";
-                timerEl.style.fontSize = "2.4rem";
-                timerEl.style.fontWeight = "900";
-                timerEl.style.color = "#ff0000";
-            }
-
-            const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
-            if (mainContainer) {
-                let flashCount = 0;
-                const flashInterval = setInterval(() => {
-                    if (flashCount >= 6) {
-                        clearInterval(flashInterval);
-                        mainContainer.style.borderColor = "#ff0000";
-                        mainContainer.style.boxShadow = "0 0 30px #ff0000, inset 0 0 15px #ff0000";
-                        return;
-                    }
-                    if (flashCount % 2 === 0) {
-                        mainContainer.style.borderColor = "#ff0000";
-                        mainContainer.style.boxShadow = "0 0 35px #ff0000, inset 0 0 20px #ff0000";
-                    } else {
-                        mainContainer.style.borderColor = "";
-                        mainContainer.style.boxShadow = "";
-                    }
-                    flashCount++;
-                }, 250);
-            }
-
-            if (typeof gameAudio !== 'undefined' && typeof gameAudio.stopAll === 'function') {
-                gameAudio.stopAll();
-            }
-        }
-    }, 1000);
 }
 
 // ==========================================
