@@ -902,60 +902,79 @@ function startNewRound() {
 
 
 // ==========================================
-// 6. ANNOUNCER & TIMER ENGINE (Strict Sequence Edition)
+// 6. ANNOUNCER & TIMER ENGINE (Strict Sequential Flow)
 // ==========================================
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         
-        let fullAnnouncement = "";
-        let langCode = (currentLang === 'es') ? 'es-MX' : 'en-US';
+        let introText, secondaryText, letterText, hypeText, langCode, secondaryLangCode;
 
         if (currentLang === 'es') {
-            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Empezando con la letra... ${letter}. ¡Dilo ya!`;
+            introText = primaryTopic;
+            secondaryText = secondaryTopic ? secondaryTopic : '';
+            letterText = `Empezando con la letra... ${letter}.`;
+            hypeText = "¡Dilo ya!";
+            langCode = 'es-MX';
+            secondaryLangCode = 'en-US';
         } else {
-            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Starting with the letter... ${letter}. Blurt it out!`;
+            introText = primaryTopic;
+            secondaryText = '';
+            letterText = `Starting with the letter... ${letter}.`;
+            hypeText = "Blurt it out!";
+            langCode = 'en-US';
+            secondaryLangCode = 'en-US';
         }
 
-        const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
-        utterance.lang = langCode;
-        utterance.rate = 1.05;
-        utterance.pitch = 1.1;
+        // Build distinct steps with intentional pauses between them
+        let steps = [introText];
+        if (secondaryText) steps.push(secondaryText);
+        steps.push(letterText);
+        steps.push(hypeText);
 
+        let currentStep = 0;
         let hasStartedGame = false;
 
-        const safeTrigger = () => {
-            if (!hasStartedGame) {
+        const executeStep = () => {
+            if (hasStartedGame) return;
+
+            if (currentStep < steps.length) {
+                const utter = new SpeechSynthesisUtterance(steps[currentStep]);
+                utter.lang = langCode;
+                utter.rate = 1.05;
+
+                // When this specific chunk finishes speaking...
+                utter.onend = () => {
+                    currentStep++;
+                    // Insert a natural 350ms pause before speaking the next piece
+                    setTimeout(executeStep, 350);
+                };
+
+                utter.onerror = () => {
+                    currentStep++;
+                    setTimeout(executeStep, 350);
+                };
+
+                window.speechSynthesis.speak(utter);
+            } else {
+                // ALL announcer steps are 100% finished — NOW trigger the game, green flash, music, and timer!
                 hasStartedGame = true;
-                clearTimeout(fallbackTimer);
                 triggerGameStart();
             }
         };
 
-        // CRITICAL: Game only starts AFTER the announcer is completely finished speaking!
-        utterance.onend = () => {
-            safeTrigger();
-        };
+        // Small initial breath after cancel() so iOS Safari doesn't choke on round transitions
+        setTimeout(() => {
+            executeStep();
+        }, 150);
 
-        utterance.onerror = () => {
-            safeTrigger();
-        };
-
-        // Safety fallback: if speech synthesis hangs for any reason, force game start after 5 seconds
-        const fallbackTimer = setTimeout(() => {
-            safeTrigger();
-        }, 5000);
-
-        window.speechSynthesis.speak(utterance);
     } else {
         triggerGameStart();
     }
 }
 
-// Helper function to handle the green flash and startTimer cleanly (Fires ONLY after speech ends)
+// Helper function to handle the green flash and startTimer cleanly (Fires ONLY after speech completely finishes)
 function triggerGameStart() {
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
     if (mainContainer) {
