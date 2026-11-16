@@ -1074,6 +1074,12 @@ function startTimer() {
             countdownInterval = null;
             isRoundActive = false; // Mark round as inactive so Play button unlocks!
 
+            // --- LOCK DAILY PROGRESS WHEN ROUND ENDS ---
+            if (typeof completeDailyChallenge === 'function') {
+                completeDailyChallenge();
+            }
+            // -------------------------------------------
+
             // --- Re-enable PLAY button ---
             const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
             if (playBtn) {
@@ -2071,3 +2077,37 @@ function completeDailyChallenge() {
         localStorage.setItem(`wordblurts_daily_completed_${currentDailyDate}`, 'true');
     }
 }
+// ==========================================
+// MODE TOGGLE EVENT LISTENERS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const randomModeBtn = document.getElementById('randomModeBtn');
+    const dailyModeBtn = document.getElementById('dailyModeBtn');
+
+    if (randomModeBtn) {
+        randomModeBtn.addEventListener('click', () => {
+            // Switch active classes visually
+            randomModeBtn.classList.add('active');
+            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
+
+            // Deactivate daily mode flag and reset state for classic play
+            isDailyModeActive = false;
+            if (typeof resetGameState === 'function') {
+                resetGameState();
+            }
+            // Trigger your standard random/classic prompt generator here if needed:
+            // if (typeof loadNewPrompt === 'function') loadNewPrompt();
+        });
+    }
+
+    if (dailyModeBtn) {
+        dailyModeBtn.addEventListener('click', () => {
+            // Switch active classes visually
+            dailyModeBtn.classList.add('active');
+            if (randomModeBtn) randomModeBtn.classList.remove('active');
+
+            // Load the date-seeded daily challenge
+            loadDailyMode();
+        });
+    }
+});
