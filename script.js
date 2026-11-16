@@ -928,7 +928,7 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-        // --- iOS SAFARI SAFETY NET: Bulletproof staggered speech queue with startup delay ---
+        // --- iOS SAFARI SAFETY NET: Immediate synchronous execution (No outer delay) ---
         if (isIOS) {
             window.speechSynthesis.cancel();
 
@@ -962,8 +962,8 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
                 }
             }
 
-            // 100ms startup delay to ensure iOS has fully registered the click gesture
-            setTimeout(playNextIOSStep, 100);
+            // Fire IMMEDIATELY synchronously so Safari grants the audio/speech gesture token
+            playNextIOSStep();
             return;
         }
 
