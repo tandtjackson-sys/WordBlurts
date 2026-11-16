@@ -777,6 +777,10 @@ function playRound() {
     // 🔓 Unlock iOS audio synchronously on the exact click/touch gesture
     unlockIOSAudio();
 
+ function playRound() {
+    // 🔓 Unlock iOS audio synchronously on the exact user click/touch gesture
+    unlockIOSAudio();
+
     startNewRound();
 }
 
@@ -904,7 +908,7 @@ function startNewRound() {
         }
     }
 
-    if (letterEl) {
+   if (letterEl) {
         letterEl.innerText = nextCard.letter;
     }
 
@@ -916,6 +920,21 @@ function startNewRound() {
 }
 
 // 2. The helper function that forces iOS hardware open on tap
+function unlockIOSAudio() {
+    if (iosUnlocked) return;
+
+    Object.values(sounds).forEach(audio => {
+        audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }).catch(e => {
+            // Ignored if outside user gesture
+        });
+    });
+
+    iosUnlocked = true;
+    console.log("iOS Audio pipeline forced open!");
+}
 function unlockIOSAudio() {
     if (iosUnlocked) return;
 
