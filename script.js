@@ -926,6 +926,36 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
             secondaryLangCode = 'en-US';
         }
 
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        // --- iOS SAFARI SAFETY NET: Single utterance to bypass gesture expiration ---
+        if (isIOS) {
+            const fullText = `${introText}. ${secondaryText ? secondaryText + '.' : ''} ${letterText} ${hypeText}`;
+            const iosUtterance = new SpeechSynthesisUtterance(fullText);
+            iosUtterance.lang = langCode;
+            iosUtterance.rate = 1.05;
+
+            const executeStart = () => {
+                const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
+                if (mainContainer) {
+                    mainContainer.style.borderColor = "#10b981"; // Vibrant green
+                    mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
+                    setTimeout(() => {
+                        mainContainer.style.borderColor = "";
+                        mainContainer.style.boxShadow = "";
+                    }, 1000);
+                }
+                startTimer();
+            };
+
+            iosUtterance.onend = executeStart;
+            iosUtterance.onerror = executeStart;
+
+            window.speechSynthesis.speak(iosUtterance);
+            return;
+        }
+
+        // --- WINDOWS & ANDROID: Your original chained logic (100% untouched) ---
         const utteranceIntro = new SpeechSynthesisUtterance(introText);
         utteranceIntro.lang = langCode;
         utteranceIntro.rate = 1.05;
