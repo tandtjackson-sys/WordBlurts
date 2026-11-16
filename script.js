@@ -1,12 +1,27 @@
-// 1. Preload your audio files right at the top of script.js
-let iosUnlocked = false;
+// 1. File-free iOS audio unlock and initialization (No missing MP3 errors!)
+let iosAudioUnlocked = false;
 
-const sounds = {
-    start: new Audio('assets/start.mp3'),
-    beep: new Audio('assets/beep.mp3'),
-    correct: new Audio('assets/correct.mp3')
-    // Add your voice MP3s here too when you record them!
-};
+function unlockIOSAudio() {
+    if (iosAudioUnlocked) return;
+
+    // Unlock native Web Audio engine
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+        const tempCtx = new AudioContext();
+        if (tempCtx.state === 'suspended') {
+            tempCtx.resume();
+        }
+    }
+
+    // Play tiny silent audio data URI (zero 404 file errors)
+    const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjM2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABhQCFAw====");
+    silentAudio.play().then(() => {
+        iosAudioUnlocked = true;
+        console.log("iOS audio pipeline unlocked successfully!");
+    }).catch(e => {
+        console.log("Unlock deferred:", e);
+    });
+}
 
 // ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
