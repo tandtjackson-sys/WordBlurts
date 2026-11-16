@@ -1,3 +1,13 @@
+// 1. Preload your audio files right at the top of script.js
+let iosUnlocked = false;
+
+const sounds = {
+    start: new Audio('assets/start.mp3'),
+    beep: new Audio('assets/beep.mp3'),
+    correct: new Audio('assets/correct.mp3')
+    // Add your voice MP3s here too when you record them!
+};
+
 // ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
@@ -764,6 +774,9 @@ if (typeof window.isTransitioning === 'undefined') {
 }
 
 function playRound() {
+    // 🔓 Unlock iOS audio synchronously on the exact click/touch gesture
+    unlockIOSAudio();
+
     startNewRound();
 }
 
@@ -782,6 +795,8 @@ function startNewRound() {
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
     stopEverything();
+    // (rest of your startNewRound logic continues here...)
+}
 
     // 3. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
@@ -900,6 +915,22 @@ function startNewRound() {
     isRoundActive = true;
 }
 
+// 2. The helper function that forces iOS hardware open on tap
+function unlockIOSAudio() {
+    if (iosUnlocked) return;
+
+    Object.values(sounds).forEach(audio => {
+        audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }).catch(e => {
+            // Ignored if outside user gesture
+        });
+    });
+
+    iosUnlocked = true;
+    console.log("iOS Audio pipeline forced open!");
+}
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
