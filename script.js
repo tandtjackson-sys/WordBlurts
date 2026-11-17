@@ -1990,7 +1990,7 @@ document.addEventListener('click', () => {
 // iOS Audio & Speech Synthesis Safety Net
 // ==========================================
 
-let iosAudioUnlocked = false;
+window.iosAudioUnlocked = window.iosAudioUnlocked || false;
 
 function unlockIOSAudioAndSpeech() {
     if (iosAudioUnlocked) return;
@@ -2004,6 +2004,7 @@ function unlockIOSAudioAndSpeech() {
                 audioCtx.resume();
             }
         }
+
 
         // 2. Prime Speech Synthesis ONLY on iOS Safari (protects Android/Windows)
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
