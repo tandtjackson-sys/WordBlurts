@@ -854,6 +854,13 @@ function startNewRound() {
 
     if (typeof stopEverything === 'function') stopEverything();
 
+    const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.style.borderColor = "";
+        mainContainer.style.boxShadow = "";
+    }
+
+    
     // 3. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
