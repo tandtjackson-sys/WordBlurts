@@ -1025,11 +1025,11 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         let langCode = (window.currentLang === 'es') ? 'es-MX' : 'en-US';
 
         if (window.currentLang === 'es') {
-            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Letra... ${letter}. ¡Dilo ya!`;
+            const sec = secondaryTopic ? `, ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`;
         } else {
-            const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Starting with... ${letter}. Blurt it out!`;
+            const sec = secondaryTopic ? `, ${secondaryTopic}` : '';
+            fullAnnouncement = `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`;
         }
 
         const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
@@ -1088,6 +1088,7 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
     }
 }
 
+
 // Helper function to handle the green flash and startTimer cleanly
 function triggerGameStart() {
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
@@ -1115,6 +1116,20 @@ function startTimer() {
     const durationSec = 15;
     const endTimeMs = Date.now() + durationSec * 1000;
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
+    const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
+
+    // Reset any leftover colors/glow from previous round
+    if (timerEl) {
+        timerEl.innerText = String(durationSec);
+        timerEl.style.color = "";
+        timerEl.style.textShadow = "";
+        timerEl.style.transform = "";
+        timerEl.style.transition = "transform 0.15s ease, color 0.15s ease, text-shadow 0.15s ease";
+    }
+    if (mainContainer) {
+        mainContainer.style.borderColor = "";
+        mainContainer.style.boxShadow = "";
+    }
 
     // Start the Web Audio tension track (drone, heartbeat, ostinato, riser)
     if (typeof gameAudio !== 'undefined' && gameAudio && gameAudio.ctx) {
@@ -1134,9 +1149,6 @@ function startTimer() {
     }
 
     let lastDisplayedSec = durationSec;
-    if (timerEl) {
-        timerEl.innerText = String(durationSec);
-    }
 
     // Check every 100ms using Date.now() so iOS backgrounding/throttling never slows the clock
     countdownInterval = setInterval(() => {
@@ -1147,16 +1159,26 @@ function startTimer() {
             lastDisplayedSec = remainingSec;
             if (timerEl) {
                 timerEl.innerText = String(remainingSec);
-
-                // Visual urgency in the final 5 seconds
-                if (remainingSec <= 5 && remainingSec > 0) {
-                    timerEl.style.color = "#ef4444";
-                    timerEl.classList.add('flash-red');
-                }
             }
         }
 
-        // Time's Up!
+        // Yellow flash on 5 & 4; Orange flash on 3, 2 & 1
+        if (remainingSec <= 5 && remainingSec > 0 && timerEl) {
+            const isYellowPhase = (remainingSec === 5 || remainingSec === 4);
+            const pulseColor = isYellowPhase ? "#facc15" : "#f97316";
+            const glowRgba = isYellowPhase ? "rgba(250, 204, 21, 0.85)" : "rgba(249, 115, 22, 0.9)";
+
+            const isPulseOn = Math.floor(remainingMs / 250) % 2 === 0;
+            timerEl.style.color = isPulseOn ? pulseColor : "#ffffff";
+            timerEl.style.textShadow = isPulseOn ? `0 0 20px ${pulseColor}, 0 0 40px ${pulseColor}` : "none";
+            timerEl.style.transform = isPulseOn ? "scale(1.18)" : "scale(1.0)";
+            if (mainContainer) {
+                mainContainer.style.borderColor = isPulseOn ? pulseColor : "";
+                mainContainer.style.boxShadow = isPulseOn ? `0 0 35px ${glowRgba}` : "";
+            }
+        }
+
+        // Time's Up (0): Solid Red!
         if (remainingMs <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
@@ -1165,6 +1187,16 @@ function startTimer() {
             if (timerEl) {
                 timerEl.innerText = "0";
                 timerEl.style.color = "#ef4444";
+                timerEl.style.textShadow = "0 0 25px #ef4444";
+                timerEl.style.transform = "scale(1.0)";
+            }
+            if (mainContainer) {
+                mainContainer.style.borderColor = "#ef4444";
+                mainContainer.style.boxShadow = "0 0 45px #ef4444, inset 0 0 25px #ef4444";
+                setTimeout(() => {
+                    mainContainer.style.borderColor = "";
+                    mainContainer.style.boxShadow = "";
+                }, 1200);
             }
 
             // Stop tension layers and play the final sting/buzzer
@@ -1193,6 +1225,7 @@ function startTimer() {
         }
     }, 100);
 }
+
 
 
 
