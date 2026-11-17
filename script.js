@@ -1103,19 +1103,17 @@ function triggerGameStart() {
         mainContainer.style.borderColor = "#10b981"; // Vibrant green
         mainContainer.style.boxShadow = "0 0 40px #10b981, inset 0 0 25px #10b981";
         setTimeout(() => {
-            mainContainer.style.borderColor = "";
-            mainContainer.style.boxShadow = "";
+            if (mainContainer.style.borderColor === "rgb(16, 185, 129)" || mainContainer.style.borderColor === "#10b981") {
+                mainContainer.style.borderColor = "";
+                mainContainer.style.boxShadow = "";
+            }
         }, 1000);
     }
     startTimer();
 }
 
 // ==========================================
-// 7. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
-// ==========================================
-
-// ==========================================
-// 7. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
+// 7a. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
 // ==========================================
 
 window.redFlashTimers = window.redFlashTimers || [];
@@ -1137,17 +1135,13 @@ function startTimer() {
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
 
-    // Reset any leftover colors/glow from previous round
+    // Reset timer text styles (leave mainContainer's green GO border flash intact)
     if (timerEl) {
         timerEl.innerText = String(durationSec);
         timerEl.style.color = "";
         timerEl.style.textShadow = "";
         timerEl.style.transform = "";
         timerEl.style.transition = "transform 0.15s ease, color 0.15s ease, text-shadow 0.15s ease";
-    }
-    if (mainContainer) {
-        mainContainer.style.borderColor = "";
-        mainContainer.style.boxShadow = "";
     }
 
     // Start the Web Audio tension track (drone, heartbeat, ostinato, riser)
@@ -1263,13 +1257,8 @@ function startTimer() {
     }, 100);
 }
 
-
-
-
-
-
 // ==========================================
-// 7. DAILY & CHALLENGE MODE ENGINE
+// 7b. DAILY & CHALLENGE MODE ENGINE
 // ==========================================
 function getURLSeed() {
     const params = new URLSearchParams(window.location.search);
