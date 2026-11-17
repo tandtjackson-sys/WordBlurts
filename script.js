@@ -2189,7 +2189,7 @@ const translations = {
         randomModeBtn: "✨ Classic",
         dailyModeBtn: "📅 Daily Blurts"
     },
-    es: {
+es: {
         rulesText: "❓ Cómo jugar",
         aboutText: "📖 Acerca de",
         team2Label: "Jugador / Equipo 2",
@@ -2199,11 +2199,12 @@ const translations = {
     }
 };
 
-let currentLang = 'en';
+window.currentLang = window.currentLang || 'en';
 
 function updateLanguage(lang) {
     const t = translations[lang];
     if (!t) return;
+
 
     // Update all target elements instantly
     document.getElementById('rulesText').textContent = t.rulesText;
