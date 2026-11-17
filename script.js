@@ -1107,10 +1107,22 @@ function triggerGameStart() {
 // 7. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
 // ==========================================
 
+// ==========================================
+// 7. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
+// ==========================================
+
+window.redFlashTimers = window.redFlashTimers || [];
+
 function startTimer() {
     if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
         clearInterval(countdownInterval);
         countdownInterval = null;
+    }
+
+    // Clear any leftover red-flash timeouts from the previous round
+    if (Array.isArray(window.redFlashTimers)) {
+        window.redFlashTimers.forEach(id => clearTimeout(id));
+        window.redFlashTimers = [];
     }
 
     const durationSec = 15;
@@ -1162,11 +1174,10 @@ function startTimer() {
             }
         }
 
-        // Yellow flash on 5 & 4; Orange flash on 3, 2 & 1
+        // Yellow flash for the last 5 seconds (5, 4, 3, 2, 1)
         if (remainingSec <= 5 && remainingSec > 0 && timerEl) {
-            const isYellowPhase = (remainingSec === 5 || remainingSec === 4);
-            const pulseColor = isYellowPhase ? "#facc15" : "#f97316";
-            const glowRgba = isYellowPhase ? "rgba(250, 204, 21, 0.85)" : "rgba(249, 115, 22, 0.9)";
+            const pulseColor = "#facc15";
+            const glowRgba = "rgba(250, 204, 21, 0.85)";
 
             const isPulseOn = Math.floor(remainingMs / 250) % 2 === 0;
             timerEl.style.color = isPulseOn ? pulseColor : "#ffffff";
@@ -1178,7 +1189,7 @@ function startTimer() {
             }
         }
 
-        // Time's Up (0): Solid Red!
+        // Time's Up (0): Flash Red 3 Times!
         if (remainingMs <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
@@ -1186,18 +1197,38 @@ function startTimer() {
 
             if (timerEl) {
                 timerEl.innerText = "0";
-                timerEl.style.color = "#ef4444";
-                timerEl.style.textShadow = "0 0 25px #ef4444";
-                timerEl.style.transform = "scale(1.0)";
             }
-            if (mainContainer) {
-                mainContainer.style.borderColor = "#ef4444";
-                mainContainer.style.boxShadow = "0 0 45px #ef4444, inset 0 0 25px #ef4444";
-                setTimeout(() => {
+
+            // Helper to toggle the red flash state on or off
+            const setRedFlash = (on) => {
+                if (timerEl) {
+                    timerEl.style.color = on ? "#ef4444" : "#ffffff";
+                    timerEl.style.textShadow = on ? "0 0 25px #ef4444, 0 0 45px #ff2a2a" : "none";
+                    timerEl.style.transform = on ? "scale(1.22)" : "scale(1.0)";
+                }
+                if (mainContainer) {
+                    mainContainer.style.borderColor = on ? "#ef4444" : "";
+                    mainContainer.style.boxShadow = on ? "0 0 45px #ef4444, inset 0 0 25px #ef4444" : "";
+                }
+            };
+
+            // 3 distinct red flashes (ON at 0ms, 400ms, 800ms; OFF at 220ms, 620ms; settles red on 0 at 1100ms)
+            setRedFlash(true);
+            window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 220));
+            window.redFlashTimers.push(setTimeout(() => setRedFlash(true), 400));
+            window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 620));
+            window.redFlashTimers.push(setTimeout(() => setRedFlash(true), 800));
+            window.redFlashTimers.push(setTimeout(() => {
+                if (timerEl) {
+                    timerEl.style.color = "#ef4444";
+                    timerEl.style.textShadow = "0 0 15px rgba(239, 68, 68, 0.6)";
+                    timerEl.style.transform = "scale(1.0)";
+                }
+                if (mainContainer) {
                     mainContainer.style.borderColor = "";
                     mainContainer.style.boxShadow = "";
-                }, 1200);
-            }
+                }
+            }, 1100));
 
             // Stop tension layers and play the final sting/buzzer
             if (typeof gameAudio !== 'undefined' && gameAudio) {
@@ -1225,6 +1256,7 @@ function startTimer() {
         }
     }, 100);
 }
+
 
 
 
