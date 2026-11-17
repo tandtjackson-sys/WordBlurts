@@ -237,7 +237,7 @@ class GameAudioEngine {
         this.noise = null;
         this.muted = false;
     }
-    unlock() {
+       unlock() {
         if (!this.ctx) {
             const Ctx = window.AudioContext || window.webkitAudioContext;
             this.ctx = new Ctx({ latencyHint: "interactive" });
@@ -259,11 +259,19 @@ class GameAudioEngine {
             this.master.connect(this.ctx.destination);
             this.noise = makeNoise(this.ctx, 2);
         }
-        if (this.ctx.state === "suspended") {
+        if (this.ctx.state === "suspended" || this.ctx.state === "interrupted") {
             this.ctx.resume();
         }
+        try {
+            const buffer = this.ctx.createBuffer(1, 1, 22050);
+            const source = this.ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.ctx.destination);
+            source.start(0);
+        } catch (e) {}
     }
     stopAll() {
+
         const when = this.ctx ? this.ctx.currentTime : 0;
         for (const voice of this.voices) {
             try { voice.stop(when); } catch (e) {}
@@ -962,6 +970,10 @@ function startNewRound() {
 
 // Helper function that forces iOS hardware open on tap
 function unlockIOSAudio() {
+    if (typeof gameAudio !== 'undefined' && typeof gameAudio.unlock === 'function') {
+        gameAudio.unlock();
+    }
+
     if (typeof iosUnlocked !== 'undefined' && iosUnlocked) return;
 
     if (typeof sounds !== 'undefined') {
@@ -986,6 +998,7 @@ function unlockIOSAudio() {
     window.iosUnlocked = true;
     console.log("iOS Audio & Speech pipeline forced open!");
 }
+
 
 
 // ==========================================
@@ -1088,6 +1101,99 @@ function triggerGameStart() {
     }
     startTimer();
 }
+
+// ==========================================
+// 7. TIMESTAMP-ACCURATE 15-SECOND TIMER (iOS-Proof)
+// ==========================================
+
+function startTimer() {
+    if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+
+    const durationSec = 15;
+    const endTimeMs = Date.now() + durationSec * 1000;
+    const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
+
+    // Start the Web Audio tension track (drone, heartbeat, ostinato, riser)
+    if (typeof gameAudio !== 'undefined' && gameAudio && gameAudio.ctx) {
+        gameAudio.unlock();
+        gameAudio.stopAll();
+        const t0 = gameAudio.ctx.currentTime + 0.02;
+        const end = t0 + durationSec;
+        const track = (v) => gameAudio.voices.push(v);
+        try {
+            if (typeof gameAudio.layerDrone === 'function') gameAudio.layerDrone(gameAudio.ctx, t0, end, gameAudio.music, track);
+            if (typeof gameAudio.layerHeartbeat === 'function') gameAudio.layerHeartbeat(gameAudio.ctx, t0, end, gameAudio.music, track);
+            if (typeof gameAudio.layerOstinato === 'function') gameAudio.layerOstinato(gameAudio.ctx, t0, end, gameAudio.music, track);
+            if (typeof gameAudio.layerRiser === 'function') gameAudio.layerRiser(gameAudio.ctx, t0, end, gameAudio.music, track);
+        } catch (e) {
+            console.warn("Audio layer skipped:", e);
+        }
+    }
+
+    let lastDisplayedSec = durationSec;
+    if (timerEl) {
+        timerEl.innerText = String(durationSec);
+    }
+
+    // Check every 100ms using Date.now() so iOS backgrounding/throttling never slows the clock
+    countdownInterval = setInterval(() => {
+        const remainingMs = endTimeMs - Date.now();
+        const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+
+        if (remainingSec !== lastDisplayedSec) {
+            lastDisplayedSec = remainingSec;
+            if (timerEl) {
+                timerEl.innerText = String(remainingSec);
+
+                // Visual urgency in the final 5 seconds
+                if (remainingSec <= 5 && remainingSec > 0) {
+                    timerEl.style.color = "#ef4444";
+                    timerEl.classList.add('flash-red');
+                }
+            }
+        }
+
+        // Time's Up!
+        if (remainingMs <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            isRoundActive = false;
+
+            if (timerEl) {
+                timerEl.innerText = "0";
+                timerEl.style.color = "#ef4444";
+            }
+
+            // Stop tension layers and play the final sting/buzzer
+            if (typeof gameAudio !== 'undefined' && gameAudio) {
+                gameAudio.stopAll();
+                if (typeof gameAudio.playSting === 'function') {
+                    gameAudio.playSting();
+                }
+            }
+
+            // Re-enable PLAY button for the next round
+            const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+            if (playBtn) {
+                playBtn.disabled = false;
+                playBtn.style.opacity = "1";
+                playBtn.style.cursor = "pointer";
+            }
+
+            // If Daily Mode just finished round 10, automatically trigger completion
+            if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
+                setTimeout(() => {
+                    if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
+                    if (typeof showDailyResultsModal === 'function') showDailyResultsModal();
+                }, 1200);
+            }
+        }
+    }, 100);
+}
+
 
 
 // ==========================================
