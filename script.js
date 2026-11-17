@@ -825,13 +825,8 @@ if (typeof window.isTransitioning === 'undefined') {
 }
 
 function playRound() {
-    // 🔓 Unlock iOS audio synchronously on the exact click/touch gesture
-    unlockIOSAudio();
-
- function playRound() {
     // 🔓 Unlock iOS audio synchronously on the exact user click/touch gesture
     unlockIOSAudio();
-
     startNewRound();
 }
 
@@ -849,9 +844,7 @@ function startNewRound() {
     window.isTransitioning = true;
     setTimeout(() => { window.isTransitioning = false; }, 300);
 
-    stopEverything();
-    // (rest of your startNewRound logic continues here...)
-}
+    if (typeof stopEverything === 'function') stopEverything();
 
     // 3. Disable and fade the PLAY button while the round is running
     const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
@@ -877,7 +870,6 @@ function startNewRound() {
     // 5. Determine next prompt card (Daily vs Classic)
     let nextCard;
     if (window.isDailyMode) {
-        // Ensure daily deck is populated
         if (typeof dailyDeckPrompts === 'undefined' || !Array.isArray(dailyDeckPrompts) || dailyDeckPrompts.length === 0) {
             if (typeof getDailyPrompts === 'function') {
                 const dailyData = getDailyPrompts();
@@ -890,7 +882,6 @@ function startNewRound() {
             nextCard = dailyDeckPrompts[dailyCurrentIndex];
             dailyCurrentIndex++;
         } else {
-            // Fallback if daily deck couldn't load
             nextCard = drawNextCombo();
         }
     } else {
@@ -928,7 +919,6 @@ function startNewRound() {
         promptEl.style.justifyContent = 'center';
 
         if (window.currentLang === 'es' && typeof GAME_DATA !== 'undefined' && GAME_DATA['en'] && GAME_DATA['es']) {
-            // Find the matching index in either English or Spanish list
             let idx = GAME_DATA['en'].topicsMaster ? GAME_DATA['en'].topicsMaster.indexOf(nextCard.topic) : -1;
             if (idx === -1 && GAME_DATA['es'].topicsMaster) {
                 idx = GAME_DATA['es'].topicsMaster.indexOf(nextCard.topic);
@@ -959,7 +949,7 @@ function startNewRound() {
         }
     }
 
-   if (letterEl) {
+    if (letterEl) {
         letterEl.innerText = nextCard.letter;
     }
 
@@ -970,41 +960,43 @@ function startNewRound() {
     isRoundActive = true;
 }
 
-// 2. The helper function that forces iOS hardware open on tap
+// Helper function that forces iOS hardware open on tap
 function unlockIOSAudio() {
-    if (iosUnlocked) return;
+    if (typeof iosUnlocked !== 'undefined' && iosUnlocked) return;
 
-    Object.values(sounds).forEach(audio => {
-        audio.play().then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }).catch(e => {
-            // Ignored if outside user gesture
+    if (typeof sounds !== 'undefined') {
+        Object.values(sounds).forEach(audio => {
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(() => {});
         });
-    });
+    }
 
-    iosUnlocked = true;
-    console.log("iOS Audio pipeline forced open!");
+    // Also wake up iOS SpeechSynthesis on the direct tap gesture
+    if ('speechSynthesis' in window) {
+        try {
+            window.speechSynthesis.cancel();
+            const silentUtterance = new SpeechSynthesisUtterance('');
+            silentUtterance.volume = 0;
+            window.speechSynthesis.speak(silentUtterance);
+        } catch (e) {}
+    }
+
+    window.iosUnlocked = true;
+    console.log("iOS Audio & Speech pipeline forced open!");
 }
-function unlockIOSAudio() {
-    if (iosUnlocked) return;
 
-    Object.values(sounds).forEach(audio => {
-        audio.play().then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }).catch(e => {
-            // Ignored if outside user gesture
-        });
-    });
-
-    iosUnlocked = true;
-    console.log("iOS Audio pipeline forced open!");
-}
 
 // ==========================================
 // 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
 // ==========================================
+
+// ==========================================
+// 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
+// ==========================================
+
+window.activeUtterance = null; // Prevents iOS Safari from garbage-collecting speech mid-sentence
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
     // 1. Immediately ensure Web Audio is unlocked on tap (satisfies mobile gesture rules)
@@ -1017,9 +1009,9 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         window.speechSynthesis.cancel();
 
         let fullAnnouncement = "";
-        let langCode = (currentLang === 'es') ? 'es-MX' : 'en-US';
+        let langCode = (window.currentLang === 'es') ? 'es-MX' : 'en-US';
 
-        if (currentLang === 'es') {
+        if (window.currentLang === 'es') {
             const sec = secondaryTopic ? `. ${secondaryTopic}` : '';
             fullAnnouncement = `${primaryTopic}${sec}. Letra... ${letter}. ¡Dilo ya!`;
         } else {
@@ -1028,8 +1020,18 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         }
 
         const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
+        window.activeUtterance = utterance; // Keep alive in global memory for iOS
         utterance.lang = langCode;
         utterance.rate = 1.05;
+
+        // Explicitly assign a loaded voice if available (prevents iOS silent stalls)
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+            const langPrefix = (window.currentLang === 'es') ? 'es' : 'en';
+            const matchedVoice = voices.find(v => v.lang.startsWith(langPrefix) && v.localService)
+                              || voices.find(v => v.lang.startsWith(langPrefix));
+            if (matchedVoice) utterance.voice = matchedVoice;
+        }
 
         let gameStarted = false;
 
@@ -1051,19 +1053,21 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
             triggerStartOnce();
         };
 
-        // Bulletproof Safety Net: If Safari drops the event or hangs, 
-        // force the game to start after 3.5 seconds so play never locks up.
+        // Bulletproof Safety Net: Dynamic timeout based on text length (minimum 3.5s)
+        const dynamicTimeout = Math.max(3500, fullAnnouncement.length * 80 + 1500);
         const failsafeTimer = setTimeout(() => {
             if (!gameStarted) {
                 window.speechSynthesis.cancel();
                 triggerStartOnce();
             }
-        }, 3500);
+        }, dynamicTimeout);
 
-        // Give iOS a tiny 50ms breath after cancel() before speaking
-        setTimeout(() => {
+        // Call speak() synchronously inside the tap gesture so iOS allows audio
+        try {
             window.speechSynthesis.speak(utterance);
-        }, 50);
+        } catch (e) {
+            triggerStartOnce();
+        }
 
     } else {
         // Fallback for non-speech environments
@@ -1084,6 +1088,7 @@ function triggerGameStart() {
     }
     startTimer();
 }
+
 
 // ==========================================
 // 7. DAILY & CHALLENGE MODE ENGINE
