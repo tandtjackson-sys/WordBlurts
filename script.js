@@ -1189,7 +1189,7 @@ function startTimer() {
             }
         }
 
-        // Time's Up (0): Flash Red 3 Times!
+        // Time's Up (0): Flash Red 3 Times, then stay lit in Red until next PLAY!
         if (remainingMs <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
@@ -1212,23 +1212,22 @@ function startTimer() {
                 }
             };
 
-            // 3 distinct red flashes (ON at 0ms, 400ms, 800ms; OFF at 220ms, 620ms; settles red on 0 at 1100ms)
+            // 3 distinct red flashes, then settle into a steady red glow until PLAY is pressed
             setRedFlash(true);
             window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 220));
             window.redFlashTimers.push(setTimeout(() => setRedFlash(true), 400));
             window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 620));
-            window.redFlashTimers.push(setTimeout(() => setRedFlash(true), 800));
             window.redFlashTimers.push(setTimeout(() => {
                 if (timerEl) {
                     timerEl.style.color = "#ef4444";
-                    timerEl.style.textShadow = "0 0 15px rgba(239, 68, 68, 0.6)";
+                    timerEl.style.textShadow = "0 0 18px rgba(239, 68, 68, 0.8)";
                     timerEl.style.transform = "scale(1.0)";
                 }
                 if (mainContainer) {
-                    mainContainer.style.borderColor = "";
-                    mainContainer.style.boxShadow = "";
+                    mainContainer.style.borderColor = "#ef4444";
+                    mainContainer.style.boxShadow = "0 0 35px rgba(239, 68, 68, 0.85), inset 0 0 18px rgba(239, 68, 68, 0.45)";
                 }
-            }, 1100));
+            }, 800));
 
             // Stop tension layers and play the final sting/buzzer
             if (typeof gameAudio !== 'undefined' && gameAudio) {
@@ -1256,6 +1255,7 @@ function startTimer() {
         }
     }, 100);
 }
+
 
 
 
