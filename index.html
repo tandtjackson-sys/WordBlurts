@@ -1082,10 +1082,20 @@
 
 
 
-                   <!-- MAIN GAME CARD -->
+                    <!-- MAIN GAME CARD -->
             <main class="game-card">
-                <!-- SINGLE-LINE MINI 3D LOGO INSIDE GAMEPLAY BORDER -->
-                <div style="width: 100%; margin: 2px auto 12px auto; padding: 0 4px; box-sizing: border-box;">
+                <!-- RESPONSIVE MINI 3D LOGO (Single-line on Desktop, Big Stacked on Mobile) -->
+                <style>
+                    .card-logo-desktop { display: block; width: 100%; margin: 2px auto 12px auto; padding: 0 4px; box-sizing: border-box; }
+                    .card-logo-mobile { display: none; width: 92%; max-width: 320px; margin: 0 auto 10px auto; box-sizing: border-box; }
+                    @media (max-width: 600px) {
+                        .card-logo-desktop { display: none; }
+                        .card-logo-mobile { display: block; }
+                    }
+                </style>
+
+                <!-- 1. Desktop Single-Line Version -->
+                <div class="card-logo-desktop">
                     <svg viewBox="0 0 716 68" style="width: 100%; height: auto; display: block;" xmlns="http://w3.org" aria-label="Word Blurts!">
                         <defs>
                             <linearGradient id="yellowFrontMini" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1164,6 +1174,26 @@
                         </g>
                     </svg>
                 </div>
+
+                <!-- 2. Mobile Stacked 2-Line Version (Large & Punchy on Phones) -->
+                <div class="card-logo-mobile">
+                    <svg viewBox="0 0 490 136" style="width: 100%; height: auto; display: block;" xmlns="http://w3.org" aria-label="Word Blurts!">
+                        <g filter="url(#glowMini)">
+                            <!-- Top Row: W O R D (Centered) -->
+                            <g transform="translate(115, 4)">
+                                <rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" />
+                                <rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" />
+                                <text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">W</text>
+                            </g>
+                            <g transform="translate(182, 4)">
+                                <rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" />
+                                <rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" />
+                                <text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">O</text>
+                            </g>
+                            <g transform="translate(249, 4)">
+                                <rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" />
+                                <rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" />
+
 
                 <!-- MODE TOGGLE BUTTONS -->
                 <div class="mode-toggle-container">
@@ -1386,6 +1416,6 @@
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=6.0"></script>
+    <script src="script.js?v=6.1"></script>
 </body>
 </html>
