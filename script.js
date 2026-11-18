@@ -847,12 +847,10 @@ window.setRoomCode = function(code) {
         comboDeck = generateDeck();
     }
 
-    // Update URL share parameter without reloading page
-    const url = new URL(window.location);
+    // Update URL share parameter cleanly without /index.html
+    const url = new URL(window.location.origin + "/");
     if (clean) {
         url.searchParams.set('code', clean);
-    } else {
-        url.searchParams.delete('code');
     }
     window.history.replaceState({}, '', url);
 
