@@ -1082,36 +1082,52 @@
 
 
 
-          <!-- MAIN GAME CARD -->
-            <main class="game-card">
+<!-- MAIN GAME CARD -->
+            <main class="game-card" style="padding-top: 14px; padding-bottom: 18px;">
+                <!-- COMPACT IN-CARD BRAND BADGE (Visible when scrolled on mobile) -->
+                <div style="display: flex; justify-content: center; align-items: center; gap: 3px; margin-bottom: 10px; user-select: none;">
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">W</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">O</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">R</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">D</span>
+                    <span style="width: 5px;"></span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">B</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">L</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">U</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">R</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">T</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">S</span>
+                    <span style="background: linear-gradient(180deg, #f59e0b, #d97706); color: #1e1b4b; font-weight: 900; font-size: 0.78rem; padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">!</span>
+                </div>
+
                 <!-- MODE TOGGLE BUTTONS -->
-                <div class="mode-toggle-container">
+                <div class="mode-toggle-container" style="margin-bottom: 8px;">
                     <button id="randomModeBtn" class="mode-btn active">✨ Classic</button>
                     <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
                 </div>
 
-                <!-- PARTY / STREAM ROOM CODE BAR -->
-                <div id="roomModeWrapper" style="margin: 8px auto 12px auto; text-align: center; max-width: 360px;">
-                    <button type="button" id="toggleRoomBarBtn" onclick="toggleRoomPanel()" style="background: rgba(30, 41, 59, 0.85); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 20px; padding: 6px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                <!-- PARTY / STREAM ROOM CODE BAR (Mobile-safe width) -->
+                <div id="roomModeWrapper" style="margin: 4px auto 10px auto; text-align: center; width: 100%; max-width: 320px; box-sizing: border-box;">
+                    <button type="button" id="toggleRoomBarBtn" onclick="toggleRoomPanel()" style="background: rgba(30, 41, 59, 0.85); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                         📡 Party / Stream Room Code
                     </button>
 
-                    <div id="roomPanel" style="display: none; margin-top: 8px; padding: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 12px;">
-                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE (e.g. WOLF)" oninput="handleRoomInput(this.value)" style="width: 130px; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 1rem;">
-                            <button type="button" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: none; background: #f59e0b; color: #1e1b4b; font-weight: bold; cursor: pointer; font-size: 0.85rem;">🎲 New</button>
-                            <button type="button" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.85rem;">🔗 Share</button>
+                    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;">
+                            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="width: 110px !important; min-width: 0 !important; max-width: 120px !important; flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
+                            <button type="button" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: none; background: #f59e0b; color: #1e1b4b; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🎲 New</button>
+                            <button type="button" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
                         </div>
-                        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.8rem; color: #94a3b8;">
-                            Enter same code on all phones to sync rounds!
+                        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; word-wrap: break-word;">
+                            Enter same code on all phones to sync!
                         </div>
                     </div>
                 </div>
 
-                <div id="roundCounter" style="display: none; font-size: 1.1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 8px;"></div>
-                <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
-                <div class="letter-display" id="letterDisplay">-</div>
-                <div class="timer" id="timerDisplay">15</div>
+                <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 4px;"></div>
+                <div class="prompt-box" id="promptDisplay" style="margin: 8px 0;">Press PLAY or hit Spacebar to start!</div>
+                <div class="letter-display" id="letterDisplay" style="margin: 4px 0;">-</div>
+                <div class="timer" id="timerDisplay" style="margin: 4px 0 10px 0;">15</div>
                 <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY</button>
             </main>
 
@@ -1363,6 +1379,6 @@
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=6.1"></script>
+    <script src="script.js?v=6.2"></script>
 </body>
 </html>
