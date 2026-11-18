@@ -882,7 +882,39 @@
                 font-size: 0.82rem;
             }
         }
-    </style>
+
+        
+  /* Desktop: Side-by-side single line */
+    .game-logo-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .game-logo-header .logo-word {
+        display: flex;
+        gap: 3px;
+    }
+
+    .game-logo-header .logo-tile {
+        font-size: 1.5rem; 
+    }
+
+    /* Mobile: Stacked with larger text */
+    @media (max-width: 768px) {
+        .game-logo-header {
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .game-logo-header .logo-tile {
+            font-size: 2.1rem;
+        }
+    }
+</style>
 
 
     <!-- Structured Data / SEO Schema Markup -->
@@ -1195,11 +1227,21 @@
                                 <rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" />
 
 
-                <!-- MODE TOGGLE BUTTONS -->
-                <div class="mode-toggle-container">
-                    <button id="randomModeBtn" class="mode-btn active">✨ Classic</button>
-                    <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
-                </div>
+                <!-- RESPONSIVE HEADER LOGO -->
+<div class="game-logo-header">
+    <div class="logo-word word-row">
+        <span class="logo-tile">W</span><span class="logo-tile">O</span><span class="logo-tile">R</span><span class="logo-tile">D</span>
+    </div>
+    <div class="logo-word blurts-row">
+        <span class="logo-tile">B</span><span class="logo-tile">L</span><span class="logo-tile">U</span><span class="logo-tile">R</span><span class="logo-tile">T</span><span class="logo-tile">S</span><span class="logo-tile">!</span>
+    </div>
+</div>
+
+<!-- MODE TOGGLE BUTTONS -->
+<div class="mode-toggle-container">
+    <button id="randomModeBtn" class="mode-btn active">✨ Classic</button>
+    <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
+</div>
 
                <div id="roundCounter" style="display: none; font-size: 1.1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 8px;"></div>
               <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
@@ -1416,6 +1458,6 @@
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=6.1"></script>
+    <script src="script.js?v=6.2"></script>
 </body>
 </html>
