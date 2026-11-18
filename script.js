@@ -804,13 +804,98 @@ function generateDeck() {
     return deck;
 }
 
+// ==========================================
+// ROOM CODE SEEDED MULTIPLAYER ENGINE
+// ==========================================
+window.activeRoomCode = "";
+let roomSeedState = 0;
+
+function hashRoomCode(code) {
+    let hash = 2166136261;
+    const clean = code.trim().toUpperCase();
+    for (let i = 0; i < clean.length; i++) {
+        hash ^= clean.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+}
+
+function nextSeededRandom() {
+    // Mulberry32 deterministic PRNG
+    roomSeedState |= 0;
+    roomSeedState = (roomSeedState + 0x6D2B79F5) | 0;
+    let t = Math.imul(roomSeedState ^ (roomSeedState >>> 15), 1 | roomSeedState);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+window.setRoomCode = function(code) {
+    const clean = (code || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6);
+    window.activeRoomCode = clean;
+
+    if (clean.length > 0) {
+        // Switch off Daily Mode if active so Room Mode takes priority
+        if (window.isDailyMode && typeof switchToClassicMode === 'function') {
+            switchToClassicMode();
+        }
+        window.isDailyMode = false;
+        roomSeedState = hashRoomCode(clean);
+        // Reset deck in identical order for all players
+        comboDeck = generateDeck();
+    } else {
+        // Empty code returns to standard unseeded Classic mode
+        comboDeck = generateDeck();
+    }
+
+    // Update URL share parameter without reloading page
+    const url = new URL(window.location);
+    if (clean) {
+        url.searchParams.set('code', clean);
+    } else {
+        url.searchParams.delete('code');
+    }
+    window.history.replaceState({}, '', url);
+
+    return clean;
+};
+
+window.generateRandomRoomCode = function() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // Omitted I and O to prevent confusion
+    let result = "";
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+// Auto-load room code if someone opens a shared link like wordblurts.com/?code=WOLF
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const urlCode = params.get('code');
+    if (urlCode) {
+        const applied = window.setRoomCode(urlCode);
+        const inputEl = document.getElementById('roomCodeInput');
+        if (inputEl) inputEl.value = applied;
+        const statusEl = document.getElementById('roomStatusText');
+        if (statusEl && applied) {
+            statusEl.innerText = `🟢 Synced to Room: ${applied}`;
+        }
+    }
+});
+
 function drawNextCombo() {
-    // Standard Random Mode logic
+    // Standard Random or Seeded Room Mode logic
     if (comboDeck.length === 0) {
         comboDeck = generateDeck();
     }
     if (comboDeck.length === 0) return { topic: "Ready", letter: "A" };
-    const index = Math.floor(Math.random() * comboDeck.length);
+
+    // Use deterministic seeded math if a Room Code is active, otherwise normal Math.random()
+    const randVal = (window.activeRoomCode && window.activeRoomCode.length > 0)
+        ? nextSeededRandom()
+        : Math.random();
+
+    const index = Math.floor(randVal * comboDeck.length);
     return comboDeck.splice(index, 1)[0];
 }
 
