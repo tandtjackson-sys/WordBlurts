@@ -1106,7 +1106,7 @@
                     <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
                 </div>
 
-                <!-- PARTY / STREAM ROOM CODE BAR (Mobile-safe width) -->
+         <!-- PARTY / STREAM ROOM CODE BAR (Mobile-safe width) -->
                 <div id="roomModeWrapper" style="margin: 4px auto 10px auto; text-align: center; width: 100%; max-width: 320px; box-sizing: border-box;">
                     <button type="button" id="toggleRoomBarBtn" onclick="toggleRoomPanel()" style="background: rgba(30, 41, 59, 0.85); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                         📡 Party / Stream Room Code
@@ -1115,7 +1115,15 @@
                     <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;">
                             <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="width: 110px !important; min-width: 0 !important; max-width: 120px !important; flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
-                            <button type="button" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: none; background: #f59e0b; color: #1e1b4b; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🎲 New</button>
+                            <button type="button" onclick="createNewRoom()" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <polygon points="6,3 18,3 22,9 12,21 2,9" fill="rgba(125, 211, 252, 0.45)" stroke="#bae6fd" stroke-width="1.6" stroke-linejoin="round"/>
+                                    <polygon points="6,3 18,3 15,9 9,9" fill="rgba(224, 242, 254, 0.55)"/>
+                                    <polyline points="2,9 22,9" stroke="#e0f2fe" stroke-width="1.2" stroke-opacity="0.8"/>
+                                    <polyline points="6,3 9,9 12,21 15,9 18,3" stroke="#e0f2fe" stroke-width="1.2" stroke-opacity="0.85" fill="none"/>
+                                </svg>
+                                <span>New</span>
+                            </button>
                             <button type="button" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
                         </div>
                         <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; word-wrap: break-word;">
@@ -1379,6 +1387,6 @@
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=6.2"></script>
+    <script src="script.js?v=6.3"></script>
 </body>
 </html>
