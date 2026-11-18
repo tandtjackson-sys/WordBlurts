@@ -1141,11 +1141,11 @@
                 handleRoomInput(newCode);
             }
 
-            function copyRoomLink() {
+      function copyRoomLink() {
                 if (!window.activeRoomCode) {
                     createNewRoom();
                 }
-                const shareUrl = `${window.location.origin}${window.location.pathname}?code=${window.activeRoomCode}`;
+                const shareUrl = `${window.location.origin}/?code=${window.activeRoomCode}`;
                 navigator.clipboard.writeText(shareUrl).then(() => {
                     const statusEl = document.getElementById('roomStatusText');
                     if (statusEl) {
@@ -1363,6 +1363,6 @@
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=6.0"></script>
+    <script src="script.js?v=6.1"></script>
 </body>
 </html>
