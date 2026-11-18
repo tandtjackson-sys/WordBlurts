@@ -1707,7 +1707,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
 }
 
 // ==========================================
-- // AD & UTILITY MANAGEMENT
+// AD & UTILITY MANAGEMENT
 // ==========================================
 function triggerInterstitialAd() {
     if (window.googletag && googletag.apiReady) {
@@ -1718,6 +1718,7 @@ function triggerInterstitialAd() {
 }
 
 function refreshAds() {
+    if (document.hidden) return; // Never refresh ads while tab or phone screen is hidden
     const now = Date.now();
     if (now - lastAdRefreshTime >= AD_REFRESH_INTERVAL) {
         if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
@@ -1728,6 +1729,7 @@ function refreshAds() {
         }
     }
 }
+
 
 function adjustScore(team, delta) {
     const el = document.getElementById(team + "Score");
@@ -1779,6 +1781,7 @@ function resetScores() {
 // ==========================================
 // 9. EVENT LISTENERS & INITIALIZATION
 // ==========================================
+
 function initWordBlurts() {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
     window.currentLang = savedLang;
