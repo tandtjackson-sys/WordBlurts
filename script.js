@@ -1125,7 +1125,17 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
         window.activeUtterance = utterance; // Keep alive in global memory for iOS
         utterance.lang = langCode;
-        utterance.rate = 1.05;
+
+        // --- SPEECH SPEED & VOLUME POLISH ---
+        // Detect desktop browsers (Windows/Mac/Linux) to compensate for SAPI5/cloud speech latency
+        const isDesktopBrowser = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        // Lower volume by 30% (0.7) to prevent speakerphone echo
+        utterance.volume = 0.7;
+        
+        // Speed up desktop browsers so they match Android's snappy pace
+        utterance.rate = isDesktopBrowser ? 1.38 : 1.05;
+        // ------------------------------------
 
         // Explicitly assign a loaded voice if available (prevents iOS silent stalls)
         const voices = window.speechSynthesis.getVoices();
