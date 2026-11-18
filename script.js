@@ -1102,13 +1102,12 @@ function unlockIOSAudio() {
 window.activeUtterance = null; // Prevents iOS Safari from garbage-collecting speech mid-sentence
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
-    // 1. Immediately ensure Web Audio is unlocked on tap (satisfies mobile gesture rules)
+    // 1. Immediately ensure Web Audio is unlocked on tap
     if (typeof gameAudio !== 'undefined' && typeof gameAudio.unlock === 'function') {
         gameAudio.unlock();
     }
 
     if ('speechSynthesis' in window) {
-        // Clear any stuck utterances from previous rounds
         window.speechSynthesis.cancel();
 
         let fullAnnouncement = "";
@@ -1123,67 +1122,69 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         }
 
         const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
-        window.activeUtterance = utterance; // Keep alive in global memory for iOS
+        window.activeUtterance = utterance;
         utterance.lang = langCode;
 
         // --- SPEECH SPEED & VOLUME POLISH ---
-        // Detect desktop browsers (Windows/Mac/Linux) to compensate for SAPI5/cloud speech latency
         const isDesktopBrowser = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        
-        // Lower volume by 30% (0.7) to prevent speakerphone echo
-        utterance.volume = 0.7;
-        
-        // Speed up desktop browsers so they match Android's snappy pace
-        utterance.rate = isDesktopBrowser ? 1.38 : 1.05;
+        utterance.volume = 0.7; // 30% quieter to prevent speakerphone echo
+        utterance.rate = isDesktopBrowser ? 1.38 : 1.05; // Snappy desktop pace matching Android
         // ------------------------------------
 
-        // Explicitly assign a loaded voice if available (prevents iOS silent stalls)
-        const voices = window.speechSynthesis.getVoices();
-        if (voices && voices.length > 0) {
-            const langPrefix = (window.currentLang === 'es') ? 'es' : 'en';
-            const matchedVoice = voices.find(v => v.lang.startsWith(langPrefix) && v.localService)
-                              || voices.find(v => v.lang.startsWith(langPrefix));
-            if (matchedVoice) utterance.voice = matchedVoice;
-        }
-
-        let gameStarted = false;
-
-        // Failsafe trigger wrapper ensuring it can only fire once per round
-        const triggerStartOnce = () => {
-            if (!gameStarted) {
-                gameStarted = true;
-                clearTimeout(failsafeTimer);
-                triggerGameStart();
+        // Robust voice assignment with desktop fallback
+        const assignVoiceAndSpeak = () => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices && voices.length > 0) {
+                const langPrefix = (window.currentLang === 'es') ? 'es' : 'en';
+                const matchedVoice = voices.find(v => v.lang.startsWith(langPrefix) && v.localService)
+                                  || voices.find(v => v.lang.startsWith(langPrefix));
+                if (matchedVoice) utterance.voice = matchedVoice;
             }
-        };
 
-        // Normal path: Safari finishes speaking and triggers the game start
-        utterance.onend = () => {
-            triggerStartOnce();
-        };
+            let gameStarted = false;
+            const triggerStartOnce = () => {
+                if (!gameStarted) {
+                    gameStarted = true;
+                    clearTimeout(failsafeTimer);
+                    triggerGameStart();
+                }
+            };
 
-        utterance.onerror = () => {
-            triggerStartOnce();
-        };
+            utterance.onend = () => triggerStartOnce();
+            utterance.onerror = () => triggerStartOnce();
 
-        // Bulletproof Safety Net: Dynamic timeout based on text length (minimum 3.5s)
-        const dynamicTimeout = Math.max(3500, fullAnnouncement.length * 80 + 1500);
-        const failsafeTimer = setTimeout(() => {
-            if (!gameStarted) {
-                window.speechSynthesis.cancel();
+            const dynamicTimeout = Math.max(3500, fullAnnouncement.length * 80 + 1500);
+            const failsafeTimer = setTimeout(() => {
+                if (!gameStarted) {
+                    window.speechSynthesis.cancel();
+                    triggerStartOnce();
+                }
+            }, dynamicTimeout);
+
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
                 triggerStartOnce();
             }
-        }, dynamicTimeout);
+        };
 
-        // Call speak() synchronously inside the tap gesture so iOS allows audio
-        try {
-            window.speechSynthesis.speak(utterance);
-        } catch (e) {
-            triggerStartOnce();
+        // Ensure voices are loaded (Chrome/Edge fire 'voiceschanged' asynchronously)
+        if (window.speechSynthesis.getVoices().length > 0) {
+            assignVoiceAndSpeak();
+        } else {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.onvoiceschanged = null;
+                assignVoiceAndSpeak();
+            };
+            // Failsafe if voiceschanged never fires
+            setTimeout(() => {
+                if (!utterance.voice && window.speechSynthesis.speaking === false) {
+                    assignVoiceAndSpeak();
+                }
+            }, 100);
         }
 
     } else {
-        // Fallback for non-speech environments
         triggerGameStart();
     }
 }
