@@ -1218,7 +1218,7 @@ function startTimer() {
         countdownInterval = null;
     }
 
-    // Clear any leftover red-flash timeouts from the previous round
+    // Clear any leftover flash/red timeouts from the previous round
     if (Array.isArray(window.redFlashTimers)) {
         window.redFlashTimers.forEach(id => clearTimeout(id));
         window.redFlashTimers = [];
@@ -1229,7 +1229,33 @@ function startTimer() {
     const timerEl = document.getElementById('timerDisplay') || document.getElementById('timer');
     const mainContainer = document.querySelector('.game-card') || document.querySelector('.prompt-box') || document.querySelector('main') || document.querySelector('.container');
 
-    // Reset timer text styles (leave mainContainer's green GO border flash intact)
+    const applyGreenSteady = () => {
+        if (timerEl) {
+            timerEl.style.color = "#4ade80";
+            timerEl.style.textShadow = "0 0 14px rgba(74, 222, 128, 0.55)";
+            timerEl.style.transform = "scale(1.0)";
+        }
+        if (mainContainer) {
+            mainContainer.style.borderColor = "#22c55e";
+            mainContainer.style.boxShadow = "0 0 24px rgba(34, 197, 94, 0.35)";
+        }
+    };
+
+    const setYellowFlash = (on) => {
+        const pulseColor = "#facc15";
+        const glowRgba = "rgba(250, 204, 21, 0.85)";
+        if (timerEl) {
+            timerEl.style.color = on ? pulseColor : "#ffffff";
+            timerEl.style.textShadow = on ? `0 0 20px ${pulseColor}, 0 0 40px ${pulseColor}` : "none";
+            timerEl.style.transform = on ? "scale(1.18)" : "scale(1.0)";
+        }
+        if (mainContainer) {
+            mainContainer.style.borderColor = on ? pulseColor : "";
+            mainContainer.style.boxShadow = on ? `0 0 35px ${glowRgba}` : "";
+        }
+    };
+
+    // Reset timer text styles and start with steady green light
     if (timerEl) {
         timerEl.innerText = String(durationSec);
         timerEl.style.color = "";
@@ -1237,6 +1263,7 @@ function startTimer() {
         timerEl.style.transform = "";
         timerEl.style.transition = "transform 0.15s ease, color 0.15s ease, text-shadow 0.15s ease";
     }
+    applyGreenSteady();
 
     // Start the Web Audio tension track (drone, heartbeat, ostinato, riser)
     if (typeof gameAudio !== 'undefined' && gameAudio && gameAudio.ctx) {
@@ -1256,6 +1283,7 @@ function startTimer() {
     }
 
     let lastDisplayedSec = durationSec;
+    let lastSingleFlashSec = null;
 
     // Check every 100ms using Date.now() so iOS backgrounding/throttling never slows the clock
     countdownInterval = setInterval(() => {
@@ -1269,22 +1297,23 @@ function startTimer() {
             }
         }
 
-        // Yellow flash for the last 5 seconds (5, 4, 3, 2, 1)
-        if (remainingSec <= 5 && remainingSec > 0 && timerEl) {
-            const pulseColor = "#facc15";
-            const glowRgba = "rgba(250, 204, 21, 0.85)";
-
-            const isPulseOn = Math.floor(remainingMs / 250) % 2 === 0;
-            timerEl.style.color = isPulseOn ? pulseColor : "#ffffff";
-            timerEl.style.textShadow = isPulseOn ? `0 0 20px ${pulseColor}, 0 0 40px ${pulseColor}` : "none";
-            timerEl.style.transform = isPulseOn ? "scale(1.18)" : "scale(1.0)";
-            if (mainContainer) {
-                mainContainer.style.borderColor = isPulseOn ? pulseColor : "";
-                mainContainer.style.boxShadow = isPulseOn ? `0 0 35px ${glowRgba}` : "";
+        // Steady green until yellow begins flashing at 5 seconds
+        if (remainingMs > 0 && remainingSec > 5) {
+            applyGreenSteady();
+        } else if (remainingMs > 0 && (remainingSec === 5 || remainingSec === 4)) {
+            // Yellow flashes once on second 5 and once on second 4
+            if (lastSingleFlashSec !== remainingSec) {
+                lastSingleFlashSec = remainingSec;
+                setYellowFlash(true);
+                window.redFlashTimers.push(setTimeout(() => setYellowFlash(false), 350));
             }
+        } else if (remainingMs > 0 && remainingSec <= 3 && remainingSec >= 1) {
+            // Yellow flashes twice per second (250ms on / 250ms off) starting at 3
+            const isPulseOn = Math.floor(remainingMs / 250) % 2 === 0;
+            setYellowFlash(isPulseOn);
         }
 
-        // Time's Up (0): Flash Red 3 Times, then stay lit in Red until next PLAY!
+        // Time's Up (0): Flash Red 4 times at twice per second (250ms on / 250ms off = 2000ms), then stay steady red
         if (remainingMs <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
@@ -1294,7 +1323,6 @@ function startTimer() {
                 timerEl.innerText = "0";
             }
 
-            // Helper to toggle the red flash state on or off
             const setRedFlash = (on) => {
                 if (timerEl) {
                     timerEl.style.color = on ? "#ef4444" : "#ffffff";
@@ -1307,11 +1335,16 @@ function startTimer() {
                 }
             };
 
-            // 3 distinct red flashes, then settle into a steady red glow until PLAY is pressed
-            setRedFlash(true);
-            window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 220));
-            window.redFlashTimers.push(setTimeout(() => setRedFlash(true), 400));
-            window.redFlashTimers.push(setTimeout(() => setRedFlash(false), 620));
+            // 4 flashes at 2 per second (each flash = 250ms ON + 250ms OFF = 500ms; 4 flashes = 2000ms)
+            const flashStepMs = 250;
+            for (let i = 0; i < 4; i++) {
+                const onAt = i * flashStepMs * 2;
+                const offAt = onAt + flashStepMs;
+                window.redFlashTimers.push(setTimeout(() => setRedFlash(true), onAt));
+                window.redFlashTimers.push(setTimeout(() => setRedFlash(false), offAt));
+            }
+
+            // Settle into steady red glow right after the 4th flash finishes at 2000ms
             window.redFlashTimers.push(setTimeout(() => {
                 if (timerEl) {
                     timerEl.style.color = "#ef4444";
@@ -1322,7 +1355,7 @@ function startTimer() {
                     mainContainer.style.borderColor = "#ef4444";
                     mainContainer.style.boxShadow = "0 0 35px rgba(239, 68, 68, 0.85), inset 0 0 18px rgba(239, 68, 68, 0.45)";
                 }
-            }, 800));
+            }, 2000));
 
             // Stop tension layers and play the final sting/buzzer
             if (typeof gameAudio !== 'undefined' && gameAudio) {
