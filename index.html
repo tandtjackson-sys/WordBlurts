@@ -1322,16 +1322,14 @@ footer {
             </div>
         </aside>
 
-
-        <!-- Main Game Container -->
-        <div class="game-container">
+<!-- Main Game Container -->
+      <div class="game-container">
             
                  <!-- TOP BANNER -->
             <div class="ad-banner ad-banner-top">
                 <span>Advertisement (Top Banner)</span>
             </div>
 
-            <!-- TOP ACTION / NAV BUTTONS -->
             <div class="top-utility-bar">
                 <button id="rules-btn" class="rules-toggle-btn" onclick="toggleRules()">
                     <span id="rulesText">❓ How to Play</span>
@@ -1465,8 +1463,7 @@ footer {
                 <div class="timer" id="timerDisplay">15</div>
                 <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY!</button>
             </main>
-
-            <!-- SCOREBOARD -->
+<!-- SCOREBOARD -->
             <section class="scoreboard" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px 0;">
                 <div class="team-box" style="flex: 1; min-width: 135px; max-width: 210px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px; text-align: center;">
                     <div id="team1Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 1</div>
@@ -1546,6 +1543,17 @@ footer {
     <button class="reset-score-btn" id="resetBtn" onclick="resetScores()">RESET SCORES</button>
 </div>
 
+    <!-- FOOTER -->
+    <footer style="text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #8a99ad; position: relative; z-index: 10; width: 100%;">
+        <p id="footer-copyright">&copy; 2026 Word Blurts! All rights reserved.</p>
+        <p>
+            <a href="javascript:void(0);" id="open-about-btn" onclick="openAboutModal(); return false;" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">About</a> | 
+            <a href="teachers.html" id="footer-teachers-link" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">For Teachers</a> | 
+            <a href="privacy.html" id="footer-privacy-link" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">Privacy Policy</a> | 
+            <a href="https://google.com" id="footer-ads-link" target="_blank" rel="noopener noreferrer" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">Ad Settings</a>
+        </p>
+    </footer>
+
 
             <!-- SEO & INFO SECTION -->
             <section class="seo-info-card" id="about-section-1">
@@ -1605,16 +1613,7 @@ footer {
 
     </div> <!-- /.page-layout -->
 
-    <!-- FOOTER -->
-    <footer style="text-align: center; margin-top: 30px; padding: 20px; font-size: 0.9em; color: #8a99ad; position: relative; z-index: 10; width: 100%;">
-        <p id="footer-copyright">&copy; 2026 Word Blurts! All rights reserved.</p>
-        <p>
-            <a href="javascript:void(0);" id="open-about-btn" onclick="openAboutModal(); return false;" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">About</a> | 
-            <a href="teachers.html" id="footer-teachers-link" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">For Teachers</a> | 
-            <a href="privacy.html" id="footer-privacy-link" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">Privacy Policy</a> | 
-            <a href="https://google.com" id="footer-ads-link" target="_blank" rel="noopener noreferrer" style="color: #4dabf7; margin: 0 10px; text-decoration: none;">Ad Settings</a>
-        </p>
-    </footer>
+   
 
 
 
@@ -1730,6 +1729,6 @@ footer {
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=8.1"></script>
+    <script src="script.js?v=8.2"></script>
 </body>
 </html>
