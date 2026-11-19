@@ -1128,7 +1128,7 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         // --- SPEECH SPEED & VOLUME POLISH ---
         utterance.volume = 0.7; // 30% quieter to prevent speakerphone echo
-        utterance.rate = isDesktopBrowser ? 1.2 : 1.05; // Tighter desktop cadence; Android unchanged
+        utterance.rate = isDesktopBrowser ? 1.35 : 1.05; // Tighter desktop cadence; Android unchanged
         // ------------------------------------
 
         // Robust voice assignment with desktop fallback
