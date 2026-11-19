@@ -1176,7 +1176,7 @@
                     </svg>
                 </div>
 
-                <!-- 2. Mobile Stacked 2-Line Logo -->
+                               <!-- 2. Mobile Stacked 2-Line Logo -->
                 <div class="card-logo-mobile">
                     <svg viewBox="0 0 490 136" style="width: 100%; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg" aria-label="Word Blurts!">
                         <g filter="url(#glowMini)">
@@ -1187,7 +1187,59 @@
                             <g transform="translate(12, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">B</text></g>
                             <g transform="translate(79, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">L</text></g>
                             <g transform="translate(146, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">U</text></g>
+                            <g transform="translate(213, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">R</text></g>
+                            <g transform="translate(280, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">T</text></g>
+                            <g transform="translate(347, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">S</text></g>
+                            <g transform="translate(414, 70)"><rect x="5" y="5" width="56" height="56" rx="11" fill="url(#yellowSideMini)" /><rect x="0" y="0" width="56" height="56" rx="11" fill="url(#yellowFrontMini)" stroke="#fff" stroke-width="2" /><text x="28" y="43" font-family="'Segoe UI Black', Arial-Black, sans-serif" font-weight="900" font-size="42" fill="#1e1b4b" text-anchor="middle">!</text></g>
+                        </g>
+                    </svg>
+                </div>
 
+                <!-- MODE TOGGLE BUTTONS -->
+                <div class="mode-toggle-container" style="margin-bottom: 8px;">
+                    <button id="randomModeBtn" class="mode-btn active">✨ Classic</button>
+                    <button id="dailyModeBtn" class="mode-btn">📅 Daily Blurts</button>
+                </div>
+
+                <!-- PARTY / STREAM ROOM CODE BAR -->
+                <div id="roomModeWrapper" style="margin: 4px auto 10px auto; text-align: center; width: 100%; max-width: 320px; box-sizing: border-box;">
+                    <button type="button" id="toggleRoomBarBtn" onclick="toggleRoomPanel()" style="background: rgba(30, 41, 59, 0.85); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                        📡 Party / Stream Room Code
+                    </button>
+
+                    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;">
+                            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="width: 110px !important; min-width: 0 !important; max-width: 120px !important; flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
+                            <button type="button" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">💎 New</button>
+                            <button type="button" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
+                        </div>
+                        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; word-wrap: break-word;">
+                            Enter same code on all phones to sync!
+                        </div>
+                    </div>
+                </div>
+
+                <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 4px;"></div>
+                <div class="prompt-box" id="promptDisplay" style="margin: 8px 0;">Press PLAY or hit Spacebar to start!</div>
+                <div class="letter-display" id="letterDisplay" style="margin: 4px 0;">-</div>
+                <div class="timer" id="timerDisplay" style="margin: 4px 0 10px 0;">15</div>
+                <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY</button>
+            </main>
+
+            <!-- SCOREBOARD -->
+            <section class="scoreboard" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px 0;">
+                <div class="team-box" style="flex: 1; min-width: 135px; max-width: 210px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px; text-align: center;">
+                    <div id="team1Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 1</div>
+                    <div id="team1Score" style="font-size: 2rem; font-weight: 900; color: #ffd700; margin: 4px 0;">0</div>
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button type="button" onclick="adjustScore('team1', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #334155; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
+                        <button type="button" onclick="adjustScore('team1', 1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">+</button>
+                    </div>
+                </div>
+
+                <div class="team-box" style="flex: 1; min-width: 135px; max-width: 210px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px; text-align: center;">
+                    <div id="team2Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 2</div>
+                    <div id="team2Score" style="font-size: 2rem; font-weight: 900; color: #ffd700; margin: 4px 0;">0</div>
 
             <script>
             function toggleRoomPanel() {
