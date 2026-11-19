@@ -1390,7 +1390,7 @@ header .logo-3d {
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
                 <div class="letter-display" id="letterDisplay">-</div>
                 <div class="timer" id="timerDisplay">15</div>
-                <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY</button>
+                <button class="play-btn" id="playBtn" onclick="if(isDailyMode){ if(initDailyMode()){ playRound(); } } else { playRound(); }">PLAY!</button>
             </main>
 
             <!-- SCOREBOARD -->
@@ -1421,7 +1421,7 @@ header .logo-3d {
                 const statusEl = document.getElementById('roomStatusText');
                 if (statusEl) {
                     statusEl.innerText = clean
-                        ? `🟢 Synced to Room: ${clean} (Tap PLAY together!)`
+                        ? `🟢 Synced to Room: ${clean} (Tap PLAY at the same time!)`
                         : 'Enter same code on all phones to sync rounds!';
                     statusEl.style.color = clean ? '#4ade80' : '#94a3b8';
                 }
@@ -1657,6 +1657,6 @@ header .logo-3d {
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=7.8"></script>
+    <script src="script.js?v=7.9"></script>
 </body>
 </html>
