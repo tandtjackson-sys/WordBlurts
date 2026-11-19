@@ -1095,10 +1095,6 @@ function unlockIOSAudio() {
 // 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
 // ==========================================
 
-// ==========================================
-// 6. ANNOUNCER & TIMER ENGINE (Bulletproof iOS Fallback)
-// ==========================================
-
 window.activeUtterance = null; // Prevents iOS Safari from garbage-collecting speech mid-sentence
 
 function speakPrompt(primaryTopic, secondaryTopic, letter) {
@@ -1110,15 +1106,20 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
 
+        const isDesktopBrowser = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const sec = secondaryTopic ? `, ${secondaryTopic}` : '';
+
         let fullAnnouncement = "";
         let langCode = (window.currentLang === 'es') ? 'es-MX' : 'en-US';
 
         if (window.currentLang === 'es') {
-            const sec = secondaryTopic ? `, ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`;
+            fullAnnouncement = isDesktopBrowser
+                ? `${primaryTopic}${sec}, letra ${letter}, ¡dilo ya!`
+                : `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`;
         } else {
-            const sec = secondaryTopic ? `, ${secondaryTopic}` : '';
-            fullAnnouncement = `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`;
+            fullAnnouncement = isDesktopBrowser
+                ? `${primaryTopic}${sec}, starting with the letter ${letter}, blurt it out!`
+                : `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`;
         }
 
         const utterance = new SpeechSynthesisUtterance(fullAnnouncement);
@@ -1126,9 +1127,8 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
         utterance.lang = langCode;
 
         // --- SPEECH SPEED & VOLUME POLISH ---
-        const isDesktopBrowser = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         utterance.volume = 0.7; // 30% quieter to prevent speakerphone echo
-        utterance.rate = isDesktopBrowser ? 1.38 : 1.05; // Snappy desktop pace matching Android
+        utterance.rate = isDesktopBrowser ? 1.52 : 1.05; // Tighter desktop cadence; Android unchanged
         // ------------------------------------
 
         // Robust voice assignment with desktop fallback
