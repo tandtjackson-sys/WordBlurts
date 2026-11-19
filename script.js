@@ -1114,11 +1114,11 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         if (window.currentLang === 'es') {
             fullAnnouncement = isDesktopBrowser
-                ? `${primaryTopic}${sec}, letra ${letter}, ¡dilo ya!`
+                ? `${primaryTopic}${sec}, letra: ${letter}, ¡dilo ya!`
                 : `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`;
         } else {
             fullAnnouncement = isDesktopBrowser
-                ? `${primaryTopic}${sec}, starting with the letter ${letter}, blurt it out!`
+                ? `${primaryTopic}${sec}, starting with the letter: ${letter}, blurt it out!`
                 : `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`;
         }
 
