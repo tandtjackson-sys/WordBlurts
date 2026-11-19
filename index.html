@@ -1457,7 +1457,7 @@ footer {
                     </div>
                 </div>
 
-                <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 6px;"></div>
+            <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 6px;"></div>
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
                 <div class="letter-display" id="letterDisplay">-</div>
                 <div class="timer" id="timerDisplay">15</div>
@@ -1477,6 +1477,12 @@ footer {
                 <div class="team-box" style="flex: 1; min-width: 135px; max-width: 210px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px; text-align: center;">
                     <div id="team2Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 2</div>
                     <div id="team2Score" style="font-size: 2rem; font-weight: 900; color: #ffd700; margin: 4px 0;">0</div>
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button type="button" onclick="adjustScore('team2', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #334155; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
+                        <button type="button" onclick="adjustScore('team2', 1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">+</button>
+                    </div>
+                </div>
+            </section>
 
             <script>
             function toggleRoomPanel() {
