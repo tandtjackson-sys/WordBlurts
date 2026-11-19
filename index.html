@@ -242,38 +242,26 @@
                 padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
                 padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
             }
-            .ad-banner-top {
-                position: fixed !important;
+          .ad-banner-top {
+                position: sticky;
                 top: 0;
-                left: 50%;
-                transform: translateX(-50%);
                 width: 100%;
-                max-width: 100vw;
-                height: calc(50px + env(safe-area-inset-top, 0px));
+                max-width: 760px;
+                min-height: calc(50px + env(safe-area-inset-top, 0px));
                 padding-top: env(safe-area-inset-top, 0px);
-                margin: 0 !important;
-                border-radius: 0 !important;
-                border-left: none;
-                border-right: none;
-                border-top: none;
+                margin: 0 auto 12px auto;
                 background-color: rgba(15, 23, 42, 0.96);
                 backdrop-filter: blur(6px);
                 z-index: 999;
             }
             .ad-banner-bottom {
-                position: fixed !important;
+                position: sticky;
                 bottom: 0;
-                left: 50%;
-                transform: translateX(-50%);
                 width: 100%;
-                max-width: 100vw;
-                height: calc(50px + env(safe-area-inset-bottom, 0px));
+                max-width: 760px;
+                min-height: calc(50px + env(safe-area-inset-bottom, 0px));
                 padding-bottom: env(safe-area-inset-bottom, 0px);
-                margin: 0 !important;
-                border-radius: 0 !important;
-                border-left: none;
-                border-right: none;
-                border-bottom: none;
+                margin: 12px auto 0 auto;
                 background-color: rgba(15, 23, 42, 0.96);
                 backdrop-filter: blur(6px);
                 z-index: 999;
@@ -1469,7 +1457,7 @@ footer {
                     <div id="team1Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 1</div>
                     <div id="team1Score" style="font-size: 2rem; font-weight: 900; color: #ffd700; margin: 4px 0;">0</div>
                     <div style="display: flex; justify-content: center; gap: 10px;">
-                        <button type="button" onclick="adjustScore('team1', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #334155; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
+                        <button type="button" onclick="adjustScore('team1', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #dc2626; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
                         <button type="button" onclick="adjustScore('team1', 1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">+</button>
                     </div>
                 </div>
@@ -1711,6 +1699,6 @@ footer {
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=8.4"></script>
+    <script src="script.js?v=8.5"></script>
 </body>
 </html>
