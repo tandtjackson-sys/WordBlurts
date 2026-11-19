@@ -1128,6 +1128,18 @@ header .logo-3d {
     margin-left: auto !important;
     margin-right: auto !important;
 }
+
+/* Override any earlier left/transform offset on the logo so it matches the top buttons */
+header .logo-3d,
+.logo-3d {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+}
         
     </style>
 
