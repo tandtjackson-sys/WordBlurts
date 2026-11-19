@@ -455,6 +455,7 @@
             justify-content: space-between;
             overflow-x: hidden;
             position: relative;
+            padding-top: 56px;
         }
 
 
@@ -1163,6 +1164,42 @@ header .logo-3d {
     margin-right: auto !important;
     display: block !important;
 }
+
+/* Keep all main column children centered inside .game-container */
+.game-container {
+    flex: 1 1 auto;
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-container > footer,
+.game-container footer {
+    width: 100%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Ensure .ad-banner-top is visible and cleanly centered at the top */
+.ad-banner-top {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-height: 50px;
+    height: calc(50px + env(safe-area-inset-top, 0px)) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 999 !important;
+}
         
     </style>
 
@@ -1657,6 +1694,6 @@ header .logo-3d {
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=7.9"></script>
+    <script src="script.js?v=8.0"></script>
 </body>
 </html>
