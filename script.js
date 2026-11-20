@@ -60,10 +60,14 @@ function unlockIOSAudio() {
 }
 
 // ==========================================
+// ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
 window.isDailyMode = false;
 window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
+if (typeof currentLang !== 'undefined') {
+    currentLang = window.currentLang;
+}
 let lastAdRefreshTime = 0;
 const AD_REFRESH_INTERVAL = 35000;
 
@@ -71,7 +75,7 @@ const AD_REFRESH_INTERVAL = 35000;
 function updateFullscreenBtnText() {
     const fsBtn = document.getElementById('fullscreenToggleBtn');
     if (fsBtn) {
-        const isEs = (window.currentLang === 'es');
+        const isEs = ((window.currentLang || currentLang) === 'es');
         const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
         const label = fsBtn.querySelector('span') || fsBtn;
         if (isFS) {
@@ -81,20 +85,6 @@ function updateFullscreenBtnText() {
         }
     }
 }
-
-window.toggleLanguage = function() {
-    window.currentLang = (window.currentLang === "es") ? "en" : "es";
-    applyFooterLanguage();
-applyRoomBarLanguage();
-    localStorage.setItem("wordblurts_lang", window.currentLang);
-    if (typeof switchLanguage === 'function') {
-        switchLanguage(window.currentLang);
-    }
-    if (typeof updateStaticUI === 'function') {
-        updateStaticUI();
-    }
-    updateFullscreenBtnText();
-};
 
 window.toggleRules = function() {
     const rulesCard = document.getElementById('rulesCard');
@@ -504,19 +494,26 @@ if (canvas) {
 // ==========================================
 // 4. LANGUAGE SWITCHER & UI CONTROLLERS
 // ==========================================
+function syncLanguageState(langCode) {
+    const normalized = (langCode === 'es') ? 'es' : 'en';
+    currentLang = normalized;
+    window.currentLang = normalized;
+    localStorage.setItem("wordblurts_lang", normalized);
+    return normalized;
+}
+
 function toggleLanguage() {
-    const newLang = (currentLang === 'en') ? 'es' : 'en';
-    switchLanguage(newLang);
+    const activeLang = (window.currentLang || currentLang) === 'es' ? 'en' : 'es';
+    switchLanguage(activeLang);
 }
 
 function switchLanguage(langCode) {
     if (!GAME_DATA[langCode]) return;
-    currentLang = langCode;
-    window.currentLang = langCode;
-    localStorage.setItem("wordblurts_lang", currentLang);
 
-    window.lettersMaster = GAME_DATA[currentLang].lettersMaster;
-    window.topicsMaster = GAME_DATA[currentLang].topicsMaster;
+    const activeLang = syncLanguageState(langCode);
+
+    window.lettersMaster = GAME_DATA[activeLang].lettersMaster;
+    window.topicsMaster = GAME_DATA[activeLang].topicsMaster;
     topicsMaster = window.topicsMaster;
     lettersMaster = window.lettersMaster;
 
@@ -529,7 +526,7 @@ function switchLanguage(langCode) {
     // --- INSTANT UI LANGUAGE UPDATE ---
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
     if (promptEl && typeof currentActiveTopic !== 'undefined' && currentActiveTopic) {
-        if (currentLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
+        if (activeLang === 'es' && GAME_DATA['en'] && GAME_DATA['es']) {
             // Find matching index whether currentActiveTopic is currently English or Spanish
             let idx = GAME_DATA['en'].topicsMaster.indexOf(currentActiveTopic);
             if (idx === -1) idx = GAME_DATA['es'].topicsMaster.indexOf(currentActiveTopic);
@@ -548,14 +545,15 @@ function switchLanguage(langCode) {
 
             promptEl.innerHTML = `
                 <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${englishTopic}</div>
-            `;
+   `;
         }
     }
     // ----------------------------------
 
-     updateStaticUI();
+    updateStaticUI();
+    if (typeof applyFooterLanguage === 'function') applyFooterLanguage(activeLang);
+    if (typeof applyRoomBarLanguage === 'function') applyRoomBarLanguage(activeLang);
 }
-
 
 function updateStaticUI() {
     const isEs = (currentLang === "es");
@@ -621,78 +619,78 @@ function updateStaticUI() {
 
 
     // Translate SEO About Section (Bottom of Page)
-const about1 = document.getElementById('about-section-1');
-if (about1) {
-    if (isEs) {
-        about1.innerHTML = `
-            <h2>Acerca de Word Blurts!</h2>
-            <p><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción. Ya sea que estés organizando una noche de juegos con amigos, jugando con la familia o poniendo a prueba tus propios conocimientos, ¡Word Blurts! ofrece diversión instantánea directamente en tu navegador web.</p>
-            
-            <h3>Cómo Funciona</h3>
-            <p>Cada ronda genera un tema aleatorio y una letra inicial. Una vez que el locutor da la señal, los jugadores compiten contra un cronómetro de 15 segundos para decir una palabra coincidente antes de que se acabe el tiempo. ¡Lleva la puntuación directamente en el marcador de equipo integrado y mira quién reina supremo!</p>
+    const about1 = document.getElementById('about-section-1');
+    if (about1) {
+        if (isEs) {
+            about1.innerHTML = `
+                <h2>Acerca de Word Blurts!</h2>
+                <p><strong>Word Blurts!</strong> es un juego de palabras de fiesta en línea rápido y gratuito diseñado para poner a prueba tus habilidades de pensamiento rápido, vocabulario y velocidad de reacción. Ya sea que estés organizando una noche de juegos con amigos, jugando con la familia o poniendo a prueba tus propios conocimientos, ¡Word Blurts! ofrece diversión instantánea directamente en tu navegador web.</p>
+                
+                <h3>Cómo Funciona</h3>
+                <p>Cada ronda genera un tema aleatorio y una letra inicial. Una vez que el locutor da la señal, los jugadores compiten contra un cronómetro de 15 segundos para decir una palabra coincidente antes de que se acabe el tiempo. ¡Lleva la puntuación directamente en el marcador de equipo integrado y mira quién reina supremo!</p>
 
-            <h3>Características Principales</h3>
-            <ul>
-                <li>⚡ <strong>Juego instantáneo en el navegador:</strong> No se requieren descargas, registros de cuenta ni instalaciones.</li>
-                <li>⏱ <strong>Cuenta regresiva dinámica de 15 segundos:</strong> El temporizador visual y de audio integrado mantiene la presión.</li>
-                <li>👥 <strong>Marcador interactivo:</strong> Lleva las puntuaciones del Jugador 1 y Jugador 2 o de equipos completos sin problemas.</li>
-                <li>📱 <strong>Compatible con dispositivos móviles y de escritorio:</strong> Diseño totalmente receptivo con controles táctiles y de barra espaciadora.</li>
-            </ul>
+                <h3>Características Principales</h3>
+                <ul>
+                    <li>⚡ <strong>Juego instantáneo en el navegador:</strong> No se requieren descargas, registros de cuenta ni instalaciones.</li>
+                    <li>⏱ <strong>Cuenta regresiva dinámica de 15 segundos:</strong> El temporizador visual y de audio integrado mantiene la presión.</li>
+                    <li>👥 <strong>Marcador interactivo:</strong> Lleva las puntuaciones del Jugador 1 y Jugador 2 o de equipos completos sin problemas.</li>
+                    <li>📱 <strong>Compatible con dispositivos móviles y de escritorio:</strong> Diseño totalmente receptivo con controles táctiles y de barra espaciadora.</li>
+                </ul>
 
-            <h3>Preguntas Frecuentes</h3>
-            <div class="faq-item">
-                <strong>P: ¿Word Blurts! es gratis para jugar?</strong>
-                <p>Sí, ¡Word Blurts! es 100% gratuito para jugar en computadoras de escritorio, tabletas y dispositivos móviles.</p>
-            </div>
-            <div class="faq-item">
-                <strong>P: ¿Cuántos jugadores pueden participar?</strong>
-                <p>¡Word Blurts! funciona muy bien para 1 o 2 jugadores, o hasta grupos grandes divididos en Equipo 1 y Equipo 2. Cuantos más jugadores, más respuestas divertidas escucharás y más hilarante se vuelve.</p>
-            </div>
-            <div class="faq-item">
-                <strong>P: ¿Puedo jugar en mi teléfono?</strong>
-                <p>¡Absolutamente! El juego está optimizado para todos los tamaños de pantalla y navegadores móviles.</p>
-            </div>
-            <div class="faq-item">
-                <strong>P: ¿Las reglas son estrictas?</strong>
-                <p>¡Absolutamente no! El juego fue creado para el disfrute máximo de todos. Solo asegúrate de que todos estén de acuerdo con cualquier regla modificada antes de empezar a jugar.</p>
-            </div>
-        `;
-    } else {
-        about1.innerHTML = `
-            <h2>What is Word Blurts!???</h2>
-            <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
-            
-            <h3>How It Works</h3>
-            <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to Blurt out a matching word before time runs out! Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
+                <h3>Preguntas Frecuentes</h3>
+                <div class="faq-item">
+                    <strong>P: ¿Word Blurts! es gratis para jugar?</strong>
+                    <p>Sí, ¡Word Blurts! es 100% gratuito para jugar en computadoras de escritorio, tabletas y dispositivos móviles.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Cuántos jugadores pueden participar?</strong>
+                    <p>¡Word Blurts! funciona muy bien para 1 o 2 jugadores, o hasta grupos grandes divididos en Equipo 1 y Equipo 2. Cuantos más jugadores, más respuestas divertidas escucharás y más hilarante se vuelve.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Puedo jugar en mi teléfono?</strong>
+                    <p>¡Absolutamente! El juego está optimizado para todos los tamaños de pantalla y navegadores móviles.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>P: ¿Las reglas son estrictas?</strong>
+                    <p>¡Absolutamente no! El juego fue creado para el disfrute máximo de todos. Solo asegúrate de que todos estén de acuerdo con cualquier regla modificada antes de empezar a jugar.</p>
+                </div>
+            `;
+        } else {
+            about1.innerHTML = `
+                <h2>What is Word Blurts!???</h2>
+                <p><strong>Word Blurts!</strong> is a fast-paced, free, online party word game designed to test your quick-thinking skills, vocabulary, and reaction speed. Whether you are hosting a game night with friends, playing with family, or testing your own knowledge, Word Blurts! delivers instant fun right in your web browser.</p>
+                
+                <h3>How It Works</h3>
+                <p>Each round generates a random category prompt and a starter letter. Once the announcer gives the signal, players race against a 15-second timer to Blurt out a matching word before time runs out! Keep score right on the built-in team scoreboard and see who reigns supreme!</p>
 
-            <h3>Key Features</h3>
-            <ul>
-                <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
-                <li>⏱ <strong>Dynamic 15-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
-                <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
-                <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
-            </ul>
+                <h3>Key Features</h3>
+                <ul>
+                    <li>⚡ <strong>Instant Browser Play:</strong> No downloads, account sign-ups, or installations required.</li>
+                    <li>⏱ <strong>Dynamic 15-Second Countdown:</strong> Built-in visual and audio timer keeps the pressure on.</li>
+                    <li>👥 <strong>Interactive Scoreboard:</strong> Track scores for Player 1 and Player 2 or full teams seamlessly.</li>
+                    <li>📱 <strong>Mobile & Desktop Friendly:</strong> Fully responsive design with spacebar and touch controls.</li>
+                </ul>
 
-            <h3>Frequently Asked Questions</h3>
-            <div class="faq-item">
-                <strong>Q: Is Word Blurts! free to play?</strong>
-                <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: How many players can play?</strong>
-                <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: Can I play on my phone?</strong>
-                <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
-            </div>
-            <div class="faq-item">
-                <strong>Q: Are the rules strict?</strong>
-                <p>Absolutely not! The game was created for everyone's maximum enjoyment! Just make sure everyone agrees to any changed rules before beginning to play.</p>
-            </div>
-        `;
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-item">
+                    <strong>Q: Is Word Blurts! free to play?</strong>
+                    <p>Yes, Word Blurts! is 100% free to play on desktop, tablet, and mobile devices.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: How many players can play?</strong>
+                    <p>Word Blurts! works great for 1 or 2 players all the way up to large groups split into Team 1 and Team 2. The more players, the more nutty answers you'll hear, and the more hilarious it gets!</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Can I play on my phone?</strong>
+                    <p>Absolutely! The game is optimized for all screen sizes and mobile browsers.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Q: Are the rules strict?</strong>
+                    <p>Absolutely not! The game was created for everyone's maximum enjoyment! Just make sure everyone agrees to any changed rules before beginning to play.</p>
+                </div>
+            `;
+        }
     }
-}
 
     // Translate About Modal Pop-up (about-section-2)
     const about2 = document.getElementById('about-section-2');
@@ -1455,12 +1453,39 @@ function getDailyPrompts() {
 // DAILY MODE & SCOREBOARD LOGIC
 // ==========================================
 
+function restoreClassicScoreboxes() {
+    const team2Card = document.querySelector('.team-score-card:nth-child(2)');
+    if (team2Card) {
+        team2Card.style.display = '';
+        team2Card.classList.remove('hidden', 'disabled');
+    }
+
+    const scoreCards = document.querySelectorAll('.team-score-card, .score-box, .score-card, [data-score-box]');
+    scoreCards.forEach((card) => {
+        card.style.display = '';
+        card.classList.remove('hidden', 'disabled');
+    });
+
+    const scoreButtons = document.querySelectorAll('.team-score-card button, .score-btn, .adjust-score-btn');
+    scoreButtons.forEach((btn) => {
+        btn.disabled = false;
+        btn.removeAttribute('aria-disabled');
+        btn.classList.remove('disabled');
+    });
+
+    if (typeof updateScoreboardUI === 'function') {
+        updateScoreboardUI();
+    } else if (typeof renderScores === 'function') {
+        renderScores();
+    }
+}
+
 function setGameMode(mode) {
     const team2Card = document.querySelector('.team-score-card:nth-child(2)'); // Target Team 2 scoreboard card
-    
+
     if (mode === 'daily') {
         isDailyMode = true;
-        
+
         // Hide Team 2 card in Daily mode for a clean solo layout
         if (team2Card) team2Card.style.display = 'none';
 
@@ -1468,21 +1493,25 @@ function setGameMode(mode) {
             const isAvailable = initDailyMode();
             if (!isAvailable) {
                 isDailyMode = false;
-                if (team2Card) team2Card.style.display = 'flex';
+                restoreClassicScoreboxes();
                 return;
             }
         }
-        document.getElementById('dailyModeBtn').classList.add('active');
-        document.getElementById('randomModeBtn').classList.remove('active');
+        const dailyBtn = document.getElementById('dailyModeBtn');
+        const randomBtn = document.getElementById('randomModeBtn');
+        if (dailyBtn) dailyBtn.classList.add('active');
+        if (randomBtn) randomBtn.classList.remove('active');
         if (typeof playRound === 'function') playRound();
     } else {
         isDailyMode = false;
-        
-        // Restore Team 2 card for Classic mode
-        if (team2Card) team2Card.style.display = 'flex';
 
-        document.getElementById('randomModeBtn').classList.add('active');
-        document.getElementById('dailyModeBtn').classList.remove('active');
+        // Restore Team 2 card and scoring boxes for Classic mode
+        restoreClassicScoreboxes();
+
+        const randomBtn = document.getElementById('randomModeBtn');
+        const dailyBtn = document.getElementById('dailyModeBtn');
+        if (randomBtn) randomBtn.classList.add('active');
+        if (dailyBtn) dailyBtn.classList.remove('active');
     }
 }
 
@@ -1507,7 +1536,7 @@ function initDailyMode() {
         dailyDeckPrompts = dailyData.prompts || [];
     }
 
-    dailyCurrentIndex = 0; 
+    dailyCurrentIndex = 0;
     window.dailyRoundAnswers = {}; // Stores answers per round index: { 0: "toaster", 1: "tennis" }
     dailyResultsArray = [];
     dailyStartTime = null;
@@ -1515,12 +1544,22 @@ function initDailyMode() {
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
 
-    const dailyMessageEl = document.getElementById('dailyMessage') || document.getElementById('promptDisplay'); 
+    const activeLang =
+        (typeof window !== 'undefined' && window.currentLang) ||
+        (typeof currentLang !== 'undefined' ? currentLang : 'en');
+    const isEs = activeLang === 'es';
+
+    const dailyMessageEl = document.getElementById('dailyMessage') || document.getElementById('promptDisplay');
     if (dailyMessageEl) {
-        dailyMessageEl.innerHTML = `
-            <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 8px; text-align: center;">Daily Blurts are ready!</div>
-            <div style="font-size: 1.1rem; color: #cbd5e1; text-align: center;">Press Play to start Round 1.</div>
-        `;
+        dailyMessageEl.innerHTML = isEs
+            ? `
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 8px; text-align: center;">¡Los Blurts Diarios están listos!</div>
+                <div style="font-size: 1.1rem; color: #cbd5e1; text-align: center;">Presiona Jugar para comenzar la Ronda 1.</div>
+            `
+            : `
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 8px; text-align: center;">Daily Blurts are ready!</div>
+                <div style="font-size: 1.1rem; color: #cbd5e1; text-align: center;">Press Play to start Round 1.</div>
+            `;
     }
 
     return true;
@@ -1545,7 +1584,7 @@ function handleDailyCompletion() {
         letterEl.innerText = "★";
     }
 
-    const saveBtn = document.getElementById('saveDailyScoreBtn');
+   const saveBtn = document.getElementById('saveDailyScoreBtn');
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             const scoreEl = document.getElementById('team1Score') || document.getElementById('scoreDisplay');
@@ -1598,6 +1637,11 @@ function showDailyResults(totalScore, streak, resultsArray) {
     const modal = document.getElementById('results-modal');
     if (!modal) return;
 
+    const activeLang =
+        (typeof window !== 'undefined' && window.currentLang) ||
+        (typeof currentLang !== 'undefined' ? currentLang : 'en');
+    const isEs = activeLang === 'es';
+
     const streakVal = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || streak || '1', 10);
 
     // Build Spoiler-Free Emoji Matrix (🟩 for points, 🟨 for zero)
@@ -1609,8 +1653,13 @@ function showDailyResults(totalScore, streak, resultsArray) {
         emojiRow = "🟩".repeat(totalScore) + "🟨".repeat(Math.max(0, 10 - totalScore));
     }
 
-    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10\nPlay free at WordBlurts.com`;
-    const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay free at WordBlurts.com`;
+    const shareText = isEs
+        ? `🧩 Word Blurts! Diario\n${emojiRow}\nPuntuación: ${totalScore}/10\nJuega gratis en WordBlurts.com`
+        : `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10\nPlay free at WordBlurts.com`;
+
+    const challengeText = isEs
+        ? `⚔️ ¡Conseguí ${totalScore}/10 en el Blurt Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
+        : `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay free at WordBlurts.com`;
 
     // Update DOM Stats (Hide the time stat box completely)
     document.getElementById('res-score').textContent = `${totalScore}/10`;
@@ -1631,15 +1680,24 @@ function showDailyResults(totalScore, streak, resultsArray) {
     }
     
     if (breakdownContainer && Array.isArray(dailyDeckPrompts) && dailyDeckPrompts.length > 0) {
-        let breakdownHTML = '<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; text-align: center;">Tell us what you Blurted! (Compare with other players tomorrow)</div>';
+        const headerText = isEs
+            ? '¡Cuéntanos qué dijiste! (Compara con otros jugadores mañana)'
+            : 'Tell us what you Blurted! (Compare with other players tomorrow)';
+        const inputPlaceholder = isEs
+            ? 'Escribe lo que dijiste (Opcional)'
+            : 'Tell us what you Blurted! (Optional)';
+        const roundPrefix = isEs ? 'R' : 'R';
+
+        let breakdownHTML = `<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; text-align: center;">${headerText}</div>`;
         dailyDeckPrompts.forEach((p, idx) => {
-            const topicText = p.topic || p.prompt || `Round ${idx + 1}`;
+            const topicText = p.topic || p.prompt || (isEs ? `Ronda ${idx + 1}` : `Round ${idx + 1}`);
             const letterText = p.letter || "";
             const savedAns = (window.dailyRoundAnswers && window.dailyRoundAnswers[idx]) ? window.dailyRoundAnswers[idx] : "";
+            const escapedAns = String(savedAns).replace(/"/g, '&quot;');
             breakdownHTML += `
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px;">
-                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">R${idx+1}: ${topicText} (${letterText})</span>
-                    <input type="text" class="round-answer-input" data-round="${idx}" value="${savedAns}" placeholder="Tell us what you Blurted! (Optional)" style="width: 170px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;" />
+                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${roundPrefix}${idx + 1}: ${topicText} (${letterText})</span>
+                    <input type="text" class="round-answer-input" data-round="${idx}" value="${escapedAns}" placeholder="${inputPlaceholder}" style="width: 170px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;" />
                 </div>
             `;
         });
@@ -1677,7 +1735,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: 'Word Blurts! Daily',
+                        title: isEs ? 'Word Blurts! Diario' : 'Word Blurts! Daily',
                         text: shareText,
                         url: 'https://wordblurts.com'
                     });
@@ -1687,7 +1745,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             } else {
                 await navigator.clipboard.writeText(shareText);
                 const originalText = shareBtn.textContent;
-                shareBtn.textContent = "📋 Copied to Clipboard!";
+                shareBtn.textContent = isEs ? "📋 ¡Copiado al portapapeles!" : "📋 Copied to Clipboard!";
                 setTimeout(() => { shareBtn.textContent = originalText; }, 2500);
             }
         };
@@ -1700,7 +1758,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: 'Challenge - Word Blurts!',
+                        title: isEs ? 'Reto - Word Blurts!' : 'Challenge - Word Blurts!',
                         text: challengeText,
                         url: 'https://wordblurts.com'
                     });
@@ -1710,35 +1768,11 @@ function showDailyResults(totalScore, streak, resultsArray) {
             } else {
                 await navigator.clipboard.writeText(challengeText);
                 const originalText = challengeBtn.textContent;
-                challengeBtn.textContent = "⚔️ Challenge Copied!";
+                challengeBtn.textContent = isEs ? "⚔️ ¡Reto copiado!" : "⚔️ Challenge Copied!";
                 setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
             }
         };
     }
-}
-
-    // Challenge a Friend Button Logic
-    const challengeBtn = document.getElementById('challenge-friend-btn');
-    if (challengeBtn) {
-        challengeBtn.onclick = async () => {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Challenge - Word Blurts!',
-                        text: challengeText,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Challenge dismissed or failed:", err);
-                }
-            } else {
-                await navigator.clipboard.writeText(challengeText);
-                const originalText = challengeBtn.textContent;
-                challengeBtn.textContent = "⚔️ Challenge Copied!";
-                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
-            }
-        };
-    
 }
 
 // ==========================================
@@ -1967,6 +2001,17 @@ window.startNewRound = startNewRound;
 window.adjustScore = adjustScore;
 window.resetScores = resetScores;
 window.showDailyResultsModal = showDailyResultsModal;
+
+if (typeof syncLanguageState === 'function') {
+    window.syncLanguageState = syncLanguageState;
+}
+if (typeof applyFooterLanguage === 'function') {
+    window.applyFooterLanguage = applyFooterLanguage;
+}
+if (typeof applyRoomBarLanguage === 'function') {
+    window.applyRoomBarLanguage = applyRoomBarLanguage;
+}
+
 function setGameMode(mode) {
     if (mode === 'daily') {
         if (typeof initDailyMode === 'function') {
@@ -2163,34 +2208,57 @@ function applyWordBlurtsFixes() {
     }
 }
 
-// Run on load and restore saved Spanish language automatically
+// Run on load and restore saved language automatically
 document.addEventListener('DOMContentLoaded', () => {
-    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    window.currentLang = savedLang;
-    if (typeof currentLang !== 'undefined') {
-        currentLang = savedLang;
-    }
-    if (savedLang === 'es') {
-        if (typeof switchLanguage === 'function') {
-            switchLanguage('es');
+    const savedLang = (localStorage.getItem("wordblurts_lang") === "es") ? "es" : "en";
+
+    if (typeof syncLanguageState === 'function') {
+        syncLanguageState(savedLang);
+    } else {
+        window.currentLang = savedLang;
+        if (typeof currentLang !== 'undefined') {
+            currentLang = savedLang;
         }
+    }
+
+    if (savedLang === 'es' && typeof switchLanguage === 'function') {
+        switchLanguage('es');
+    } else {
         if (typeof updateStaticUI === 'function') {
             updateStaticUI();
         }
-        if (typeof updateFullscreenBtnText === 'function') {
-            updateFullscreenBtnText();
+        if (typeof applyFooterLanguage === 'function') {
+            applyFooterLanguage(savedLang);
+        }
+        if (typeof applyRoomBarLanguage === 'function') {
+            applyRoomBarLanguage(savedLang);
         }
     }
-    applyWordBlurtsFixes();
-    setTimeout(applyWordBlurtsFixes, 200);
+
+    if (typeof updateFullscreenBtnText === 'function') {
+        updateFullscreenBtnText();
+    }
+
+    if (typeof applyWordBlurtsFixes === 'function') {
+        applyWordBlurtsFixes();
+        setTimeout(applyWordBlurtsFixes, 200);
+    }
 });
 
 // Continuously sync in the background so mode changes (Daily <-> Classic) apply instantly
-setInterval(applyWordBlurtsFixes, 300);
+setInterval(() => {
+    if (typeof applyWordBlurtsFixes === 'function') {
+        applyWordBlurtsFixes();
+    }
+}, 300);
 
 // Also trigger immediately on any click
 document.addEventListener('click', () => {
-    setTimeout(applyWordBlurtsFixes, 50);
+    setTimeout(() => {
+        if (typeof applyWordBlurtsFixes === 'function') {
+            applyWordBlurtsFixes();
+        }
+    }, 50);
 });
 
 // ==========================================
