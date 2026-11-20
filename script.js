@@ -1776,8 +1776,11 @@ function adjustScore(team, delta) {
 
             // If in Daily Mode and points were added (+), instantly inject/reveal the per-round answer input box!
             if (typeof isDailyMode !== 'undefined' && isDailyMode && typeof dailyCurrentIndex !== 'undefined') {
-                const currentIndex = Math.max(0, (window.dailyRoundAnswers || 1) - 1);
-                if (!window.dailyRoundAnswers) window.dailyRoundAnswers = {};
+                const parsedIndex = parseInt(dailyCurrentIndex, 10);
+                const currentIndex = Number.isFinite(parsedIndex) ? Math.max(0, parsedIndex) : 0;
+                if (!window.dailyRoundAnswers || typeof window.dailyRoundAnswers !== 'object') {
+                    window.dailyRoundAnswers = {};
+                }
                 
                 // Check if prompt container already has the answer input box for this round
                 let promptArea = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
@@ -1806,9 +1809,20 @@ function adjustScore(team, delta) {
 function resetScores() {
     const t1 = document.getElementById('team1Score');
     const t2 = document.getElementById('team2Score');
+    const hadPoints =
+        (t1 && (parseInt(t1.innerText, 10) || 0) > 0) ||
+        (t2 && (parseInt(t2.innerText, 10) || 0) > 0);
+
     if (t1) t1.innerText = '0';
     if (t2) t2.innerText = '0';
-    triggerInterstitialAd();
+
+    if (hadPoints && typeof playSlideDown === 'function') {
+        playSlideDown();
+    }
+
+    if (typeof triggerInterstitialAd === 'function') {
+        triggerInterstitialAd();
+    }
 }
 
 // ==========================================
