@@ -62,8 +62,7 @@ function unlockIOSAudio() {
 // ==========================================
 // 0. GLOBAL STATE & WINDOW ATTACHMENTS
 // ==========================================
-let isDailyMode = false;
-window.isDailyMode = isDailyMode;
+window.isDailyMode = false;
 window.currentLang = localStorage.getItem("wordblurts_lang") || "en";
 let lastAdRefreshTime = 0;
 const AD_REFRESH_INTERVAL = 35000;
