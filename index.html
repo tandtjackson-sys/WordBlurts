@@ -208,33 +208,69 @@
             overflow: hidden;
         }
 
-        .mode-btn:hover:not(.active) {
-            color: #e2e8f0;
-            border-color: rgba(0, 240, 255, 0.3);
-            background: rgba(0, 240, 255, 0.05);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
-        }
+       .mode-btn:hover:not(.active) {
+    color: #e2e8f0;
+    border-color: rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.05);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+}
 
-        .mode-btn.active {
-            color: #ffffff;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(112, 0, 255, 0.35) 100%);
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4), inset 0 0 8px rgba(0, 240, 255, 0.2);
-            text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
-        }
+.mode-btn.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(112, 0, 255, 0.35) 100%);
+    border-color: #00f0ff;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4), inset 0 0 8px rgba(0, 240, 255, 0.2);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+}
 
-        .mode-btn.active#dailyModeBtn {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.35) 0%, rgba(91, 33, 182, 0.45) 100%);
-            border-color: #a78bfa;
-            box-shadow: 0 0 15px rgba(167, 139, 250, 0.35), inset 0 0 8px rgba(167, 139, 250, 0.2);
-            text-shadow: 0 0 8px rgba(167, 139, 250, 0.7);
-        }
+.mode-btn.active#dailyModeBtn {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.35) 0%, rgba(91, 33, 182, 0.45) 100%);
+    border-color: #a78bfa;
+    box-shadow: 0 0 15px rgba(167, 139, 250, 0.35), inset 0 0 8px rgba(167, 139, 250, 0.2);
+    text-shadow: 0 0 8px rgba(167, 139, 250, 0.7);
+}
 
-        .mode-btn:active {
-            transform: scale(0.96);
-        }
+.mode-btn:active {
+    transform: scale(0.96);
+}
 
-          @media (max-width: 768px) {
+/* Match top and bottom banner height & edge clearance on desktop */
+.ad-banner-top,
+.ad-banner-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 760px;
+    height: 60px;
+    min-height: 50px;
+    max-height: 70px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    background-color: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(6px);
+    z-index: 999;
+}
+
+.ad-banner-top {
+    position: sticky;
+    top: 16px;
+    margin: 16px auto 10px auto;
+}
+
+.ad-banner-bottom {
+    position: sticky;
+    bottom: 16px;
+    margin: 10px auto 16px auto;
+}
+
+/* Uniform vertical spacing through the game field down to Reset Scores */
+.game-field-stack > * + *,
+.game-field-reset {
+    margin-top: 10px !important;
+}
+
+@media (max-width: 768px) {
     .side-column {
         display: none !important;
     }
@@ -243,129 +279,109 @@
         padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     }
     .ad-banner-top {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: sticky;
         top: 0;
-        width: 100%;
-        max-width: 760px;
+        height: auto;
         min-height: calc(50px + env(safe-area-inset-top, 0px));
+        max-height: none;
         padding-top: env(safe-area-inset-top, 0px);
-        margin: 0 auto 12px auto;
-        background-color: rgba(15, 23, 42, 0.96);
-        backdrop-filter: blur(6px);
-        z-index: 999;
+        padding-bottom: 0;
+        margin: 0 auto 10px auto;
     }
     .ad-banner-bottom {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: sticky;
         bottom: 0;
-        width: 100%;
-        max-width: 760px;
+        height: auto;
         min-height: calc(50px + env(safe-area-inset-bottom, 0px));
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-        margin: 12px auto 0 auto;
-        background-color: rgba(15, 23, 42, 0.96);
-        backdrop-filter: blur(6px);
-        z-index: 999;
+        max-height: none;
+        padding-top: 0;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+        margin: 10px auto 0 auto;
     }
 }
 
-        @media (max-width: 480px) {
-            .mode-toggle-container {
-                width: 90%;
-                gap: 6px;
-            }
-            .mode-btn {
-                flex: 1;
-                padding: 8px 12px;
-                font-size: 0.82rem;
-                text-align: center;
-            }
-        }
+@media (max-width: 480px) {
+    .mode-toggle-container {
+        width: 90%;
+        gap: 6px;
+    }
+    .mode-btn {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        text-align: center;
+    }
+}
 
+/* ==========================================
+   DAILY RESULTS MODAL STYLES
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(10, 14, 26, 0.85);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
 
+.modal-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 2px solid #38bdf8;
+    box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
+    border-radius: 18px;
+    padding: 30px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    color: #ffffff;
+    box-sizing: border-box;
+}
 
-        /* ==========================================
-           DAILY RESULTS MODAL STYLES
-           ========================================== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(10, 14, 26, 0.85);
-            backdrop-filter: blur(6px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
-        }
+.modal-title {
+    font-family: 'Segoe UI Black', Arial-Black, sans-serif;
+    font-size: 1.6rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #fef08a;
+    text-shadow: 0 2px 8px rgba(254, 240, 138, 0.3);
+}
 
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
-        .modal-card {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border: 2px solid #38bdf8;
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
-            border-radius: 18px;
-            padding: 30px;
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
-            color: #ffffff;
-            box-sizing: border-box;
-        }
+.stat-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #38bdf8;
+}
 
-        .modal-title {
-            font-family: 'Segoe UI Black', Arial-Black, sans-serif;
-            font-size: 1.6rem;
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: #fef08a;
-            text-shadow: 0 2px 8px rgba(254, 240, 138, 0.3);
-        }
-
-
-        .stats-row {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-
-        .stat-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 8px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-
-        .stat-value {
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: #38bdf8;
-        }
-
-
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
 
 
         .emoji-grid {
@@ -1697,6 +1713,6 @@ footer {
 
 
     <!-- MAIN SCRIPT TAG -->
-    <script src="script.js?v=8.7"></script>
+    <script src="script.js?v=8.8"></script>
 </body>
 </html>
