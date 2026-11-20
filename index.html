@@ -234,39 +234,45 @@
             transform: scale(0.96);
         }
 
-                @media (max-width: 768px) {
-            .side-column {
-                display: none !important;
-            }
-            .game-container {
-                padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
-                padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
-            }
-          .ad-banner-top {
-                position: sticky;
-                top: 0;
-                width: 100%;
-                max-width: 760px;
-                min-height: calc(50px + env(safe-area-inset-top, 0px));
-                padding-top: env(safe-area-inset-top, 0px);
-                margin: 0 auto 12px auto;
-                background-color: rgba(15, 23, 42, 0.96);
-                backdrop-filter: blur(6px);
-                z-index: 999;
-            }
-            .ad-banner-bottom {
-                position: sticky;
-                bottom: 0;
-                width: 100%;
-                max-width: 760px;
-                min-height: calc(50px + env(safe-area-inset-bottom, 0px));
-                padding-bottom: env(safe-area-inset-bottom, 0px);
-                margin: 12px auto 0 auto;
-                background-color: rgba(15, 23, 42, 0.96);
-                backdrop-filter: blur(6px);
-                z-index: 999;
-            }
-        }
+          @media (max-width: 768px) {
+    .side-column {
+        display: none !important;
+    }
+    .game-container {
+        padding-top: calc(16px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+    .ad-banner-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        max-width: 760px;
+        min-height: calc(50px + env(safe-area-inset-top, 0px));
+        padding-top: env(safe-area-inset-top, 0px);
+        margin: 0 auto 12px auto;
+        background-color: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(6px);
+        z-index: 999;
+    }
+    .ad-banner-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        max-width: 760px;
+        min-height: calc(50px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        margin: 12px auto 0 auto;
+        background-color: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(6px);
+        z-index: 999;
+    }
+}
 
         @media (max-width: 480px) {
             .mode-toggle-container {
@@ -1454,11 +1460,15 @@ footer {
                     <div id="team2Label" contenteditable="true" style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 4px;">Player / Team 2</div>
                     <div id="team2Score" style="font-size: 2rem; font-weight: 900; color: #ffd700; margin: 4px 0;">0</div>
                     <div style="display: flex; justify-content: center; gap: 10px;">
-                        <button type="button" onclick="adjustScore('team2', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #334155; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
+                        <button type="button" onclick="adjustScore('team2', -1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #dc2626; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">−</button>
                         <button type="button" onclick="adjustScore('team2', 1)" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 1.2rem; font-weight: bold; cursor: pointer;">+</button>
                     </div>
                 </div>
             </section>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <button type="button" onclick="resetScores()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30, 41, 59, 0.9); color: #f8fafc; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Reset Scores</button>
+            </div>
 
             <script>
             function toggleRoomPanel() {
