@@ -259,9 +259,16 @@
 }
 
 .ad-banner-bottom {
-    position: sticky;
+    position: fixed;
     bottom: 16px;
-    margin: 10px auto 16px auto;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+}
+
+/* Give page content room at the bottom so the fixed banner doesn't cover text */
+.game-container {
+    padding-bottom: 90px;
 }
 
 /* Uniform vertical spacing through the game field down to Reset Scores */
@@ -276,7 +283,7 @@
     }
     .game-container {
         padding-top: calc(16px + env(safe-area-inset-top, 0px));
-        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
     }
     .ad-banner-top {
         top: 0;
@@ -289,12 +296,14 @@
     }
     .ad-banner-bottom {
         bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
         height: auto;
         min-height: calc(50px + env(safe-area-inset-bottom, 0px));
         max-height: none;
         padding-top: 0;
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-        margin: 10px auto 0 auto;
+        margin: 0;
     }
 }
 
