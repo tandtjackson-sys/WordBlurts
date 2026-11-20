@@ -1114,11 +1114,11 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         if (window.currentLang === 'es') {
             fullAnnouncement = isDesktopBrowser
-                ? `${primaryTopic}${sec}, letra: ${letter}, ¡dilo ya!`
+                ? `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`
                 : `${primaryTopic}${sec}. Letra: ${letter}... ¡Dilo ya!`;
         } else {
             fullAnnouncement = isDesktopBrowser
-                ? `${primaryTopic}${sec}, starting with the letter: ${letter}, blurt it out!`
+                ? `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`
                 : `${primaryTopic}${sec}. Starting with the letter: ${letter}... Blurt it out!`;
         }
 
@@ -1128,7 +1128,7 @@ function speakPrompt(primaryTopic, secondaryTopic, letter) {
 
         // --- SPEECH SPEED & VOLUME POLISH ---
         utterance.volume = 0.7; // 30% quieter to prevent speakerphone echo
-        utterance.rate = isDesktopBrowser ? 1.35 : 1.05; // Tighter desktop cadence; Android unchanged
+        utterance.rate = isDesktopBrowser ? 1.08 : 0.98; // Snappy without sounding rushed
         // ------------------------------------
 
         // Robust voice assignment with desktop fallback
