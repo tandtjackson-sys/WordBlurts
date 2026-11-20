@@ -84,6 +84,8 @@ function updateFullscreenBtnText() {
 
 window.toggleLanguage = function() {
     window.currentLang = (window.currentLang === "es") ? "en" : "es";
+    applyFooterLanguage();
+applyRoomBarLanguage();
     localStorage.setItem("wordblurts_lang", window.currentLang);
     if (typeof switchLanguage === 'function') {
         switchLanguage(window.currentLang);
