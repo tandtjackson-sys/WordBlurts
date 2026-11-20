@@ -1437,23 +1437,23 @@ footer {
                     <button id="dailyModeBtn" class="mode-btn rules-toggle-btn">📅 Daily Blurts</button>
                 </div>
 
-                <!-- PARTY / STREAM ROOM CODE BAR -->
-                <div id="roomModeWrapper">
-                    <button type="button" id="toggleRoomBarBtn" class="rules-toggle-btn" onclick="toggleRoomPanel()">
-                        📡 Party / Stream Room Code
-                    </button>
+          <!-- PARTY / STREAM ROOM CODE BAR -->
+<div id="roomModeWrapper">
+    <button type="button" id="toggleRoomBarBtn" class="rules-toggle-btn" onclick="toggleRoomPanel()">
+        📡 Party / Stream Room Code
+    </button>
 
-                    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;">
-                            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="width: 110px !important; min-width: 0 !important; max-width: 120px !important; flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
-                            <button type="button" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">💎 New</button>
-                            <button type="button" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
-                        </div>
-                        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; word-wrap: break-word;">
-                            Enter the same code on all phones to sync!
-                        </div>
-                    </div>
-                </div>
+    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;">
+            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="width: 110px !important; min-width: 0 !important; max-width: 120px !important; flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
+            <button type="button" id="newRoomBtn" onclick="createNewRoom()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">💎 New</button>
+            <button type="button" id="shareRoomBtn" onclick="copyRoomLink()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
+        </div>
+        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; word-wrap: break-word;">
+            Enter the same code on all phones to sync!
+        </div>
+    </div>
+</div>
 
             <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 6px;"></div>
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
