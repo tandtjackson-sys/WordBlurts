@@ -2451,18 +2451,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+window.currentLang = localStorage.getItem('wordblurts_lang') === 'es' ? 'es' : 'en';
+
 const translations = {
     en: {
         rulesText: "❓ How to Play",
         aboutText: "📖 About",
-        fullscreenText: "Fullscreen",
-        team1Label: "Player / Team 1",
-        team2Label: "Player / Team 2",
-        resetBtn: "RESET SCORES",
+        fullscreenText: "🖵 Fullscreen",
         randomModeBtn: "✨ Classic",
         dailyModeBtn: "📅 Daily Blurts",
-        roomCodeBtn: "Party / Stream Room Code",
-        playBtn: "PLAY",
+        toggleRoomBarBtn: "📡 Party / Stream Room Code",
+        playBtn: "PLAY!",
+        team1Label: "Player / Team 1",
+        team2Label: "Player / Team 2",
+        resetBtn: "Reset Scores",
         footerCopyright: "© 2026 Word Blurts! All rights reserved.",
         footerAbout: "About",
         footerTeachers: "For Teachers",
@@ -2472,14 +2474,14 @@ const translations = {
     es: {
         rulesText: "❓ Cómo jugar",
         aboutText: "📖 Acerca de",
-        fullscreenText: "Pantalla completa",
+        fullscreenText: "🖵 Pantalla completa",
+        randomModeBtn: "✨ Clásico",
+        dailyModeBtn: "📅 Blurts Diarios",
+        toggleRoomBarBtn: "📡 Código de Sala / Stream",
+        playBtn: "¡JUGAR!",
         team1Label: "Jugador / Equipo 1",
         team2Label: "Jugador / Equipo 2",
         resetBtn: "Reiniciar marcador",
-        randomModeBtn: "✨ Clásico",
-        dailyModeBtn: "📅 Blurts Diarios",
-        roomCodeBtn: "Código de Sala / Stream",
-        playBtn: "JUGAR",
         footerCopyright: "© 2026 Word Blurts! Todos los derechos reservados.",
         footerAbout: "Acerca de",
         footerTeachers: "Para docentes",
@@ -2487,8 +2489,6 @@ const translations = {
         footerAdSettings: "Configuración de anuncios"
     }
 };
-
-window.currentLang = window.currentLang || 'en';
 
 function updateLanguage(lang) {
     const cleanLang = (lang === 'es') ? 'es' : 'en';
@@ -2498,7 +2498,6 @@ function updateLanguage(lang) {
     window.currentLang = cleanLang;
     localStorage.setItem('wordblurts_lang', cleanLang);
 
-    // Helper: safely update text only if the element exists on the page
     const setText = (id, value) => {
         const el = document.getElementById(id);
         if (el && value !== undefined) {
@@ -2506,27 +2505,27 @@ function updateLanguage(lang) {
         }
     };
 
-   setText('rulesText', t.rulesText);
-setText('aboutText', t.aboutText);
-setText('fullscreenText', t.fullscreenText);
-setText('team1Label', t.team1Label);
-setText('team2Label', t.team2Label);
-setText('resetBtn', t.resetBtn);
-setText('randomModeBtn', t.randomModeBtn);
-setText('dailyModeBtn', t.dailyModeBtn);
-setText('roomCodeBtn', t.roomCodeBtn);
-setText('playBtn', t.playBtn);
-setText('footer-copyright', t.footerCopyright);
-setText('open-about-btn', t.footerAbout);
-setText('footer-teachers-link', t.footerTeachers);
-setText('footer-privacy-link', t.footerPrivacy);
-setText('footer-ads-link', t.footerAdSettings);
-    // Keep the toggle button label in sync too
+    setText('rulesText', t.rulesText);
+    setText('aboutText', t.aboutText);
+    setText('fullscreenText', t.fullscreenText);
+    setText('randomModeBtn', t.randomModeBtn);
+    setText('dailyModeBtn', t.dailyModeBtn);
+    setText('toggleRoomBarBtn', t.toggleRoomBarBtn);
+    setText('playBtn', t.playBtn);
+    setText('team1Label', t.team1Label);
+    setText('team2Label', t.team2Label);
+    setText('resetBtn', t.resetBtn);
+    setText('footer-copyright', t.footerCopyright);
+    setText('open-about-btn', t.footerAbout);
+    setText('footer-teachers-link', t.footerTeachers);
+    setText('footer-privacy-link', t.footerPrivacy);
+    setText('footer-ads-link', t.footerAdSettings);
+
     const langBtn = document.getElementById('lang-toggle-btn');
     if (langBtn) {
         const labelSpan = langBtn.querySelector('span');
         if (labelSpan) {
-            labelSpan.textContent = (cleanLang === 'en') ? '🇪🇸 Español' : '🇺🇸 English';
+            labelSpan.textContent = (cleanLang === 'en') ? '🌐 Español' : '🌐 English';
         }
     }
 }
