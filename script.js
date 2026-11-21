@@ -2506,18 +2506,21 @@ function updateLanguage(lang) {
         }
     };
 
-    // Update all target elements safely
-    setText('rulesText', t.rulesText);
-    setText('aboutText', t.aboutText);
-    setText('team2Label', t.team2Label);
-    setText('resetBtn', t.resetBtn);
-    setText('randomModeBtn', t.randomModeBtn);
-    setText('dailyModeBtn', t.dailyModeBtn);
-setText('footerCopyright', t.footerCopyright);
-setText('footerAbout', t.footerAbout);
-setText('footerTeachers', t.footerTeachers);
-setText('footerPrivacy', t.footerPrivacy);
-setText('footerAdSettings', t.footerAdSettings);
+   setText('rulesText', t.rulesText);
+setText('aboutText', t.aboutText);
+setText('fullscreenText', t.fullscreenText);
+setText('team1Label', t.team1Label);
+setText('team2Label', t.team2Label);
+setText('resetBtn', t.resetBtn);
+setText('randomModeBtn', t.randomModeBtn);
+setText('dailyModeBtn', t.dailyModeBtn);
+setText('roomCodeBtn', t.roomCodeBtn);
+setText('playBtn', t.playBtn);
+setText('footer-copyright', t.footerCopyright);
+setText('open-about-btn', t.footerAbout);
+setText('footer-teachers-link', t.footerTeachers);
+setText('footer-privacy-link', t.footerPrivacy);
+setText('footer-ads-link', t.footerAdSettings);
     // Keep the toggle button label in sync too
     const langBtn = document.getElementById('lang-toggle-btn');
     if (langBtn) {
