@@ -2455,18 +2455,36 @@ const translations = {
     en: {
         rulesText: "❓ How to Play",
         aboutText: "📖 About",
+        fullscreenText: "Fullscreen",
+        team1Label: "Player / Team 1",
         team2Label: "Player / Team 2",
         resetBtn: "RESET SCORES",
         randomModeBtn: "✨ Classic",
-        dailyModeBtn: "📅 Daily Blurts"
+        dailyModeBtn: "📅 Daily Blurts",
+        roomCodeBtn: "Party / Stream Room Code",
+        playBtn: "PLAY",
+        footerCopyright: "© 2026 Word Blurts! All rights reserved.",
+        footerAbout: "About",
+        footerTeachers: "For Teachers",
+        footerPrivacy: "Privacy Policy",
+        footerAdSettings: "Ad Settings"
     },
-es: {
+    es: {
         rulesText: "❓ Cómo jugar",
         aboutText: "📖 Acerca de",
+        fullscreenText: "Pantalla completa",
+        team1Label: "Jugador / Equipo 1",
         team2Label: "Jugador / Equipo 2",
         resetBtn: "Reiniciar marcador",
         randomModeBtn: "✨ Clásico",
-        dailyModeBtn: "📅 Blurts Diarios"
+        dailyModeBtn: "📅 Blurts Diarios",
+        roomCodeBtn: "Código de Sala / Stream",
+        playBtn: "JUGAR",
+        footerCopyright: "© 2026 Word Blurts! Todos los derechos reservados.",
+        footerAbout: "Acerca de",
+        footerTeachers: "Para docentes",
+        footerPrivacy: "Política de privacidad",
+        footerAdSettings: "Configuración de anuncios"
     }
 };
 
@@ -2495,7 +2513,11 @@ function updateLanguage(lang) {
     setText('resetBtn', t.resetBtn);
     setText('randomModeBtn', t.randomModeBtn);
     setText('dailyModeBtn', t.dailyModeBtn);
-
+setText('footerCopyright', t.footerCopyright);
+setText('footerAbout', t.footerAbout);
+setText('footerTeachers', t.footerTeachers);
+setText('footerPrivacy', t.footerPrivacy);
+setText('footerAdSettings', t.footerAdSettings);
     // Keep the toggle button label in sync too
     const langBtn = document.getElementById('lang-toggle-btn');
     if (langBtn) {
