@@ -2516,7 +2516,7 @@ function updateLanguage(lang) {
     setText('team2Label', t.team2Label);
     setText('resetBtn', t.resetBtn);
     setText('footer-copyright', t.footerCopyright);
-    setText('open-about-btn', t.footerAbout);
+    setText('footer-about-link', t.footerAbout);
     setText('footer-teachers-link', t.footerTeachers);
     setText('footer-privacy-link', t.footerPrivacy);
     setText('footer-ads-link', t.footerAdSettings);
