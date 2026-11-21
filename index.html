@@ -1351,7 +1351,7 @@ footer {
                 </button>
 
                 <button class="rules-toggle-btn" id="fullscreenToggleBtn" onclick="toggleFullScreen()">
-                    <span>🖵 Fullscreen</span>
+                    <span id="fullscreenText">🖵 Fullscreen</span>
                 </button>
             </div>
 
@@ -1492,7 +1492,7 @@ footer {
             </section>
 
             <div style="text-align: center; margin-top: 10px;">
-                <button type="button" onclick="resetScores()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30, 41, 59, 0.9); color: #f8fafc; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Reset Scores</button>
+                <button type="button" id="resetBtn" onclick="resetScores()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30, 41, 59, 0.9); color: #f8fafc; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Reset Scores</button>
             </div>
 
             <script>
