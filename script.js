@@ -1,6 +1,6 @@
 // Keep a global reference so iOS Safari doesn't garbage-collect the voice mid-stream
 window.activeUtterance = null;
-
+window.currentLang = localStorage.getItem("wordblurts_lang") === "es" ? "es" : "en";
 function speakGameText(text) {
     if (!('speechSynthesis' in window)) {
         console.log("Speech synthesis not supported in this browser.");
@@ -2473,29 +2473,40 @@ es: {
 window.currentLang = window.currentLang || 'en';
 
 function updateLanguage(lang) {
-    const t = translations[lang];
+    const cleanLang = (lang === 'es') ? 'es' : 'en';
+    const t = translations[cleanLang];
     if (!t) return;
 
+    window.currentLang = cleanLang;
+    localStorage.setItem('wordblurts_lang', cleanLang);
 
-    // Update all target elements instantly
-    document.getElementById('rulesText').textContent = t.rulesText;
-    document.getElementById('aboutText').textContent = t.aboutText;
-    document.getElementById('team2Label').textContent = t.team2Label;
-    document.getElementById('resetBtn').textContent = t.resetBtn;
-    document.getElementById('randomModeBtn').textContent = t.randomModeBtn;
-    document.getElementById('dailyModeBtn').textContent = t.dailyModeBtn;
+    // Helper: safely update text only if the element exists on the page
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value !== undefined) {
+            el.textContent = value;
+        }
+    };
+
+    // Update all target elements safely
+    setText('rulesText', t.rulesText);
+    setText('aboutText', t.aboutText);
+    setText('team2Label', t.team2Label);
+    setText('resetBtn', t.resetBtn);
+    setText('randomModeBtn', t.randomModeBtn);
+    setText('dailyModeBtn', t.dailyModeBtn);
+
+    // Keep the toggle button label in sync too
+    const langBtn = document.getElementById('lang-toggle-btn');
+    if (langBtn) {
+        const labelSpan = langBtn.querySelector('span');
+        if (labelSpan) {
+            labelSpan.textContent = (cleanLang === 'en') ? '🇪🇸 Español' : '🇺🇸 English';
+        }
+    }
 }
 
 function toggleLanguage() {
-    // Toggle between English and Spanish
-    currentLang = (currentLang === 'en') ? 'es' : 'en';
-    
-    // Apply the translation updates
-    updateLanguage(currentLang);
-    
-    // Update the button label itself to show the alternate language option
-    const langBtn = document.getElementById('lang-toggle-btn');
-    if (langBtn) {
-        langBtn.querySelector('span').textContent = (currentLang === 'en') ? '🇪🇸 Español' : '🇺🇸 English';
-    }
+    const nextLang = (window.currentLang === 'en') ? 'es' : 'en';
+    updateLanguage(nextLang);
 }
