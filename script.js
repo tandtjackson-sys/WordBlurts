@@ -1893,7 +1893,66 @@ function showDailyResults(totalScore, streak, resultsArray) {
             }
         };
     }
+// Make the completion modal and everything inside it larger & easier to read
+    modal.style.padding = '20px';
+    const card = modal.querySelector('.modal-card');
+    if (card) {
+        card.style.width = '92vw';
+        card.style.maxWidth = '540px';
+        card.style.padding = '26px 24px';
+        card.style.borderRadius = '18px';
+        card.style.fontSize = '1.08rem';
+    }
 
+    const modalTitle = card ? card.querySelector('h1, h2, h3, .modal-title') : null;
+    if (modalTitle) {
+        modalTitle.style.fontSize = '1.85rem';
+        modalTitle.style.marginBottom = '14px';
+    }
+
+    if (scoreEl) {
+        scoreEl.style.fontSize = '1.85rem';
+        scoreEl.style.fontWeight = '800';
+    }
+    if (streakEl) {
+        streakEl.style.fontSize = '1.65rem';
+        streakEl.style.fontWeight = '800';
+    }
+
+    // Keep all 10 squares on a single row while making them noticeably larger
+    if (emojiEl) {
+        emojiEl.style.whiteSpace = 'nowrap';
+        emojiEl.style.fontSize = '1.5rem';
+        emojiEl.style.letterSpacing = '4px';
+        emojiEl.style.margin = '12px 0';
+        emojiEl.style.display = 'block';
+        emojiEl.style.textAlign = 'center';
+    }
+
+    if (breakdownContainer) {
+        breakdownContainer.style.maxHeight = '230px';
+        breakdownContainer.style.fontSize = '1rem';
+        breakdownContainer.style.padding = '12px 6px';
+        breakdownContainer.querySelectorAll('.round-answer-input').forEach(inp => {
+            inp.style.width = '200px';
+            inp.style.padding = '7px 10px';
+            inp.style.fontSize = '0.95rem';
+        });
+    }
+
+    ['share-results-btn', 'challenge-friend-btn', 'share-your-blurts-btn'].forEach(btnId => {
+        const b = document.getElementById(btnId);
+        if (b) {
+            b.style.padding = '13px 16px';
+            b.style.fontSize = '1.08rem';
+            b.style.borderRadius = '10px';
+        }
+    });
+
+    if (countdownEl) {
+        countdownEl.style.fontSize = '0.98rem';
+        countdownEl.style.marginTop = '10px';
+    }
     modal.style.display = 'flex';
 
     // Wire Close/Dismiss Logic
