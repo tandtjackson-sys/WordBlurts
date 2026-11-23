@@ -1518,7 +1518,57 @@ function setGameMode(mode) {
         if (dailyBtn) dailyBtn.classList.remove('active');
     }
 }
+function syncYesterdayBlurtsButton() {
+    const btn = document.getElementById('yesterdayBlurtsBtn');
+    if (!btn) return;
 
+    const activeLang =
+        (typeof window !== 'undefined' && window.currentLang) ||
+        (typeof currentLang !== 'undefined' ? currentLang : 'en');
+    const isEs = activeLang === 'es';
+
+    let prevData = null;
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.COMPLETED_DATA);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            const todayEastern = getEasternDateStr();
+            if (parsed && parsed.dateStr && parsed.dateStr < todayEastern) {
+                prevData = parsed;
+            }
+        }
+    } catch (e) {
+        prevData = null;
+    }
+
+    if (!prevData) {
+        btn.style.display = 'none';
+        return;
+    }
+
+    btn.style.display = '';
+    btn.textContent = isEs ? '🗣️ ¡Blurts de ayer!' : "🗣️ Yesterday's Daily Blurts!";
+
+    btn.onclick = () => {
+        if (Array.isArray(prevData.scoredRounds)) {
+            window.dailyRoundScored = prevData.scoredRounds.slice();
+        }
+        if (Array.isArray(prevData.resultsArray)) {
+            const restoredAnswers = {};
+            prevData.resultsArray.forEach((ans, idx) => {
+                if (ans) restoredAnswers[idx] = ans;
+            });
+            window.dailyRoundAnswers = restoredAnswers;
+        }
+        const streakVal = parseInt(
+            localStorage.getItem(STORAGE_KEYS.STREAK) || '1',
+            10
+        );
+        if (typeof showDailyResults === 'function') {
+            showDailyResults(prevData.score || 0, streakVal, prevData.resultsArray || []);
+        }
+    };
+}
 function initDailyMode() {
     const status = getDailyStatus();
     if (status.isCompletedToday && !getURLSeed()) {
