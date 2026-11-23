@@ -2882,4 +2882,6 @@ function updateLanguage(lang) {
 function toggleLanguage() {
     const nextLang = (window.currentLang === 'en') ? 'es' : 'en';
     updateLanguage(nextLang);
+    syncYesterdayBlurtsButton();
 }
+document.addEventListener('DOMContentLoaded', syncYesterdayBlurtsButton);
