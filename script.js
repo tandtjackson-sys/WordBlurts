@@ -1953,6 +1953,33 @@ function showDailyResults(totalScore, streak, resultsArray) {
         countdownEl.style.fontSize = '0.98rem';
         countdownEl.style.marginTop = '10px';
     }
+    // Bump "Come back tomorrow for the next Daily Blurt!" by ~15%
+    if (card) {
+        card.querySelectorAll('p, div, span').forEach(el => {
+            const txt = (el.textContent || '').trim();
+            if (
+                txt === 'Come back tomorrow for the next Daily Blurt!' ||
+                txt === '¡Vuelve mañana para el próximo Blurt Diario!'
+            ) {
+                el.style.fontSize = '1.15rem';
+                el.style.lineHeight = '1.4';
+            }
+        });
+    }
+
+    // Bump both bottom countdown lines by ~18% (keeping the second line slightly smaller relative to the first)
+    if (countdownEl) {
+        countdownEl.style.fontSize = '1.15rem';
+        countdownEl.style.lineHeight = '1.45';
+        countdownEl.style.marginTop = '12px';
+
+        const subLine = countdownEl.querySelector('span');
+        if (subLine) {
+            subLine.style.display = 'inline-block';
+            subLine.style.marginTop = '3px';
+            subLine.style.fontSize = '0.92rem';
+        }
+    }
     modal.style.display = 'flex';
 
     // Wire Close/Dismiss Logic
