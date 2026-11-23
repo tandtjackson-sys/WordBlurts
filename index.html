@@ -649,26 +649,30 @@
         }
 
 
-        .game-card {
+     .game-card {
             background: var(--card-bg);
             width: 100%;
-            padding: 35px 25px;
+            padding: 22px 20px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.25);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 12px;
             border: 1px solid var(--card-border);
             position: relative;
             overflow: hidden;
         }
 
+        .game-card > * {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
 
         .prompt-box {
-            font-size: 1.6rem;
+            font-size: 1.45rem;
             font-weight: 800;
-            min-height: 70px;
+            min-height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -677,9 +681,8 @@
             text-align: center;
         }
 
-
         .letter-display {
-            font-size: 5.5rem;
+            font-size: 4.5rem;
             font-weight: 900;
             color: var(--accent-yellow);
             line-height: 1;
@@ -687,12 +690,11 @@
             transition: transform 0.2s ease;
         }
 
-
         .timer {
-            font-size: 4rem;
+            font-size: 3.25rem;
             font-weight: 900;
             color: #ef4444;
-            min-height: 70px;
+            min-height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -701,13 +703,12 @@
             max-width: 100%;
         }
 
-
         .play-btn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            font-size: 1.8rem;
+            font-size: 1.65rem;
             font-weight: 800;
-            padding: 16px 55px;
+            padding: 13px 46px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
@@ -718,18 +719,15 @@
             touch-action: manipulation;
         }
 
-
         .play-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6), 0 6px 0 #047857;
         }
 
-
         .play-btn:active {
             transform: translateY(3px);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4), 0 1px 0 #047857;
         }
-
 
         .play-btn:focus {
             outline: none;
@@ -1438,7 +1436,7 @@ footer {
     </svg>
 </header>
 
-            <!-- MAIN GAME CARD -->
+           <!-- MAIN GAME CARD -->
             <main class="game-card">
                 <!-- MODE TOGGLE BUTTONS (matched to standard button size) -->
                 <div class="mode-toggle-container">
@@ -1463,6 +1461,10 @@ footer {
         </div>
     </div>
 </div>
+
+                <button type="button" id="yesterdayBlurtsBtn" class="rules-toggle-btn" style="display: none;">
+                    🗣️ Yesterday's Daily Blurts!
+                </button>
 
             <div id="roundCounter" style="display: none; font-size: 1rem; color: #94a3b8; font-weight: 600; text-align: center; margin-bottom: 6px;"></div>
                 <div class="prompt-box" id="promptDisplay">Press PLAY or hit Spacebar to start!</div>
