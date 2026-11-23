@@ -1725,8 +1725,8 @@ function showDailyResults(totalScore, streak, resultsArray) {
         : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
 
     const challengeText = isEs
-        ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurt Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
-        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay for free at WordBlurts.com`;
+        ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurts Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
+        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurts! Can you beat my score?\nPlay for free at WordBlurts.com`;
 
     // Update DOM Stats (Hide the time stat box completely)
     const scoreEl = document.getElementById('res-score');
