@@ -1857,8 +1857,8 @@ function showDailyResults(totalScore, streak, resultsArray) {
         if (countdownEl) {
             const remaining = getCountdownToEasternMidnight();
             countdownEl.innerHTML = isEs
-                ? `⏳ Próximo Día Global Blurt en: <strong>${remaining}</strong><br><span style="font-size: 0.76rem; color: #94a3b8;">Cada día termina a medianoche, hora del Este, EE. UU.</span>`
-                : `⏳ Next Global Blurt Day in: <strong>${remaining}</strong><br><span style="font-size: 0.76rem; color: #94a3b8;">Each day ends at midnight, Eastern Time, U.S.A.</span>`;
+                ? `⏳ Próximo Día Global Blurt en: <strong>${remaining}</strong><br><span style="display: inline-block; margin-top: 3px; font-size: 1.1rem; color: #94a3b8;">Cada día termina a medianoche, hora del Este, EE. UU.</span>`
+                : `⏳ Next Global Blurt Day in: <strong>${remaining}</strong><br><span style="display: inline-block; margin-top: 3px; font-size: 1.1rem; color: #94a3b8;">Each day ends at midnight, Eastern Time, U.S.A.</span>`;
         }
     };
 
@@ -1921,11 +1921,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
         }
     });
 
-    if (countdownEl) {
-        countdownEl.style.fontSize = '0.98rem';
-        countdownEl.style.marginTop = '10px';
-    }
-
     // Bump "Come back tomorrow for the next Daily Blurt!" by ~15%
     if (card) {
         card.querySelectorAll('p, div, span').forEach(el => {
@@ -1940,7 +1935,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
         });
     }
 
-    // Bump both bottom countdown lines by ~18% (keeping the second line slightly smaller relative to the first)
+    // Keep the timer line at 1.15rem and bump the Eastern Time note below it to 1.1rem
     if (countdownEl) {
         countdownEl.style.fontSize = '1.15rem';
         countdownEl.style.lineHeight = '1.45';
@@ -1950,7 +1945,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
         if (subLine) {
             subLine.style.display = 'inline-block';
             subLine.style.marginTop = '3px';
-            subLine.style.fontSize = '0.92rem';
+            subLine.style.fontSize = '1.1rem';
         }
     }
 
