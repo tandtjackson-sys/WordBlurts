@@ -1721,12 +1721,12 @@ function showDailyResults(totalScore, streak, resultsArray) {
                 : (isEs ? '¡Día difícil!' : 'Tough board today!');
 
     const richShareText = isEs
-        ? `🧩 Word Blurts! Diario (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${numericScore}/10 • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
-        : `🧩 Word Blurts! Daily (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
+        ? `🧩 Word Blurts! Diario Blurts (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${numericScore}/10 • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
+        : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
 
     const challengeText = isEs
         ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurt Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
-        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay free at WordBlurts.com`;
+        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurt! Can you beat my score?\nPlay for free at WordBlurts.com`;
 
     // Update DOM Stats (Hide the time stat box completely)
     const scoreEl = document.getElementById('res-score');
