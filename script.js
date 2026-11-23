@@ -1547,7 +1547,7 @@ function syncYesterdayBlurtsButton() {
     }
 
     btn.style.display = '';
-    btn.textContent = isEs ? '🗣️ ¡Blurts de ayer!' : "🗣️ Yesterday's Daily Blurts!";
+    btn.textContent = isEs ? '⏮️ ¡Blurts de ayer!' : "⏮️ Yesterday's Daily Blurts!";
 
     btn.onclick = () => {
         if (Array.isArray(prevData.scoredRounds)) {
@@ -2845,6 +2845,9 @@ function updateLanguage(lang) {
     if (!t) return;
 
     window.currentLang = cleanLang;
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
+    }
     localStorage.setItem('wordblurts_lang', cleanLang);
 
     const setText = (id, value) => {
