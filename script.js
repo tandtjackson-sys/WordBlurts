@@ -1712,9 +1712,17 @@ function showDailyResults(totalScore, streak, resultsArray) {
         emojiRow = "🟩".repeat(numericScore) + "🟨".repeat(10 - numericScore);
     }
 
-    const shareText = isEs
-        ? `🧩 Word Blurts! Diario\n${emojiRow}\nPuntuación: ${numericScore}/10\nJuega gratis en WordBlurts.com`
-        : `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${numericScore}/10\nPlay free at WordBlurts.com`;
+    const scoreTagline = numericScore === 10
+        ? (isEs ? '¡Ronda perfecta!' : 'Clean sweep!')
+        : numericScore >= 7
+            ? (isEs ? '¡Muy rápido!' : 'Sharp blurting!')
+            : numericScore >= 4
+                ? (isEs ? '¡Buena partida!' : 'Solid run!')
+                : (isEs ? '¡Día difícil!' : 'Tough board today!');
+
+    const richShareText = isEs
+        ? `🧩 Word Blurts! Diario (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${numericScore}/10 • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
+        : `🧩 Word Blurts! Daily (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
 
     const challengeText = isEs
         ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurt Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
@@ -1857,43 +1865,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
     syncSpoilerLockState();
     window.blurtCountdownInterval = setInterval(syncSpoilerLockState, 1000);
 
-    if (shareBlurtsBtn) {
-        shareBlurtsBtn.onclick = async () => {
-            if (shareBlurtsBtn.disabled) return;
-
-            const currentAnswers = buildLockedAnswersArray();
-            const lines = [];
-            for (let i = 0; i < 10; i++) {
-                const promptObj = (Array.isArray(dailyDeckPrompts) && dailyDeckPrompts[i]) ? dailyDeckPrompts[i] : null;
-                const topicLabel = promptObj ? (promptObj.topic || promptObj.prompt || `Round ${i + 1}`) : `Round ${i + 1}`;
-                const letterLabel = promptObj && promptObj.letter ? ` (${promptObj.letter})` : '';
-                const ansText = currentAnswers[i] ? currentAnswers[i] : '—';
-                lines.push(`R${i + 1}: ${topicLabel}${letterLabel} → ${ansText}`);
-            }
-
-            const blurtsSharePayload = isEs
-                ? `🗣️ Mis Blurts (${savedGameDateStr}) — Word Blurts!\n${lines.join('\n')}\nJuega gratis en WordBlurts.com`
-                : `🗣️ My Blurts (${savedGameDateStr}) — Word Blurts!\n${lines.join('\n')}\nPlay free at WordBlurts.com`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: isEs ? 'Mis Blurts - Word Blurts!' : 'My Blurts - Word Blurts!',
-                        text: blurtsSharePayload,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Blurts share dismissed or failed:", err);
-                }
-            } else if (navigator.clipboard) {
-                await navigator.clipboard.writeText(blurtsSharePayload);
-                const prevLabel = shareBlurtsBtn.textContent;
-                shareBlurtsBtn.textContent = isEs ? "📋 ¡Blurts copiados!" : "📋 Blurts Copied!";
-                setTimeout(() => { shareBlurtsBtn.textContent = prevLabel; }, 2500);
-            }
-        };
-    }
-// Make the completion modal and everything inside it larger & easier to read
+    // Make the completion modal and everything inside it larger & easier to read
     modal.style.padding = '20px';
     const card = modal.querySelector('.modal-card');
     if (card) {
@@ -1953,6 +1925,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
         countdownEl.style.fontSize = '0.98rem';
         countdownEl.style.marginTop = '10px';
     }
+
     // Bump "Come back tomorrow for the next Daily Blurt!" by ~15%
     if (card) {
         card.querySelectorAll('p, div, span').forEach(el => {
@@ -1980,6 +1953,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             subLine.style.fontSize = '0.92rem';
         }
     }
+
     modal.style.display = 'flex';
 
     // Wire Close/Dismiss Logic
@@ -1998,7 +1972,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
         }
     };
 
-    // Share Results Button Logic
+    // Share Results Button Logic (Spoiler-safe summary)
     const shareBtn = document.getElementById('share-results-btn');
     if (shareBtn) {
         shareBtn.onclick = async () => {
@@ -2006,17 +1980,56 @@ function showDailyResults(totalScore, streak, resultsArray) {
                 try {
                     await navigator.share({
                         title: isEs ? 'Word Blurts! Diario' : 'Word Blurts! Daily',
-                        text: shareText,
+                        text: richShareText,
                         url: 'https://wordblurts.com'
                     });
                 } catch (err) {
                     console.log("Share dismissed or failed:", err);
                 }
-            } else {
-                await navigator.clipboard.writeText(shareText);
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(richShareText);
                 const originalText = shareBtn.textContent;
                 shareBtn.textContent = isEs ? "📋 ¡Copiado al portapapeles!" : "📋 Copied to Clipboard!";
                 setTimeout(() => { shareBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+
+    // Share Your Blurts! Button Logic (Includes saved gameplay Blurts once unlocked after midnight ET)
+    if (shareBlurtsBtn) {
+        shareBlurtsBtn.onclick = async () => {
+            if (shareBlurtsBtn.disabled) return;
+
+            const currentAnswers = buildLockedAnswersArray();
+            const lines = [];
+            for (let i = 0; i < 10; i++) {
+                const promptObj = (Array.isArray(dailyDeckPrompts) && dailyDeckPrompts[i]) ? dailyDeckPrompts[i] : null;
+                const topicLabel = promptObj ? (promptObj.topic || promptObj.prompt || (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`)) : (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`);
+                const letterLabel = promptObj && promptObj.letter ? ` (${promptObj.letter})` : '';
+                const ansText = (currentAnswers[i] && currentAnswers[i].trim()) ? currentAnswers[i].trim() : '—';
+                const mark = (Array.isArray(window.dailyRoundScored) && window.dailyRoundScored[i]) ? '🟩' : '🟨';
+                lines.push(`${mark} R${i + 1}: ${topicLabel}${letterLabel} → ${ansText}`);
+            }
+
+            const blurtsSharePayload = isEs
+                ? `🗣️ Mis Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nJuega gratis: https://wordblurts.com`
+                : `🗣️ My Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nPlay free: https://wordblurts.com`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: isEs ? 'Mis Blurts - Word Blurts!' : 'My Blurts - Word Blurts!',
+                        text: blurtsSharePayload,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Blurts share dismissed or failed:", err);
+                }
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(blurtsSharePayload);
+                const prevLabel = shareBlurtsBtn.textContent;
+                shareBlurtsBtn.textContent = isEs ? "📋 ¡Blurts copiados!" : "📋 Blurts Copied!";
+                setTimeout(() => { shareBlurtsBtn.textContent = prevLabel; }, 2500);
             }
         };
     }
