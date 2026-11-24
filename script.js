@@ -1673,6 +1673,7 @@ function initDailyMode() {
     }
 
     isDailyMode = true;
+    window.isDailyMode = true;
     window.dailyCurrentIndex = 0; // Starts at index 0 for Round 1
 
     const urlSeed = getURLSeed();
@@ -1690,6 +1691,7 @@ function initDailyMode() {
 
     const dailyBtn = document.getElementById('dailyModeBtn');
     if (dailyBtn) dailyBtn.classList.add('active');
+    if (typeof syncYesterdayBlurtsButton === 'function') syncYesterdayBlurtsButton();
 
     const activeLang =
         (typeof window !== 'undefined' && window.currentLang) ||
@@ -1711,6 +1713,7 @@ function initDailyMode() {
 
     return true;
 }
+
 
 function handleDailyCompletion() {
     isRoundActive = false;
