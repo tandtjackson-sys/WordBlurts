@@ -2359,20 +2359,30 @@ function resetGameState() {
         isRoundActive = false;
     }
 
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+       const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.disabled = false;
         playBtn.style.opacity = "1";
         playBtn.style.cursor = "pointer";
-        playBtn.onclick = null;
         const activeLang = window.currentLang || 'en';
         playBtn.textContent = (activeLang === 'es') ? '¡JUGAR!' : 'PLAY!';
+        playBtn.onclick = () => {
+            if (window.isDailyMode) {
+                if (!Array.isArray(dailyDeckPrompts) || dailyDeckPrompts.length === 0) {
+                    if (typeof initDailyMode === 'function' && !initDailyMode()) return;
+                }
+            }
+            if (typeof playRound === 'function') {
+                playRound();
+            }
+        };
     }
 
     if (typeof syncYesterdayBlurtsButton === 'function') {
         syncYesterdayBlurtsButton();
     }
 }
+
 
 function initWordBlurts() {
     const savedLang = localStorage.getItem("wordblurts_lang") || "en";
@@ -2389,6 +2399,8 @@ function initWordBlurts() {
         dailyModeBtn.style.opacity = "0.7";
 
         randomModeBtn.onclick = () => {
+            window.isTransitioning = false;
+            isRoundActive = false;
             resetGameState();
             setGameMode('classic');
             randomModeBtn.style.opacity = "1";
@@ -2401,28 +2413,35 @@ function initWordBlurts() {
                     ${window.currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
                 </div>`;
             }
+            const letterEl = document.getElementById('letterDisplay') || document.getElementById('letter');
+            if (letterEl) letterEl.innerText = "-";
+            const counterEl = document.getElementById('roundCounter');
+            if (counterEl) counterEl.style.display = 'none';
         };
 
         dailyModeBtn.onclick = () => {
+            window.isTransitioning = false;
+            isRoundActive = false;
             resetGameState();
-            window.isDailyMode = true;
-            isDailyMode = true;
-            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
-            if (!isAvailable) {
-                window.isDailyMode = false;
-                isDailyMode = false;
-                syncYesterdayBlurtsButton();
-                return;
+            setGameMode('daily');
+            if (window.isDailyMode) {
+                dailyModeBtn.style.opacity = "1";
+                randomModeBtn.style.opacity = "0.7";
             }
-            const team2Card = document.querySelector('.team-score-card:nth-child(2)');
-            if (team2Card) team2Card.style.display = 'none';
+        };
+    }
 
-            dailyModeBtn.classList.add('active');
-            randomModeBtn.classList.remove('active');
-            dailyModeBtn.style.opacity = "1";
-            randomModeBtn.style.opacity = "0.7";
-            if (typeof stopEverything === 'function') stopEverything();
-            syncYesterdayBlurtsButton();
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    if (playBtn) {
+        playBtn.onclick = () => {
+            if (window.isDailyMode) {
+                if (!Array.isArray(dailyDeckPrompts) || dailyDeckPrompts.length === 0) {
+                    if (typeof initDailyMode === 'function' && !initDailyMode()) return;
+                }
+            }
+            if (typeof playRound === 'function') {
+                playRound();
+            }
         };
     }
 
@@ -2432,6 +2451,7 @@ function initWordBlurts() {
 }
 
 initWordBlurts();
+
 
 // ==========================================
 // 10. PWA INSTALL PROMPT & SERVICE WORKER
