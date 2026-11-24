@@ -1689,9 +1689,21 @@ function saveDailyResults(score, resultsArray, timeSpent = 0) {
         newStreak = status.streak + 1;
     }
 
+    const numericScore = Math.max(0, parseInt(score, 10) || 0);
+    const scoredRounds = Array.isArray(window.dailyRoundScored) ? window.dailyRoundScored : [];
+
     localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
     localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
-    localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray, timeSpent }));
+    localStorage.setItem(
+        STORAGE_KEYS.COMPLETED_DATA,
+        JSON.stringify({
+            dateStr,
+            score: numericScore,
+            resultsArray,
+            scoredRounds,
+            timeSpent
+        })
+    );
     return newStreak;
 }
 
@@ -1739,7 +1751,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
         (typeof currentLang !== 'undefined' ? currentLang : 'en');
     const isEs = activeLang === 'es';
 
-    const numericScore = Math.max(0, Math.min(10, parseInt(totalScore, 10) || 0));
+    const pointsScore = Math.max(0, parseInt(totalScore, 10) || 0);
     const streakVal = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || streak || '1', 10);
 
     // Determine the day's date string (Eastern Time, U.S.A.) for spoiler lock tracking
@@ -1767,33 +1779,29 @@ function showDailyResults(totalScore, streak, resultsArray) {
     if (Array.isArray(window.dailyRoundScored) && window.dailyRoundScored.some(Boolean)) {
         emojiRow = Array.from({ length: 10 }, (_, idx) => (window.dailyRoundScored[idx] ? "🟩" : "🟨")).join("");
     } else {
-        emojiRow = "🟩".repeat(numericScore) + "🟨".repeat(10 - numericScore);
+        const roundsWithPoints = Math.min(10, Math.max(0, Number(window.dailyRoundsScoredCount ?? (pointsScore > 0 ? 1 : 0))));
+        emojiRow = "🟩".repeat(roundsWithPoints) + "🟨".repeat(10 - roundsWithPoints);
     }
 
-    const scoreTagline = numericScore === 10
-        ? (isEs ? '¡Ronda perfecta!' : 'Clean sweep!')
-        : numericScore >= 7
+    const scoreTagline = pointsScore >= 20
+        ? (isEs ? '¡Ronda increíble!' : 'Clean sweep!')
+        : pointsScore >= 12
             ? (isEs ? '¡Muy rápido!' : 'Sharp blurting!')
-            : numericScore >= 4
+            : pointsScore >= 6
                 ? (isEs ? '¡Buena partida!' : 'Solid run!')
                 : (isEs ? '¡Día difícil!' : 'Tough board today!');
 
     const richShareText = isEs
-        ? `🧩 Word Blurts! Diario Blurts (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${numericScore}/10 • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
-        : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
+        ? `🧩 Word Blurts! Diario Blurts (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${pointsScore} pts • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
+        : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nScore: ${pointsScore} pts • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
 
     const challengeText = isEs
-        ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurts Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
-        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurts! Can you beat my score?\nPlay for free at WordBlurts.com`;
+        ? `⚔️ ¡Conseguí ${pointsScore} pts en el Blurts Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
+        : `⚔️ I scored ${pointsScore} pts in today's Daily Blurts! Can you beat my score?\nPlay for free at WordBlurts.com`;
 
-    // Update DOM Stats (Hide the time stat box completely)
+    // Update DOM Stats
     const scoreEl = document.getElementById('res-score');
-    if (scoreEl) scoreEl.textContent = `${numericScore}/10`;
-
-    const timeEl = document.getElementById('res-time');
-    if (timeEl && timeEl.parentElement) {
-        timeEl.parentElement.style.display = 'none';
-    }
+    if (scoreEl) scoreEl.textContent = `${pointsScore} pts`;
 
     const streakEl = document.getElementById('res-streak');
     if (streakEl) streakEl.textContent = `🔥 ${streakVal}`;
@@ -1860,10 +1868,10 @@ function showDailyResults(totalScore, streak, resultsArray) {
                     STORAGE_KEYS.COMPLETED_DATA,
                     JSON.stringify({
                         dateStr: savedGameDateStr,
-                        score: numericScore,
+                        score: pointsScore,
                         resultsArray: orderedAnswers,
                         scoredRounds: Array.isArray(window.dailyRoundScored) ? window.dailyRoundScored : [],
-                        timeSpent: 0
+                        
                     })
                 );
             };
@@ -2058,59 +2066,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
             for (let i = 0; i < 10; i++) {
                 const promptObj = (Array.isArray(dailyDeckPrompts) && dailyDeckPrompts[i]) ? dailyDeckPrompts[i] : null;
                 const topicLabel = promptObj ? (promptObj.topic || promptObj.prompt || (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`)) : (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`);
-                const letterLabel = promptObj && promptObj.letter ? ` (${promptObj.letter})` : '';
-                const ansText = (currentAnswers[i] && currentAnswers[i].trim()) ? currentAnswers[i].trim() : '—';
-                const mark = (Array.isArray(window.dailyRoundScored) && window.dailyRoundScored[i]) ? '🟩' : '🟨';
-                lines.push(`${mark} R${i + 1}: ${topicLabel}${letterLabel} → ${ansText}`);
-            }
-
-            const blurtsSharePayload = isEs
-                ? `🗣️ Mis Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nJuega gratis: https://wordblurts.com`
-                : `🗣️ My Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nPlay free: https://wordblurts.com`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: isEs ? 'Mis Blurts - Word Blurts!' : 'My Blurts - Word Blurts!',
-                        text: blurtsSharePayload,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Blurts share dismissed or failed:", err);
-                }
-            } else if (navigator.clipboard) {
-                await navigator.clipboard.writeText(blurtsSharePayload);
-                const prevLabel = shareBlurtsBtn.textContent;
-                shareBlurtsBtn.textContent = isEs ? "📋 ¡Blurts copiados!" : "📋 Blurts Copied!";
-                setTimeout(() => { shareBlurtsBtn.textContent = prevLabel; }, 2500);
-            }
-        };
-    }
-
-    // Challenge a Friend Button Logic
-    const challengeBtn = document.getElementById('challenge-friend-btn');
-    if (challengeBtn) {
-        challengeBtn.onclick = async () => {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: isEs ? 'Reto - Word Blurts!' : 'Challenge - Word Blurts!',
-                        text: challengeText,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Challenge dismissed or failed:", err);
-                }
-            } else {
-                await navigator.clipboard.writeText(challengeText);
-                const originalText = challengeBtn.textContent;
-                challengeBtn.textContent = isEs ? "⚔️ ¡Reto copiado!" : "⚔️ Challenge Copied!";
-                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
-            }
-        };
-    }
-}
-
+                const
 // ==========================================
 // AD & UTILITY MANAGEMENT
 // ==========================================
@@ -2145,21 +2101,28 @@ function adjustScore(team, delta) {
         const newScore = Math.max(0, current + delta);
         el.innerText = newScore;
 
+        const activeDaily = (typeof window.isDailyMode !== 'undefined' && window.isDailyMode) ||
+                            (typeof isDailyMode !== 'undefined' && isDailyMode);
+
+        const getCurrentRoundIndex = () => {
+            if (typeof dailyCurrentIndex === 'undefined') return 0;
+            const parsedIndex = parseInt(dailyCurrentIndex, 10);
+            // startNewRound() increments dailyCurrentIndex after selecting the prompt,
+            // so the active round being played is dailyCurrentIndex - 1 (clamped to 0..9).
+            return Math.max(0, Math.min(9, (Number.isFinite(parsedIndex) ? parsedIndex : 1) - 1));
+        };
+
         if (delta > 0) {
             if (typeof playSlideUp === 'function') {
                 playSlideUp();
             }
 
-            // If in Daily Mode and points were added (+), record green square & show per-round Blurt input
-            const activeDaily = (typeof window.isDailyMode !== 'undefined' && window.isDailyMode) ||
-                                (typeof isDailyMode !== 'undefined' && isDailyMode);
+            if (activeDaily) {
+                const roundIdx = getCurrentRoundIndex();
 
-            if (activeDaily && typeof dailyCurrentIndex !== 'undefined') {
-                const parsedIndex = parseInt(dailyCurrentIndex, 10);
-                // startNewRound() increments dailyCurrentIndex after selecting the prompt,
-                // so the active round being played is dailyCurrentIndex - 1 (clamped to 0..9).
-                const roundIdx = Math.max(0, Math.min(9, (Number.isFinite(parsedIndex) ? parsedIndex : 1) - 1));
-
+                if (!Array.isArray(window.dailyRoundScored)) {
+                    window.dailyRoundScored = Array(10).fill(false);
+                }
                 if (!window.dailyRoundAnswers || typeof window.dailyRoundAnswers !== 'object') {
                     window.dailyRoundAnswers = {};
                 }
@@ -2168,9 +2131,11 @@ function adjustScore(team, delta) {
                     window.dailyRoundScored[roundIdx] = true;
                 }
 
-                // Check if prompt container already has the answer input box for this round
+                // Create or re-bind the per-round Blurt input for the current round
                 const promptArea = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
-                if (promptArea && !document.getElementById('live-round-answer-input')) {
+                let liveInput = document.getElementById('live-round-answer-input');
+
+                if (promptArea && !liveInput) {
                     const inputWrapper = document.createElement('div');
                     inputWrapper.id = 'live-round-answer-input-wrapper';
                     inputWrapper.style.cssText = "margin-top: 14px; text-align: center;";
@@ -2178,11 +2143,16 @@ function adjustScore(team, delta) {
                         <input type="text" id="live-round-answer-input" placeholder="Tell us what you Blurted! (Optional)" style="width: 80%; max-width: 280px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 1rem; text-align: center;" />
                     `;
                     promptArea.appendChild(inputWrapper);
+                    liveInput = document.getElementById('live-round-answer-input');
+                }
 
-                    const liveInput = document.getElementById('live-round-answer-input');
+                if (liveInput) {
+                    liveInput.dataset.round = String(roundIdx);
                     liveInput.value = window.dailyRoundAnswers[roundIdx] || '';
                     liveInput.oninput = (e) => {
-                        window.dailyRoundAnswers[roundIdx] = e.target.value;
+                        const boundRound = parseInt(e.target.dataset.round, 10);
+                        const targetIdx = Number.isInteger(boundRound) ? boundRound : getCurrentRoundIndex();
+                        window.dailyRoundAnswers[targetIdx] = e.target.value;
                     };
                 }
             }
@@ -2190,6 +2160,11 @@ function adjustScore(team, delta) {
         } else if (delta < 0 && current > 0) {
             if (typeof playSlideDown === 'function') {
                 playSlideDown();
+            }
+
+            if (activeDaily && team === 'team1' && newScore === 0 && Array.isArray(window.dailyRoundScored)) {
+                const roundIdx = getCurrentRoundIndex();
+                window.dailyRoundScored[roundIdx] = false;
             }
         }
     }
@@ -2279,12 +2254,17 @@ function initWordBlurts() {
         };
     }
 
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+  const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.onclick = () => {
             if (window.isDailyMode && typeof initDailyMode === 'function') {
-                if (typeof dailyDeckPrompts === 'undefined' || !dailyDeckPrompts || dailyDeckPrompts.length === 0) {
-                    if (!initDailyMode()) return;
+                const hasDeck = Array.isArray(window.dailyDeckPrompts)
+                    ? window.dailyDeckPrompts.length > 0
+                    : (typeof dailyDeckPrompts !== 'undefined' && Array.isArray(dailyDeckPrompts) && dailyDeckPrompts.length > 0);
+
+                if (!hasDeck) {
+                    const initialized = initDailyMode();
+                    if (initialized === false) return;
                 }
             }
             if (typeof playRound === 'function') {
@@ -2389,24 +2369,25 @@ function showDailyResultsModal() {
     if (!modal) return;
 
     // 1. Retrieve or calculate actual game stats
-    const totalScore = window.dailyScore || 0; 
-    const totalTime = window.dailyTotalTime || 0; // seconds
+    const totalScore = Number(window.dailyScore ?? 0);
+    const totalTime = Number(window.dailyTotalTime ?? 0); // seconds
     const streak = parseInt(localStorage.getItem('wb_daily_streak') || '1', 10);
 
     // 2. Build the Emoji Matrix
     // Example: 🟩 for scored points, 🟨 for missed
     let emojiRow = "";
-    if (Array.isArray(window.dailyRoundResults)) {
+    if (Array.isArray(window.dailyRoundResults) && window.dailyRoundResults.length > 0) {
         emojiRow = window.dailyRoundResults.map(res => res ? "🟩" : "🟨").join("");
     } else {
-        emojiRow = "🟩".repeat(totalScore) + "🟨".repeat(Math.max(0, 10 - totalScore));
+        const roundsWithPoints = Math.min(10, Math.max(0, Number(window.dailyRoundsScored ?? (totalScore > 0 ? 1 : 0))));
+        emojiRow = "🟩".repeat(roundsWithPoints) + "🟨".repeat(10 - roundsWithPoints);
     }
 
-    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10 | Time: ${totalTime}s\nPlay free at WordBlurts.com`;
-    const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my time of ${totalTime}s?\nPlay free at WordBlurts.com`;
+    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore} pts | Time: ${totalTime}s\nPlay free at WordBlurts.com`;
+    const challengeText = `⚔️ I scored ${totalScore} pts in today's Daily Blurt! Can you beat my time of ${totalTime}s?\nPlay free at WordBlurts.com`;
 
     // 3. Update DOM Stats
-    document.getElementById('res-score').textContent = `${totalScore}/10`;
+    document.getElementById('res-score').textContent = `${totalScore} pts`;
     document.getElementById('res-time').textContent = `${totalTime}s`;
     document.getElementById('res-streak').textContent = `🔥 ${streak}`;
     document.getElementById('emoji-grid-display').textContent = emojiRow;
