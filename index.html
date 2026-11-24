@@ -1452,19 +1452,19 @@ footer {
                     <button id="dailyModeBtn" class="mode-btn rules-toggle-btn">📅 Daily Blurts</button>
                 </div>
 
-         <!-- PARTY / STREAM ROOM CODE BAR -->
-<div id="roomModeWrapper">
-    <button type="button" id="toggleRoomBarBtn" class="rules-toggle-btn" onclick="toggleRoomPanel()">
+      <!-- PARTY / STREAM ROOM CODE BAR -->
+<div id="roomModeWrapper" style="width: 100%; max-width: 100%; box-sizing: border-box; text-align: center;">
+    <button type="button" id="toggleRoomBarBtn" class="rules-toggle-btn" onclick="toggleRoomPanel()" style="max-width: 100%; white-space: normal; box-sizing: border-box;">
         📡 Party / Stream Room Code
     </button>
 
-    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 8px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; flex-wrap: nowrap; gap: 6px; justify-content: center; align-items: center; width: 100%;">
-            <input type="text" id="roomCodeInput" maxlength="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="flex: 1 1 auto; width: auto !important; min-width: 0 !important; max-width: none !important; padding: 6px 8px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.95rem; box-sizing: border-box;">
-            <button type="button" id="newRoomBtn" onclick="createNewRoom()" style="flex: 0 0 auto; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">💎 New</button>
-            <button type="button" id="shareRoomBtn" onclick="copyRoomLink()" style="flex: 0 0 auto; padding: 6px 10px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.82rem; white-space: nowrap;">🔗 Share</button>
+    <div id="roomPanel" style="display: none; margin-top: 6px; padding: 6px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
+        <div style="display: flex; flex-wrap: nowrap; gap: 4px; justify-content: center; align-items: center; width: 100%; box-sizing: border-box;">
+            <input type="text" id="roomCodeInput" maxlength="6" size="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="flex: 0 0 auto; width: 8.5ch !important; min-width: 0 !important; max-width: 8.5ch !important; padding: 6px 4px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 1px; font-size: 0.88rem; box-sizing: border-box;">
+            <button type="button" id="newRoomBtn" onclick="createNewRoom()" style="flex: 0 1 auto; min-width: 0; padding: 6px 7px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.78rem; white-space: nowrap;">💎 New</button>
+            <button type="button" id="shareRoomBtn" onclick="copyRoomLink()" style="flex: 0 1 auto; min-width: 0; padding: 6px 7px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.78rem; white-space: nowrap;">🔗 Share</button>
         </div>
-        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; text-align: center; word-wrap: break-word;">
+        <div id="roomStatusText" style="margin-top: 6px; font-size: 0.75rem; color: #94a3b8; text-align: center; word-wrap: break-word;">
             Enter the same code on all phones to sync!
         </div>
     </div>
