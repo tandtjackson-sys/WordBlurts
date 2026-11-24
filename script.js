@@ -2441,7 +2441,6 @@ window.playRound = playRound;
 window.startNewRound = startNewRound;
 window.adjustScore = adjustScore;
 window.resetScores = resetScores;
-window.showDailyResultsModal = showDailyResultsModal;
 
 if (typeof syncLanguageState === 'function') {
     window.syncLanguageState = syncLanguageState;
@@ -2452,6 +2451,7 @@ if (typeof applyFooterLanguage === 'function') {
 if (typeof applyRoomBarLanguage === 'function') {
     window.applyRoomBarLanguage = applyRoomBarLanguage;
 }
+
 
 function setGameMode(mode) {
     if (mode === 'daily') {
