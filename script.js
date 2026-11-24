@@ -830,11 +830,14 @@ window.setRoomCode = function(code) {
     window.activeRoomCode = clean;
 
     if (clean.length > 0) {
-        // Switch off Daily Mode if active so Room Mode takes priority
-        if (window.isDailyMode && typeof switchToClassicMode === 'function') {
+        // Set false FIRST so switchToClassicMode() sees the updated state
+        window.isDailyMode = false;
+        if (typeof switchToClassicMode === 'function') {
             switchToClassicMode();
         }
-        window.isDailyMode = false;
+        const yesterdayBtn = document.getElementById('yesterdayBlurtsBtn');
+        if (yesterdayBtn) yesterdayBtn.style.display = 'none';
+
         roomSeedState = hashRoomCode(clean);
         // Reset deck in identical order for all players
         comboDeck = generateDeck();
