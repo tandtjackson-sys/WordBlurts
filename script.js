@@ -1409,24 +1409,25 @@ function startTimer() {
                 }
             }
 
-            // Re-enable PLAY button for the next round
+             // Re-enable PLAY button for the next round (or switch to FINISH after Round 10)
             const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
             if (playBtn) {
                 playBtn.disabled = false;
                 playBtn.style.opacity = "1";
                 playBtn.style.cursor = "pointer";
-            }
 
-            // If Daily Mode just finished round 10, automatically trigger completion
-            if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
-                setTimeout(() => {
-                    if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
-                    if (typeof showDailyResultsModal === 'function') showDailyResultsModal();
-                }, 1200);
+                if (window.isDailyMode && typeof dailyCurrentIndex !== 'undefined' && dailyCurrentIndex >= 10) {
+                    const activeLang = window.currentLang || 'en';
+                    playBtn.textContent = (activeLang === 'es') ? '🏁 ¡TERMINAR Y VER RESULTADOS!' : '🏁 FINISH & SEE RESULTS!';
+                    playBtn.onclick = () => {
+                        if (typeof handleDailyCompletion === 'function') handleDailyCompletion();
+                    };
+                }
             }
         }
     }, 100);
 }
+
 
 // ==========================================
 // 7b. DAILY & CHALLENGE MODE ENGINE
@@ -1781,7 +1782,10 @@ function showDailyResults(totalScore, streak, resultsArray) {
         (typeof currentLang !== 'undefined' ? currentLang : 'en');
     const isEs = activeLang === 'es';
 
-    const numericScore = Math.max(0, Math.min(10, parseInt(totalScore, 10) || 0));
+    const totalAnswers = Math.max(0, parseInt(totalScore, 10) || 0);
+    const roundsScored = Array.isArray(window.dailyRoundScored)
+        ? window.dailyRoundScored.filter(Boolean).length
+        : Math.min(10, totalAnswers);
     const streakVal = parseInt(localStorage.getItem(STORAGE_KEYS.STREAK) || streak || '1', 10);
 
     // Determine the day's date string (Eastern Time, U.S.A.) for spoiler lock tracking
@@ -1809,28 +1813,30 @@ function showDailyResults(totalScore, streak, resultsArray) {
     if (Array.isArray(window.dailyRoundScored) && window.dailyRoundScored.some(Boolean)) {
         emojiRow = Array.from({ length: 10 }, (_, idx) => (window.dailyRoundScored[idx] ? "🟩" : "🟨")).join("");
     } else {
-        emojiRow = "🟩".repeat(numericScore) + "🟨".repeat(10 - numericScore);
+        emojiRow = "🟩".repeat(roundsScored) + "🟨".repeat(10 - roundsScored);
     }
 
-    const scoreTagline = numericScore === 10
+    const scoreTagline = roundsScored === 10
         ? (isEs ? '¡Ronda perfecta!' : 'Clean sweep!')
-        : numericScore >= 7
+        : roundsScored >= 7
             ? (isEs ? '¡Muy rápido!' : 'Sharp blurting!')
-            : numericScore >= 4
+            : roundsScored >= 4
                 ? (isEs ? '¡Buena partida!' : 'Solid run!')
                 : (isEs ? '¡Día difícil!' : 'Tough board today!');
 
     const richShareText = isEs
-        ? `🧩 Word Blurts! Diario Blurts (${savedGameDateStr})\n${emojiRow}\nPuntuación: ${numericScore}/10 • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
-        : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nScore: ${numericScore}/10 • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
+        ? `🧩 Word Blurts! Diario Blurts (${savedGameDateStr})\n${emojiRow}\nRespuestas correctas: ${totalAnswers} (${roundsScored}/10 rondas) • Racha: 🔥 ${streakVal}\n${scoreTagline}\nJuega gratis: https://wordblurts.com`
+        : `🧩 Word Blurts! Daily Blurts (${savedGameDateStr})\n${emojiRow}\nCorrect Answers: ${totalAnswers} (${roundsScored}/10 rounds) • Streak: 🔥 ${streakVal}\n${scoreTagline}\nPlay free: https://wordblurts.com`;
 
     const challengeText = isEs
-        ? `⚔️ ¡Conseguí ${numericScore}/10 en el Blurts Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
-        : `⚔️ I scored ${numericScore}/10 in today's Daily Blurts! Can you beat my score?\nPlay for free at WordBlurts.com`;
+        ? `⚔️ ¡Conseguí ${totalAnswers} respuestas (${roundsScored}/10 rondas) en el Blurts Diario de hoy! ¿Puedes superar mi puntuación?\nJuega gratis en WordBlurts.com`
+        : `⚔️ I scored ${totalAnswers} answers (${roundsScored}/10 rounds) in today's Daily Blurts! Can you beat my score?\nPlay for free at WordBlurts.com`;
 
-    // Update DOM Stats (Hide the time stat box completely)
+    // Update DOM Stats: Total Correct Answers primary, Rounds Scored secondary
     const scoreEl = document.getElementById('res-score');
-    if (scoreEl) scoreEl.textContent = `${numericScore}/10`;
+    if (scoreEl) {
+        scoreEl.innerHTML = `${totalAnswers} <span style="font-size: 0.72em; opacity: 0.85;">(${roundsScored}/10)</span>`;
+    }
 
     const timeEl = document.getElementById('res-time');
     if (timeEl && timeEl.parentElement) {
@@ -1839,6 +1845,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
 
     const streakEl = document.getElementById('res-streak');
     if (streakEl) streakEl.textContent = `🔥 ${streakVal}`;
+
 
     // Keep all 10 emoji squares on a single crisp line
     const emojiEl = document.getElementById('emoji-grid-display');
@@ -1902,7 +1909,8 @@ function showDailyResults(totalScore, streak, resultsArray) {
                     STORAGE_KEYS.COMPLETED_DATA,
                     JSON.stringify({
                         dateStr: savedGameDateStr,
-                        score: numericScore,
+                       score: totalAnswers,
+
                         resultsArray: orderedAnswers,
                         scoredRounds: Array.isArray(window.dailyRoundScored) ? window.dailyRoundScored : [],
                         timeSpent: 0
@@ -2426,95 +2434,7 @@ function setGameMode(mode) {
         document.getElementById('dailyModeBtn').classList.remove('active');
     }
 }
-function showDailyResultsModal() {
-    const modal = document.getElementById('results-modal');
-    if (!modal) return;
 
-    // 1. Retrieve or calculate actual game stats
-    const totalScore = window.dailyScore || 0; 
-    const totalTime = window.dailyTotalTime || 0; // seconds
-    const streak = parseInt(localStorage.getItem('wb_daily_streak') || '1', 10);
-
-    // 2. Build the Emoji Matrix
-    // Example: 🟩 for scored points, 🟨 for missed
-    let emojiRow = "";
-    if (Array.isArray(window.dailyRoundResults)) {
-        emojiRow = window.dailyRoundResults.map(res => res ? "🟩" : "🟨").join("");
-    } else {
-        emojiRow = "🟩".repeat(totalScore) + "🟨".repeat(Math.max(0, 10 - totalScore));
-    }
-
-    const shareText = `🧩 Word Blurts! Daily\n${emojiRow}\nScore: ${totalScore}/10 | Time: ${totalTime}s\nPlay free at WordBlurts.com`;
-    const challengeText = `⚔️ I scored ${totalScore}/10 in today's Daily Blurt! Can you beat my time of ${totalTime}s?\nPlay free at WordBlurts.com`;
-
-    // 3. Update DOM Stats
-    document.getElementById('res-score').textContent = `${totalScore}/10`;
-    document.getElementById('res-time').textContent = `${totalTime}s`;
-    document.getElementById('res-streak').textContent = `🔥 ${streak}`;
-    document.getElementById('emoji-grid-display').textContent = emojiRow;
-
-    // 4. Display Modal
-    modal.style.display = 'flex';
-
-    // 5. Wire Close/Dismiss Logic
-    const closeBtn = document.getElementById('close-modal-btn');
-    if (closeBtn) {
-        closeBtn.onclick = () => { modal.style.display = 'none'; };
-    }
-
-    // Dismiss when clicking background outside modal-card
-    modal.onclick = (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-    // 6. Share Results Button Logic
-    const shareBtn = document.getElementById('share-results-btn');
-    if (shareBtn) {
-        shareBtn.onclick = async () => {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Word Blurts! Daily',
-                        text: shareText,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Share dismissed or failed:", err);
-                }
-            } else {
-                await navigator.clipboard.writeText(shareText);
-                const originalText = shareBtn.textContent;
-                shareBtn.textContent = "📋 Copied to Clipboard!";
-                setTimeout(() => { shareBtn.textContent = originalText; }, 2500);
-            }
-        };
-    }
-
-    // 7. Challenge a Friend Button Logic
-    const challengeBtn = document.getElementById('challenge-friend-btn');
-    if (challengeBtn) {
-        challengeBtn.onclick = async () => {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Challenge - Word Blurts!',
-                        text: challengeText,
-                        url: 'https://wordblurts.com'
-                    });
-                } catch (err) {
-                    console.log("Challenge dismissed or failed:", err);
-                }
-            } else {
-                await navigator.clipboard.writeText(challengeText);
-                const originalText = challengeBtn.textContent;
-                challengeBtn.textContent = "⚔️ Challenge Copied!";
-                setTimeout(() => { challengeBtn.textContent = originalText; }, 2500);
-            }
-        };
-    }
-}
 // ==========================================
 // 11. GLOBAL WINDOW EXPORTS
 // ==========================================
