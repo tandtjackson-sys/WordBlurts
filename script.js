@@ -1765,6 +1765,7 @@ function getDailyStatus() {
 
 function saveDailyResults(score, resultsArray, timeSpent = 0) {
     const { dateStr } = getDaySeed();
+    const todayEasternStr = getEasternDateStr();
     const status = getDailyStatus();
     if (status.isCompletedToday) return status.streak;
 
@@ -1779,7 +1780,16 @@ function saveDailyResults(score, resultsArray, timeSpent = 0) {
 
     localStorage.setItem(STORAGE_KEYS.STREAK, newStreak.toString());
     localStorage.setItem(STORAGE_KEYS.LAST_DATE, dateStr);
-    localStorage.setItem(STORAGE_KEYS.COMPLETED_DATA, JSON.stringify({ score, resultsArray, timeSpent }));
+    localStorage.setItem(
+        STORAGE_KEYS.COMPLETED_DATA,
+        JSON.stringify({
+            dateStr: todayEasternStr,
+            score,
+            resultsArray,
+            scoredRounds: Array.isArray(window.dailyRoundScored) ? window.dailyRoundScored : [],
+            timeSpent
+        })
+    );
     return newStreak;
 }
 
@@ -1891,7 +1901,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
     const streakEl = document.getElementById('res-streak');
     if (streakEl) streakEl.textContent = `🔥 ${streakVal}`;
 
-
     // Keep all 10 emoji squares on a single crisp line
     const emojiEl = document.getElementById('emoji-grid-display');
     if (emojiEl) {
@@ -1954,8 +1963,7 @@ function showDailyResults(totalScore, streak, resultsArray) {
                     STORAGE_KEYS.COMPLETED_DATA,
                     JSON.stringify({
                         dateStr: savedGameDateStr,
-                       score: totalAnswers,
-
+                        score: totalAnswers,
                         resultsArray: orderedAnswers,
                         scoredRounds: Array.isArray(window.dailyRoundScored) ? window.dailyRoundScored : [],
                         timeSpent: 0
@@ -1963,7 +1971,8 @@ function showDailyResults(totalScore, streak, resultsArray) {
                 );
             };
         });
-    }
+
+        }
 
     // Spoiler-locked "Share Your Blurts!" button + live countdown to Midnight, Eastern Time, U.S.A.
     let shareBlurtsWrap = document.getElementById('share-your-blurts-wrap');
@@ -2044,7 +2053,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
         streakEl.style.fontWeight = '800';
     }
 
-    // Keep all 10 squares on a single row while making them noticeably larger
     if (emojiEl) {
         emojiEl.style.whiteSpace = 'nowrap';
         emojiEl.style.fontSize = '1.5rem';
@@ -2074,7 +2082,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
         }
     });
 
-    // Bump "Come back tomorrow for the next Daily Blurt!" by ~15%
     if (card) {
         card.querySelectorAll('p, div, span').forEach(el => {
             const txt = (el.textContent || '').trim();
@@ -2088,7 +2095,6 @@ function showDailyResults(totalScore, streak, resultsArray) {
         });
     }
 
-    // Keep the timer line at 1.15rem and bump the Eastern Time note below it to 1.1rem
     if (countdownEl) {
         countdownEl.style.fontSize = '1.15rem';
         countdownEl.style.lineHeight = '1.45';
@@ -2160,8 +2166,8 @@ function showDailyResults(totalScore, streak, resultsArray) {
             }
 
             const blurtsSharePayload = isEs
-                ? `🗣️ Mis Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nJuega gratis: https://wordblurts.com`
-                : `🗣️ My Blurts (${savedGameDateStr}) — ${numericScore}/10\n${emojiRow}\n${lines.join('\n')}\nPlay free: https://wordblurts.com`;
+                ? `🗣️ Mis Blurts (${savedGameDateStr}) — ${totalAnswers} respuestas (${roundsScored}/10)\n${emojiRow}\n${lines.join('\n')}\nJuega gratis: https://wordblurts.com`
+                : `🗣️ My Blurts (${savedGameDateStr}) — ${totalAnswers} answers (${roundsScored}/10)\n${emojiRow}\n${lines.join('\n')}\nPlay free: https://wordblurts.com`;
 
             if (navigator.share) {
                 try {
@@ -2191,12 +2197,13 @@ function showDailyResults(totalScore, streak, resultsArray) {
                     await navigator.share({
                         title: isEs ? 'Reto - Word Blurts!' : 'Challenge - Word Blurts!',
                         text: challengeText,
-                        url: 'https://wordblurts.com'
+
+                                                url: 'https://wordblurts.com'
                     });
                 } catch (err) {
                     console.log("Challenge dismissed or failed:", err);
                 }
-            } else {
+            } else if (navigator.clipboard) {
                 await navigator.clipboard.writeText(challengeText);
                 const originalText = challengeBtn.textContent;
                 challengeBtn.textContent = isEs ? "⚔️ ¡Reto copiado!" : "⚔️ Challenge Copied!";
@@ -2218,7 +2225,7 @@ function triggerInterstitialAd() {
 }
 
 function refreshAds() {
-    if (document.hidden) return; // Never refresh ads while tab or phone screen is hidden
+    if (document.hidden) return;
     const now = Date.now();
     if (now - lastAdRefreshTime >= AD_REFRESH_INTERVAL) {
         if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
@@ -2229,7 +2236,6 @@ function refreshAds() {
         }
     }
 }
-
 
 window.dailyRoundScored = window.dailyRoundScored || Array(10).fill(false);
 
@@ -2245,14 +2251,11 @@ function adjustScore(team, delta) {
                 playSlideUp();
             }
 
-            // If in Daily Mode and points were added (+), record green square & show per-round Blurt input
             const activeDaily = (typeof window.isDailyMode !== 'undefined' && window.isDailyMode) ||
                                 (typeof isDailyMode !== 'undefined' && isDailyMode);
 
             if (activeDaily && typeof dailyCurrentIndex !== 'undefined') {
                 const parsedIndex = parseInt(dailyCurrentIndex, 10);
-                // startNewRound() increments dailyCurrentIndex after selecting the prompt,
-                // so the active round being played is dailyCurrentIndex - 1 (clamped to 0..9).
                 const roundIdx = Math.max(0, Math.min(9, (Number.isFinite(parsedIndex) ? parsedIndex : 1) - 1));
 
                 if (!window.dailyRoundAnswers || typeof window.dailyRoundAnswers !== 'object') {
@@ -2263,7 +2266,6 @@ function adjustScore(team, delta) {
                     window.dailyRoundScored[roundIdx] = true;
                 }
 
-                // Check if prompt container already has the answer input box for this round
                 const promptArea = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
                 if (promptArea && !document.getElementById('live-round-answer-input')) {
                     const inputWrapper = document.createElement('div');
@@ -2312,366 +2314,6 @@ function resetScores() {
 // ==========================================
 // 9. EVENT LISTENERS & INITIALIZATION
 // ==========================================
-
-function initWordBlurts() {
-    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
-    window.currentLang = savedLang;
-    if (typeof switchLanguage === 'function') {
-        switchLanguage(savedLang);
-    }
-
-    const randomModeBtn = document.getElementById('randomModeBtn');
-    const dailyModeBtn = document.getElementById('dailyModeBtn');
-
-    if (randomModeBtn && dailyModeBtn) {
-        randomModeBtn.style.opacity = "1";
-        dailyModeBtn.style.opacity = "0.7"; // Balanced inactive state
-
-        randomModeBtn.onclick = () => {
-            window.isDailyMode = false;
-            randomModeBtn.classList.add('active');
-            dailyModeBtn.classList.remove('active');
-            randomModeBtn.style.opacity = "1";
-            dailyModeBtn.style.opacity = "0.7";
-            if (typeof stopEverything === 'function') stopEverything();
-
-            const promptEl = document.getElementById('promptDisplay');
-            if (promptEl) {
-                promptEl.innerHTML = `<div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
-                    ${window.currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
-                </div>`;
-            }
-        };
-
-        dailyModeBtn.onclick = () => {
-            window.isDailyMode = true;
-            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
-            if (!isAvailable) {
-                window.isDailyMode = false;
-                return;
-            }
-            dailyModeBtn.classList.add('active');
-            randomModeBtn.classList.remove('active');
-            dailyModeBtn.style.opacity = "1";
-            randomModeBtn.style.opacity = "0.7";
-            if (typeof stopEverything === 'function') stopEverything();
-
-            const promptEl = document.getElementById('promptDisplay');
-            if (promptEl) {
-                promptEl.style.display = 'flex';
-                promptEl.style.flexDirection = 'column';
-                promptEl.style.alignItems = 'center';
-                promptEl.style.justifyContent = 'center';
-                
-                const line1 = window.currentLang === 'es' ? '¡Blurt Diario listo!' : 'Daily Blurts are ready!';
-                const line2 = window.currentLang === 'es' ? 'Presiona Jugar para empezar la Ronda 1.' : 'Press Play to start Round 1.';
-
-                promptEl.innerHTML = `
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%;">${line1}</div>
-                    <div style="font-size: 1.2rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">${line2}</div>
-                `;
-            }
-        };
-    }
-
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
-    if (playBtn) {
-        playBtn.onclick = () => {
-            if (window.isDailyMode && typeof initDailyMode === 'function') {
-                if (typeof dailyDeckPrompts === 'undefined' || !dailyDeckPrompts || dailyDeckPrompts.length === 0) {
-                    if (!initDailyMode()) return;
-                }
-            }
-            if (typeof playRound === 'function') {
-                playRound();
-            }
-        };
-    }
-}
-
-// Execute immediately since script is at the bottom of the body
-initWordBlurts();
-
-
-// ==========================================
-// 10. PWA INSTALL PROMPT & SERVICE WORKER
-// ==========================================
-let deferredPrompt = null;
-const pwaBanner = document.getElementById('pwaInstallBanner');
-const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-const pwaDismissBtn = document.getElementById('pwaDismissBtn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
-        pwaBanner.classList.remove('hidden');
-    }
-});
-
-if (pwaInstallBtn) {
-    pwaInstallBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        if (pwaBanner) pwaBanner.classList.add('hidden');
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-    });
-}
-
-if (pwaDismissBtn) {
-    pwaDismissBtn.addEventListener('click', () => {
-        if (pwaBanner) pwaBanner.classList.add('hidden');
-        localStorage.setItem('pwaPromptDismissed', Date.now());
-    });
-}
-
-window.addEventListener('appinstalled', () => {
-    if (pwaBanner) pwaBanner.classList.add('hidden');
-    deferredPrompt = null;
-});
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => {});
-    });
-}
-
-// ==========================================
-// 11. GLOBAL WINDOW EXPORTS
-// ==========================================
-window.toggleLanguage = toggleLanguage;
-window.switchLanguage = switchLanguage;
-window.toggleRules = toggleRules;
-window.openAboutModal = openAboutModal;
-window.playRound = playRound;
-window.startNewRound = startNewRound;
-window.adjustScore = adjustScore;
-window.resetScores = resetScores;
-
-if (typeof syncLanguageState === 'function') {
-    window.syncLanguageState = syncLanguageState;
-}
-if (typeof applyFooterLanguage === 'function') {
-    window.applyFooterLanguage = applyFooterLanguage;
-}
-if (typeof applyRoomBarLanguage === 'function') {
-    window.applyRoomBarLanguage = applyRoomBarLanguage;
-}
-
-
-function setGameMode(mode) {
-    if (mode === 'daily') {
-        if (typeof initDailyMode === 'function') {
-            const isAvailable = initDailyMode();
-            if (!isAvailable) {
-                isDailyMode = false;
-                return;
-            }
-        }
-        isDailyMode = true;
-        document.getElementById('dailyModeBtn').classList.add('active');
-        document.getElementById('randomModeBtn').classList.remove('active');
-        if (typeof playRound === 'function') playRound();
-    } else {
-        isDailyMode = false;
-        document.getElementById('randomModeBtn').classList.add('active');
-        document.getElementById('dailyModeBtn').classList.remove('active');
-    }
-}
-
-// ==========================================
-// 11. GLOBAL WINDOW EXPORTS
-// ==========================================
-window.toggleLanguage = toggleLanguage;
-window.switchLanguage = switchLanguage;
-window.toggleRules = toggleRules;
-window.openAboutModal = openAboutModal;
-window.playRound = playRound;
-window.startNewRound = startNewRound;
-window.adjustScore = adjustScore;
-window.resetScores = resetScores;
-window.showDailyResultsModal = showDailyResultsModal;
-window.toggleFullScreen = toggleFullScreen; // <-- Make sure this is here!
-
-// Automatically update button text when fullscreen state changes
-function updateFullscreenBtnText() {
-    const fsBtn = document.getElementById('fullscreenToggleBtn');
-    if (!fsBtn) return;
-    
-    const span = fsBtn.querySelector('span') || fsBtn;
-    const isFull = !!document.fullscreenElement;
-    
-    if (typeof currentLang !== 'undefined' && currentLang === 'es') {
-        span.textContent = isFull ? '🖵 Salir de Pantalla Completa' : '🖵 Pantalla Completa';
-    } else {
-        span.textContent = isFull ? '🖵 Exit Fullscreen' : '🖵 Fullscreen';
-    }
-}
-
-document.addEventListener('fullscreenchange', updateFullscreenBtnText);
-document.addEventListener('webkitfullscreenchange', updateFullscreenBtnText);
-// Bulletproof Word Blurts! UI synchronization
-function applyWordBlurtsFixes() {
-    // Detect Daily Mode reliably via variable OR active Daily button state
-    const dailyBtn = document.getElementById('daily-mode-btn') || document.getElementById('dailyModeBtn') || document.querySelector('[data-mode="daily"]');
-    const isDaily = (typeof isDailyMode !== 'undefined' && Boolean(isDailyMode)) || 
-                    (typeof window.isDailyMode !== 'undefined' && Boolean(window.isDailyMode)) ||
-                    (dailyBtn && (dailyBtn.classList.contains('active') || dailyBtn.getAttribute('aria-pressed') === 'true'));
-
-    const isEs = (window.currentLang === 'es') || (typeof currentLang !== 'undefined' && currentLang === 'es');
-    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.team-label') || document.querySelector('.score-label');
-    const team2ScoreEl = document.getElementById('team2Score') || document.getElementById('score2') || document.getElementById('player2Score');
-    const team2Card = team2ScoreEl ? (team2ScoreEl.closest('.team-score-card') || team2ScoreEl.parentElement) : document.querySelectorAll('.team-score-card')[1];
-    const allScoreCards = document.querySelectorAll('.team-score-card');
-
-    if (isDaily) {
-        // Daily Mode: Hide Team 2 completely, center/constrain solo card, update label
-        if (team2Card) team2Card.style.setProperty('display', 'none', 'important');
-        
-        allScoreCards.forEach(card => {
-            if (card !== team2Card) {
-                card.style.maxWidth = '380px';
-                card.style.margin = '0 auto';
-                card.style.width = '100%';
-            }
-        });
-
-        if (scoreLabel) scoreLabel.textContent = isEs ? "Puntuación total hasta ahora:" : "Total score so far:";
-    } else {
-        // Classic Mode: Force-restore Team 2 card and reset sizing
-        if (team2Card) {
-            team2Card.style.removeProperty('display');
-            team2Card.hidden = false;
-            team2Card.classList.remove('hidden');
-        }
-        
-        allScoreCards.forEach(card => {
-            card.style.removeProperty('display');
-            card.style.maxWidth = '';
-            card.style.margin = '';
-            card.style.width = '';
-        });
-
-        if (scoreLabel) scoreLabel.textContent = isEs ? "Jugador / Equipo 1" : "Player / Team 1";
-    }
-
-    // Fix the "Tell us what you Blurted! (Optional)" input box text clipping
-    const guessInput = document.querySelector('input[type="text"]') || document.querySelector('.guess-input') || document.getElementById('guessInput');
-    if (guessInput) {
-        guessInput.style.width = '100%';
-        guessInput.style.maxWidth = '340px';
-        guessInput.style.minWidth = '280px';
-        guessInput.style.boxSizing = 'border-box';
-        guessInput.style.padding = '10px 16px';
-        guessInput.style.fontSize = '14px';
-    }
-}
-
-// Run on load and restore saved language automatically
-document.addEventListener('DOMContentLoaded', () => {
-    const savedLang = (localStorage.getItem("wordblurts_lang") === "es") ? "es" : "en";
-
-    if (typeof syncLanguageState === 'function') {
-        syncLanguageState(savedLang);
-    } else {
-        window.currentLang = savedLang;
-        if (typeof currentLang !== 'undefined') {
-            currentLang = savedLang;
-        }
-    }
-
-    if (savedLang === 'es' && typeof switchLanguage === 'function') {
-        switchLanguage('es');
-    } else {
-        if (typeof updateStaticUI === 'function') {
-            updateStaticUI();
-        }
-        if (typeof applyFooterLanguage === 'function') {
-            applyFooterLanguage(savedLang);
-        }
-        if (typeof applyRoomBarLanguage === 'function') {
-            applyRoomBarLanguage(savedLang);
-        }
-    }
-
-    if (typeof updateFullscreenBtnText === 'function') {
-        updateFullscreenBtnText();
-    }
-
-    if (typeof applyWordBlurtsFixes === 'function') {
-        applyWordBlurtsFixes();
-        setTimeout(applyWordBlurtsFixes, 200);
-    }
-});
-
-// Continuously sync in the background so mode changes (Daily <-> Classic) apply instantly
-setInterval(() => {
-    if (typeof applyWordBlurtsFixes === 'function') {
-        applyWordBlurtsFixes();
-    }
-}, 300);
-
-// Also trigger immediately on any click
-document.addEventListener('click', () => {
-    setTimeout(() => {
-        if (typeof applyWordBlurtsFixes === 'function') {
-            applyWordBlurtsFixes();
-        }
-    }, 50);
-});
-
-// ==========================================
-// iOS Audio & Speech Synthesis Safety Net
-// ==========================================
-
-window.iosAudioUnlocked = window.iosAudioUnlocked || false;
-
-function unlockIOSAudioAndSpeech() {
-    if (iosAudioUnlocked) return;
-
-    try {
-        // 1. Unlock Web Audio API context safely
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            const audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-
-        // 2. Prime Speech Synthesis ONLY on iOS Safari (protects Android/Windows)
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (isIOS && 'speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const dummy = new SpeechSynthesisUtterance('');
-            dummy.volume = 0;
-            window.speechSynthesis.speak(dummy);
-        }
-    } catch (err) {
-        console.log("Audio unlock safe fallback:", err);
-    }
-
-    iosAudioUnlocked = true;
-}
-
-// Hook it directly into your game's Play button safely
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        const playButton = document.getElementById('playButton') || document.querySelector('.play-btn') || document.querySelector('#play-btn');
-        if (playButton) {
-            playButton.addEventListener('click', () => {
-                unlockIOSAudioAndSpeech();
-            }, { once: true });
-        }
-    } catch (e) {
-        console.warn("Play button listener warning:", e);
-    }
-});
-// ==========================================
-// Game State Reset Helper (Fixes Mode Switch Lockups)
-// ==========================================
 function resetGameState() {
     if (typeof countdownInterval !== 'undefined' && countdownInterval !== null) {
         clearInterval(countdownInterval);
@@ -2695,130 +2337,213 @@ function resetGameState() {
     if (typeof syncYesterdayBlurtsButton === 'function') {
         syncYesterdayBlurtsButton();
     }
-
-    console.log("Game state successfully reset for clean mode switch.");
 }
 
-
-// Hook this reset into your mode buttons safely once DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const modeButtons = document.querySelectorAll('.mode-btn, #classicBtn, #dailyBtn');
-    modeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            resetGameState();
-        });
-    });
-});
-// ==========================================
-// DAILY MODE ENGINE (Date-Seeded & Persistence Locked)
-// ==========================================
-
-let isDailyModeActive = false;
-let currentDailyDate = null;
-
-function loadDailyMode() {
-    if (typeof setGameMode === 'function') {
-        setGameMode('daily');
-        return;
+function initWordBlurts() {
+    const savedLang = localStorage.getItem("wordblurts_lang") || "en";
+    window.currentLang = savedLang;
+    if (typeof switchLanguage === 'function') {
+        switchLanguage(savedLang);
     }
 
-
-    if (playBtn) {
-        playBtn.disabled = false;
-        playBtn.style.opacity = "1";
-        playBtn.style.cursor = "pointer";
-    }
-}
-
-function completeDailyChallenge() {
-    if (isDailyModeActive && currentDailyDate) {
-        localStorage.setItem(`wordblurts_daily_completed_${currentDailyDate}`, 'true');
-    }
-}
-// ==========================================
-// MODE TOGGLE EVENT LISTENERS
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
     const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
 
-    if (randomModeBtn) {
-        randomModeBtn.addEventListener('click', () => {
-            // Switch active classes visually
-            randomModeBtn.classList.add('active');
-            if (dailyModeBtn) dailyModeBtn.classList.remove('active');
+    if (randomModeBtn && dailyModeBtn) {
+        randomModeBtn.style.opacity = "1";
+        dailyModeBtn.style.opacity = "0.7";
 
-            // Deactivate daily mode flag and reset state for classic play
-            isDailyModeActive = false;
-            if (typeof resetGameState === 'function') {
-                resetGameState();
+        randomModeBtn.onclick = () => {
+            resetGameState();
+            setGameMode('classic');
+            randomModeBtn.style.opacity = "1";
+            dailyModeBtn.style.opacity = "0.7";
+            if (typeof stopEverything === 'function') stopEverything();
+
+            const promptEl = document.getElementById('promptDisplay');
+            if (promptEl) {
+                promptEl.innerHTML = `<div style="font-size: 1.5rem; color: #94a3b8; text-align: center;">
+                    ${window.currentLang === 'es' ? '¡Presiona Jugar para comenzar!' : 'Press Play to Start!'}
+                </div>`;
             }
-            // Trigger your standard random/classic prompt generator here if needed:
-            // if (typeof loadNewPrompt === 'function') loadNewPrompt();
-        });
-    }
+        };
 
-    if (dailyModeBtn) {
-        dailyModeBtn.addEventListener('click', () => {
-            // Switch active classes visually
+        dailyModeBtn.onclick = () => {
+            resetGameState();
+            window.isDailyMode = true;
+            isDailyMode = true;
+            const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
+            if (!isAvailable) {
+                window.isDailyMode = false;
+                isDailyMode = false;
+                syncYesterdayBlurtsButton();
+                return;
+            }
+            const team2Card = document.querySelector('.team-score-card:nth-child(2)');
+            if (team2Card) team2Card.style.display = 'none';
+
             dailyModeBtn.classList.add('active');
-            if (randomModeBtn) randomModeBtn.classList.remove('active');
-
-            // Load the date-seeded daily challenge
-            loadDailyMode();
-        });
+            randomModeBtn.classList.remove('active');
+            dailyModeBtn.style.opacity = "1";
+            randomModeBtn.style.opacity = "0.7";
+            if (typeof stopEverything === 'function') stopEverything();
+            syncYesterdayBlurtsButton();
+        };
     }
-});
-window.currentLang = localStorage.getItem('wordblurts_lang') === 'es' ? 'es' : 'en';
 
-
-
-function updateLanguage(lang) {
-    const cleanLang = (lang === 'es') ? 'es' : 'en';
-    const t = translations[cleanLang];
-    if (!t) return;
-
-    window.currentLang = cleanLang;
     if (typeof syncYesterdayBlurtsButton === 'function') {
         syncYesterdayBlurtsButton();
     }
-    localStorage.setItem('wordblurts_lang', cleanLang);
+}
 
-    const setText = (id, value) => {
-        const el = document.getElementById(id);
-        if (el && value !== undefined) {
-            el.textContent = value;
+initWordBlurts();
+
+// ==========================================
+// 10. PWA INSTALL PROMPT & SERVICE WORKER
+// ==========================================
+let deferredPrompt = null;
+const pwaBanner = document.getElementById('pwaInstallBanner');
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const pwaDismissBtn = document.getElementById('pwaDismissBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('pwaPromptDismissed') && pwaBanner) {
+        pwaBanner.classList.remove('hidden');
+    }
+});
+
+if (pwaInstallBtn) {
+    pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        if (pwaBanner) pwaBanner.classList.add('hidden');
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+    });
+}
+
+if (pwaDismissBtn) {
+    pwaDismissBtn.addEventListener('click', () => {
+        if (pwaBanner) pwaBanner.classList.add('hidden');
+        localStorage.setItem('pwaPromptDismissed', Date.now());
+    });
+}
+
+window.addEventListener('appinstalled', () => {
+    if (pwaBanner) pwaBanner.classList.add('hidden');
+    deferredPrompt = null;
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {});
+    });
+}
+
+// ==========================================
+// 11. GLOBAL WINDOW EXPORTS & UI SYNC
+// ==========================================
+window.toggleLanguage = toggleLanguage;
+window.switchLanguage = switchLanguage;
+window.toggleRules = toggleRules;
+window.openAboutModal = openAboutModal;
+window.playRound = playRound;
+window.startNewRound = startNewRound;
+window.adjustScore = adjustScore;
+window.resetScores = resetScores;
+window.toggleFullScreen = toggleFullScreen;
+
+if (typeof syncLanguageState === 'function') {
+    window.syncLanguageState = syncLanguageState;
+}
+if (typeof applyFooterLanguage === 'function') {
+    window.applyFooterLanguage = applyFooterLanguage;
+}
+if (typeof applyRoomBarLanguage === 'function') {
+    window.applyRoomBarLanguage = applyRoomBarLanguage;
+}
+
+function applyWordBlurtsFixes() {
+    const dailyBtn = document.getElementById('daily-mode-btn') || document.getElementById('dailyModeBtn') || document.querySelector('[data-mode="daily"]');
+    const isDaily = (typeof isDailyMode !== 'undefined' && Boolean(isDailyMode)) || 
+                    (typeof window.isDailyMode !== 'undefined' && Boolean(window.isDailyMode)) ||
+                    (dailyBtn && (dailyBtn.classList.contains('active') || dailyBtn.getAttribute('aria-pressed') === 'true'));
+
+    const isEs = (window.currentLang === 'es') || (typeof currentLang !== 'undefined' && currentLang === 'es');
+    const scoreLabel = document.getElementById('score-label-1') || document.querySelector('.team-label') || document.querySelector('.score-label');
+    const team2ScoreEl = document.getElementById('team2Score') || document.getElementById('score2') || document.getElementById('player2Score');
+    const team2Card = team2ScoreEl ? (team2ScoreEl.closest('.team-score-card') || team2ScoreEl.parentElement) : document.querySelectorAll('.team-score-card')[1];
+    const allScoreCards = document.querySelectorAll('.team-score-card');
+
+    if (isDaily) {
+        if (team2Card) team2Card.style.setProperty('display', 'none', 'important');
+        allScoreCards.forEach(card => {
+            if (card !== team2Card) {
+                card.style.maxWidth = '380px';
+                card.style.margin = '0 auto';
+                card.style.width = '100%';
+            }
+        });
+        if (scoreLabel) scoreLabel.textContent = isEs ? "Puntuación total hasta ahora:" : "Total score so far:";
+    } else {
+        if (team2Card) {
+            team2Card.style.removeProperty('display');
+            team2Card.hidden = false;
+            team2Card.classList.remove('hidden');
         }
-    };
+        allScoreCards.forEach(card => {
+            card.style.removeProperty('display');
+            card.style.maxWidth = '';
+            card.style.margin = '';
+            card.style.width = '';
+        });
+        if (scoreLabel) scoreLabel.textContent = isEs ? "Jugador / Equipo 1" : "Player / Team 1";
+    }
 
-    setText('rulesText', t.rulesText);
-    setText('aboutText', t.aboutText);
-    setText('fullscreenText', t.fullscreenText);
-    setText('randomModeBtn', t.randomModeBtn);
-    setText('dailyModeBtn', t.dailyModeBtn);
-    setText('toggleRoomBarBtn', t.toggleRoomBarBtn);
-    setText('playBtn', t.playBtn);
-    setText('team1Label', t.team1Label);
-    setText('team2Label', t.team2Label);
-    setText('resetBtn', t.resetBtn);
-    setText('footer-copyright', t.footerCopyright);
-    setText('footer-about-link', t.footerAbout);
-    setText('footer-teachers-link', t.footerTeachers);
-    setText('footer-privacy-link', t.footerPrivacy);
-    setText('footer-ads-link', t.footerAdSettings);
-
-    const langBtn = document.getElementById('lang-toggle-btn');
-    if (langBtn) {
-        const labelSpan = langBtn.querySelector('span');
-        if (labelSpan) {
-            labelSpan.textContent = (cleanLang === 'en') ? '🌐 Español' : '🌐 English';
-        }
+    const guessInput = document.getElementById('live-round-answer-input') || document.querySelector('.guess-input') || document.getElementById('guessInput');
+    if (guessInput) {
+        guessInput.style.width = '100%';
+        guessInput.style.maxWidth = '340px';
+        guessInput.style.minWidth = '220px';
+        guessInput.style.boxSizing = 'border-box';
+        guessInput.style.padding = '10px 16px';
+        guessInput.style.fontSize = '14px';
     }
 }
 
-function toggleLanguage() {
-    const nextLang = (window.currentLang === 'en') ? 'es' : 'en';
-    updateLanguage(nextLang);
-    syncYesterdayBlurtsButton();
-}
-document.addEventListener('DOMContentLoaded', syncYesterdayBlurtsButton);
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = (localStorage.getItem("wordblurts_lang") === "es") ? "es" : "en";
+
+    if (typeof syncLanguageState === 'function') {
+        syncLanguageState(savedLang);
+    } else {
+        window.currentLang = savedLang;
+        if (typeof currentLang !== 'undefined') {
+            currentLang = savedLang;
+        }
+    }
+
+    if (savedLang === 'es' && typeof switchLanguage === 'function') {
+        switchLanguage('es');
+    } else if (typeof updateStaticUI === 'function') {
+        updateStaticUI();
+    }
+
+    if (typeof updateFullscreenBtnText === 'function') {
+        updateFullscreenBtnText();
+    }
+
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
+    }
+
+    applyWordBlurtsFixes();
+    setTimeout(applyWordBlurtsFixes, 200);
+});
+
+setInterval(applyWordBlurtsFixes, 300);
+document.addEventListener('click', () => {
+    setTimeout(applyWordBlurtsFixes, 50);
+});
