@@ -834,8 +834,28 @@ function generateDeck() {
             deck.push({ topic: t, letter: l });
         }
     }
+
+    // Use seeded PRNG if a Party/Stream Room code is active, otherwise true Math.random()
+    const useSeed = Boolean(window.activeRoomCode && typeof roomSeedState !== 'undefined');
+    let s = useSeed ? (Number(roomSeedState) || 1) >>> 0 : 0;
+
+    function nextRand() {
+        if (!useSeed) return Math.random();
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    // Fisher-Yates shuffle so deck[0] is completely fresh every game
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(nextRand() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
     return deck;
 }
+
 
 // ==========================================
 // ROOM CODE SEEDED MULTIPLAYER ENGINE
@@ -1476,23 +1496,41 @@ function getDailyPrompts() {
     const catList = (typeof topicsMaster !== 'undefined' && topicsMaster.length) ? topicsMaster : CATEGORIES;
     const letList = (typeof lettersMaster !== 'undefined' && lettersMaster.length) ? lettersMaster : LETTERS;
 
-    let currentSeed = seed;
+    // Mix seed bits thoroughly so consecutive days produce completely different sequences
+    let s = (Number(seed) || 1) >>> 0;
+    s = Math.imul(s ^ (s >>> 16), 0x85ebca6b) >>> 0;
+    s = Math.imul(s ^ (s >>> 13), 0xc2b2ae35) >>> 0;
+    s = (s ^ (s >>> 16)) >>> 0;
+
     function nextRandom() {
-        currentSeed = (currentSeed * 9301 + 49297) % 233280;
-        return currentSeed / 233280;
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    // Copy and Fisher-Yates shuffle both lists so no topic or letter repeats in a 10-round game
+    const shuffledCats = [...catList];
+    const shuffledLets = [...letList];
+    for (let i = shuffledCats.length - 1; i > 0; i--) {
+        const j = Math.floor(nextRandom() * (i + 1));
+        [shuffledCats[i], shuffledCats[j]] = [shuffledCats[j], shuffledCats[i]];
+    }
+    for (let i = shuffledLets.length - 1; i > 0; i--) {
+        const j = Math.floor(nextRandom() * (i + 1));
+        [shuffledLets[i], shuffledLets[j]] = [shuffledLets[j], shuffledLets[i]];
     }
 
     for (let i = 0; i < 10; i++) {
-        const catIndex = Math.floor(nextRandom() * catList.length);
-        const letterIndex = Math.floor(nextRandom() * letList.length);
         prompts.push({
             round: i + 1,
-            topic: catList[catIndex], // <-- Changed from category to topic
-            letter: letList[letterIndex]
+            topic: shuffledCats[i % shuffledCats.length],
+            letter: shuffledLets[i % shuffledLets.length]
         });
     }
     return { prompts, dateStr };
 }
+
 
 // ==========================================
 // DAILY MODE & SCOREBOARD LOGIC
@@ -2637,11 +2675,14 @@ function resetGameState() {
         isRoundActive = false;
     }
 
- const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.disabled = false;
         playBtn.style.opacity = "1";
         playBtn.style.cursor = "pointer";
+        playBtn.onclick = null;
+        const activeLang = window.currentLang || 'en';
+        playBtn.textContent = (activeLang === 'es') ? '¡JUGAR!' : 'PLAY!';
     }
 
     if (typeof syncYesterdayBlurtsButton === 'function') {
@@ -2650,6 +2691,7 @@ function resetGameState() {
 
     console.log("Game state successfully reset for clean mode switch.");
 }
+
 
 // Hook this reset into your mode buttons safely once DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
