@@ -2096,17 +2096,45 @@ function showDailyResults(totalScore, streak, resultsArray) {
         };
     }
 
-    // Share Your Blurts! Button Logic (Includes saved gameplay Blurts once unlocked after midnight ET)
+  // Share Your Blurts! Button Logic (Includes saved gameplay Blurts once unlocked after midnight ET)
     if (shareBlurtsBtn) {
         shareBlurtsBtn.onclick = async () => {
             if (shareBlurtsBtn.disabled) return;
 
             const currentAnswers = buildLockedAnswersArray();
-            const lines = [];
+            const lines = [
+                isEs ? 'Mis Blurts Diarios — Word Blurts!' : 'My Daily Blurts — Word Blurts!',
+                ''
+            ];
+
             for (let i = 0; i < 10; i++) {
                 const promptObj = (Array.isArray(dailyDeckPrompts) && dailyDeckPrompts[i]) ? dailyDeckPrompts[i] : null;
                 const topicLabel = promptObj ? (promptObj.topic || promptObj.prompt || (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`)) : (isEs ? `Ronda ${i + 1}` : `Round ${i + 1}`);
-                const
+                const ans = (Array.isArray(currentAnswers) && currentAnswers[i]) ? currentAnswers[i] : '-';
+                lines.push(`${i + 1}. ${topicLabel}: ${ans}`);
+            }
+
+            const blurtsText = lines.join('\n');
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: isEs ? 'Mis Blurts Diarios' : 'My Daily Blurts',
+                        text: blurtsText,
+                        url: 'https://wordblurts.com'
+                    });
+                } catch (err) {
+                    console.log("Share dismissed or failed:", err);
+                }
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(blurtsText);
+                const originalText = shareBlurtsBtn.textContent;
+                shareBlurtsBtn.textContent = isEs ? "📋 ¡Copiado al portapapeles!" : "📋 Copied to Clipboard!";
+                setTimeout(() => { shareBlurtsBtn.textContent = originalText; }, 2500);
+            }
+        };
+    }
+}
 // ==========================================
 // AD & UTILITY MANAGEMENT
 // ==========================================
