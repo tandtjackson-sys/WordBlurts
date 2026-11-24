@@ -1519,11 +1519,16 @@ function setGameMode(mode) {
         const dailyBtn = document.getElementById('dailyModeBtn');
         if (randomBtn) randomBtn.classList.add('active');
         if (dailyBtn) dailyBtn.classList.remove('active');
+        syncYesterdayBlurtsButton();
     }
 }
 function syncYesterdayBlurtsButton() {
     const btn = document.getElementById('yesterdayBlurtsBtn');
     if (!btn) return;
+    if (!isDailyMode) {
+        btn.style.display = 'none';
+        return;
+    }
 
     const activeLang =
         (typeof window !== 'undefined' && window.currentLang) ||
