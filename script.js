@@ -567,7 +567,7 @@ function switchLanguage(langCode) {
             const englishTopic = (idx !== -1 && GAME_DATA['en'].topicsMaster[idx]) ? GAME_DATA['en'].topicsMaster[idx] : currentActiveTopic;
             const spanishTopic = (idx !== -1 && GAME_DATA['es'].topicsMaster[idx]) ? GAME_DATA['es'].topicsMaster[idx] : currentActiveTopic;
 
-            promptEl.innerHTML = `
+        promptEl.innerHTML = `
                 <div style="font-size: 2.0rem; font-weight: bold; color: #ffd700; margin-bottom: 6px; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">${spanishTopic}</div>
                 <div style="font-size: 1.5rem; color: #cbd5e1; opacity: 0.9; text-align: center; width: 100%;">(${englishTopic})</div>
             `;
@@ -583,7 +583,7 @@ function switchLanguage(langCode) {
     }
     // ----------------------------------
 
-       updateStaticUI();
+    updateStaticUI();
     updateLanguage(activeLang);
     if (typeof applyFooterLanguage === 'function') applyFooterLanguage(activeLang);
     if (typeof applyRoomBarLanguage === 'function') applyRoomBarLanguage(activeLang);
@@ -616,6 +616,10 @@ function updateLanguage(lang) {
     setText('footer-teachers-link', t.footerTeachers);
     setText('footer-privacy-link', t.footerPrivacy);
     setText('footer-ads-link', t.footerAdSettings);
+
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
+    }
 }
 
 function updateStaticUI() {
@@ -629,6 +633,7 @@ function updateStaticUI() {
     if (langToggleBtn) {
         langToggleBtn.innerHTML = isEs ? "<span>🇺🇸 English</span>" : "<span>🇪🇸 Español</span>";
     }
+
 
     // Translate Prompt Area if no active round has started yet
     const promptEl = document.getElementById('promptDisplay') || document.getElementById('topic-display') || document.getElementById('topic');
@@ -934,15 +939,13 @@ window.setRoomCode = function(code) {
         comboDeck = generateDeck();
     }
 
-    // Update URL share parameter cleanly without /index.html
+      // Keep browser URL bar clean without polluting history with ?code=
     const url = new URL(window.location.origin + "/");
-    if (clean) {
-        url.searchParams.set('code', clean);
-    }
     window.history.replaceState({}, '', url);
 
     return clean;
 };
+
 
 window.generateRandomRoomCode = function() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // Omitted I and O to prevent confusion
