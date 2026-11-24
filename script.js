@@ -583,9 +583,39 @@ function switchLanguage(langCode) {
     }
     // ----------------------------------
 
-    updateStaticUI();
+       updateStaticUI();
+    updateLanguage(activeLang);
     if (typeof applyFooterLanguage === 'function') applyFooterLanguage(activeLang);
     if (typeof applyRoomBarLanguage === 'function') applyRoomBarLanguage(activeLang);
+}
+
+function updateLanguage(lang) {
+    const cleanLang = (lang === 'es') ? 'es' : 'en';
+    const t = (typeof translations !== 'undefined') ? translations[cleanLang] : null;
+    if (!t) return;
+
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value !== undefined) {
+            el.textContent = value;
+        }
+    };
+
+    setText('rulesText', t.rulesText);
+    setText('aboutText', t.aboutText);
+    setText('fullscreenText', t.fullscreenText);
+    setText('randomModeBtn', t.randomModeBtn);
+    setText('dailyModeBtn', t.dailyModeBtn);
+    setText('toggleRoomBarBtn', t.toggleRoomBarBtn);
+    setText('playBtn', t.playBtn);
+    setText('team1Label', t.team1Label);
+    setText('team2Label', t.team2Label);
+    setText('resetBtn', t.resetBtn);
+    setText('footer-copyright', t.footerCopyright);
+    setText('footer-about-link', t.footerAbout);
+    setText('footer-teachers-link', t.footerTeachers);
+    setText('footer-privacy-link', t.footerPrivacy);
+    setText('footer-ads-link', t.footerAdSettings);
 }
 
 function updateStaticUI() {
@@ -609,6 +639,7 @@ function updateStaticUI() {
             </div>
         `;
     }
+
 
     // Translate Rules Card (with default hidden display fix)
     const rulesCard = document.getElementById('rulesCard');
