@@ -1565,7 +1565,7 @@ function setGameMode(mode) {
 function syncYesterdayBlurtsButton() {
     const btn = document.getElementById('yesterdayBlurtsBtn');
     if (!btn) return;
-    const inDaily = Boolean(window.isDailyMode || (typeof isDailyMode !== 'undefined' && isDailyMode));
+    const inDaily = Boolean(window.isDailyMode && (typeof isDailyMode === 'undefined' || isDailyMode));
     if (!inDaily || window.activeRoomCode) {
         btn.style.display = 'none';
         return;
@@ -2717,11 +2717,15 @@ function resetGameState() {
         isRoundActive = false;
     }
 
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
+ const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
     if (playBtn) {
         playBtn.disabled = false;
         playBtn.style.opacity = "1";
         playBtn.style.cursor = "pointer";
+    }
+
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
     }
 
     console.log("Game state successfully reset for clean mode switch.");
@@ -2744,65 +2748,11 @@ let isDailyModeActive = false;
 let currentDailyDate = null;
 
 function loadDailyMode() {
-    if (typeof resetGameState === 'function') {
-        resetGameState();
-    }
-
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(now.getUTCDate()).padStart(2, '0');
-    const todayStr = `${year}-${month}-${day}`;
-
-    const completionKey = `wordblurts_daily_completed_${todayStr}`;
-    const hasCompletedToday = localStorage.getItem(completionKey) === 'true';
-
-    const promptBox = document.getElementById('promptDisplay') || document.getElementById('prompt-container') || document.querySelector('.game-card');
-    const playBtn = document.getElementById('playBtn') || document.getElementById('start-btn');
-
-    if (hasCompletedToday) {
-        isDailyModeActive = false;
-        if (promptBox) {
-            promptBox.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <h2 style="color: #10b981; margin-bottom: 10px;">Daily Blurt Completed! 🎉</h2>
-                    <p style="color: #cbd5e1; font-size: 1.1rem;">You've already conquered today's challenge (${todayStr}). Come back tomorrow for a fresh word!</p>
-                </div>
-            `;
-        }
-        if (playBtn) {
-            playBtn.disabled = true;
-            playBtn.style.opacity = "0.5";
-            playBtn.style.cursor = "not-allowed";
-        }
+    if (typeof setGameMode === 'function') {
+        setGameMode('daily');
         return;
     }
 
-    if (typeof dailyWordList === 'undefined' || !dailyWordList.length) {
-        console.warn("Daily word list is missing or empty.");
-        return;
-    }
-
-    let dateHash = 0;
-    for (let i = 0; i < todayStr.length; i++) {
-        dateHash = (dateHash << 5) - dateHash + todayStr.charCodeAt(i);
-        dateHash |= 0;
-    }
-    const dailyIndex = Math.abs(dateHash) % dailyWordList.length;
-    const todaysPrompt = dailyWordList[dailyIndex];
-
-    isDailyModeActive = true;
-    currentDailyDate = todayStr;
-    window.currentPromptData = todaysPrompt;
-
-    if (promptBox) {
-        promptBox.innerHTML = `
-            <div style="font-size: 0.9rem; color: #38bdf8; font-weight: bold; margin-bottom: 8px;">📅 DAILY CHALLENGE: ${todayStr}</div>
-            <h3 style="font-size: 1.8rem; margin: 5px 0;">${todaysPrompt.primary}</h3>
-            ${todaysPrompt.secondary ? `<p style="color: #94a3b8; font-size: 1.1rem; margin-top: 5px;">${todaysPrompt.secondary}</p>` : ''}
-            <div style="margin-top: 15px; font-size: 1.2rem;">Letter: <strong style="color: #f43f5e; font-size: 1.4rem;">${todaysPrompt.letter}</strong></div>
-        `;
-    }
 
     if (playBtn) {
         playBtn.disabled = false;
