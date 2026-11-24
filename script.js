@@ -499,22 +499,58 @@ function syncLanguageState(langCode) {
 }
 
 function toggleLanguage() {
-    const activeLang = (window.currentLang || currentLang) === 'es' ? 'en' : 'es';
-    switchLanguage(activeLang);
+    const current =
+        (typeof window !== 'undefined' && window.currentLang) ||
+        (typeof currentLang !== 'undefined' ? currentLang : 'en');
+    const nextLang = current === 'es' ? 'en' : 'es';
+    switchLanguage(nextLang);
 }
 
 function switchLanguage(langCode) {
-    if (!GAME_DATA[langCode]) return;
+    if (!GAME_DATA || !GAME_DATA[langCode]) return;
 
-    const activeLang = syncLanguageState(langCode);
+    const activeLang =
+        typeof syncLanguageState === 'function'
+            ? syncLanguageState(langCode)
+            : (langCode === 'es' ? 'es' : 'en');
+
+    window.currentLang = activeLang;
+    if (typeof currentLang !== 'undefined') {
+        currentLang = activeLang;
+    }
+
+    if (typeof updateLanguage === 'function') {
+        updateLanguage(activeLang);
+    }
 
     window.lettersMaster = GAME_DATA[activeLang].lettersMaster;
     window.topicsMaster = GAME_DATA[activeLang].topicsMaster;
-    topicsMaster = window.topicsMaster;
-    lettersMaster = window.lettersMaster;
+    if (typeof topicsMaster !== 'undefined') {
+        topicsMaster = window.topicsMaster;
+    }
+    if (typeof lettersMaster !== 'undefined') {
+        lettersMaster = window.lettersMaster;
+    }
 
     // Reset combo deck so it draws exclusively from the new language
-    comboDeck = generateDeck();
+    if (typeof generateDeck === 'function') {
+        comboDeck = generateDeck();
+    }
+
+    // Refresh daily deck prompts if in Daily Mode and no custom URL seed is active
+    const inDaily =
+        (typeof window !== 'undefined' && window.isDailyMode) ||
+        (typeof isDailyMode !== 'undefined' && isDailyMode);
+    if (inDaily && typeof getDailyPrompts === 'function') {
+        const hasUrlSeed = typeof getURLSeed === 'function' ? Boolean(getURLSeed()) : false;
+        if (!hasUrlSeed) {
+            const dailyData = getDailyPrompts();
+            if (dailyData && Array.isArray(dailyData.prompts)) {
+                dailyDeckPrompts = dailyData.prompts;
+                window.dailyDeckPrompts = dailyData.prompts;
+            }
+        }
+    }
 
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     if (typeof stopEverything === 'function') stopEverything();
@@ -541,10 +577,11 @@ function switchLanguage(langCode) {
 
             promptEl.innerHTML = `
                 <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700; text-align: center; width: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${englishTopic}</div>
-   `;
+            `;
         }
     }
     // ----------------------------------
+}
 
     updateStaticUI();
     if (typeof applyFooterLanguage === 'function') applyFooterLanguage(activeLang);
@@ -1590,6 +1627,9 @@ function initDailyMode() {
     isDailyMode = true;
     window.dailyCurrentIndex = 0; // Starts at index 0 for Round 1
 
+    const yesterdayBtn = document.getElementById('yesterdayBlurtsBtn');
+    if (yesterdayBtn) yesterdayBtn.style.display = 'inline-block';
+
     const urlSeed = getURLSeed();
     if (urlSeed) {
         dailyDeckPrompts = getSeededPrompts(urlSeed);
@@ -2202,6 +2242,11 @@ function initWordBlurts() {
 
     const randomModeBtn = document.getElementById('randomModeBtn');
     const dailyModeBtn = document.getElementById('dailyModeBtn');
+    const yesterdayBtn = document.getElementById('yesterdayBlurtsBtn');
+
+    if (yesterdayBtn) {
+        yesterdayBtn.style.display = 'none';
+    }
 
     if (randomModeBtn && dailyModeBtn) {
         randomModeBtn.style.opacity = "1";
@@ -2209,6 +2254,8 @@ function initWordBlurts() {
 
         randomModeBtn.onclick = () => {
             window.isDailyMode = false;
+            if (typeof isDailyMode !== 'undefined') isDailyMode = false;
+            if (yesterdayBtn) yesterdayBtn.style.display = 'none';
             randomModeBtn.classList.add('active');
             dailyModeBtn.classList.remove('active');
             randomModeBtn.style.opacity = "1";
@@ -2225,11 +2272,15 @@ function initWordBlurts() {
 
         dailyModeBtn.onclick = () => {
             window.isDailyMode = true;
+            if (typeof isDailyMode !== 'undefined') isDailyMode = true;
             const isAvailable = typeof initDailyMode === 'function' ? initDailyMode() : true;
             if (!isAvailable) {
                 window.isDailyMode = false;
+                if (typeof isDailyMode !== 'undefined') isDailyMode = false;
+                if (yesterdayBtn) yesterdayBtn.style.display = 'none';
                 return;
             }
+            if (yesterdayBtn) yesterdayBtn.style.display = 'inline-block';
             dailyModeBtn.classList.add('active');
             randomModeBtn.classList.remove('active');
             dailyModeBtn.style.opacity = "1";
@@ -2830,13 +2881,14 @@ const translations = {
 
 function updateLanguage(lang) {
     const cleanLang = (lang === 'es') ? 'es' : 'en';
-    const t = translations[cleanLang];
+    const t = typeof translations !== 'undefined' ? translations[cleanLang] : null;
     if (!t) return;
 
     window.currentLang = cleanLang;
-    if (typeof syncYesterdayBlurtsButton === 'function') {
-        syncYesterdayBlurtsButton();
+    if (typeof currentLang !== 'undefined') {
+        currentLang = cleanLang;
     }
+
     localStorage.setItem('wordblurts_lang', cleanLang);
 
     const setText = (id, value) => {
@@ -2869,11 +2921,31 @@ function updateLanguage(lang) {
             labelSpan.textContent = (cleanLang === 'en') ? '🌐 Español' : '🌐 English';
         }
     }
+
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
+    }
+    if (typeof applyRoomBarLanguage === 'function') {
+        applyRoomBarLanguage(cleanLang);
+    }
+    if (typeof applyFooterLanguage === 'function') {
+        applyFooterLanguage(cleanLang);
+    }
 }
 
 function toggleLanguage() {
-    const nextLang = (window.currentLang === 'en') ? 'es' : 'en';
-    updateLanguage(nextLang);
-    syncYesterdayBlurtsButton();
+    const current = (window.currentLang === 'es') ? 'es' : 'en';
+    const nextLang = current === 'en' ? 'es' : 'en';
+    window.currentLang = nextLang;
+
+    if (typeof updateLanguage === 'function') {
+        updateLanguage(nextLang);
+    } else if (typeof switchLanguage === 'function') {
+        switchLanguage(nextLang);
+    }
+
+    if (typeof syncYesterdayBlurtsButton === 'function') {
+        syncYesterdayBlurtsButton();
+    }
 }
 document.addEventListener('DOMContentLoaded', syncYesterdayBlurtsButton);
