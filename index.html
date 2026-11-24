@@ -1460,7 +1460,7 @@ footer {
 
     <div id="roomPanel" style="display: none; margin-top: 6px; padding: 6px; background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
         <div style="display: flex; flex-wrap: nowrap; gap: 4px; justify-content: center; align-items: center; width: 100%; min-width: 0; box-sizing: border-box;">
-            <input type="text" id="roomCodeInput" maxlength="6" size="6" placeholder="CODE" oninput="handleRoomInput(this.value)" style="flex: 0 1 7.2ch; width: 7.2ch !important; min-width: 6.5ch !important; max-width: 8ch !important; padding: 6px 4px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; box-sizing: border-box;">
+            <input type="text" id="roomCodeInput" maxlength="6" size="8" placeholder="CODE" oninput="handleRoomInput(this.value)" style="flex: 0 1 9.2ch; width: 9.2ch !important; min-width: 8.5ch !important; max-width: 10ch !important; padding: 6px 4px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem; box-sizing: border-box;">
             <button type="button" id="newRoomBtn" onclick="createNewRoom()" style="flex: 0 0 auto; min-width: 0; padding: 6px 7px; border-radius: 8px; border: 1px solid rgba(125, 211, 252, 0.55); background: rgba(14, 116, 144, 0.35); color: #e0f2fe; font-weight: bold; cursor: pointer; font-size: 0.76rem; line-height: 1.1; white-space: nowrap; box-sizing: border-box;">💎 New</button>
             <button type="button" id="shareRoomBtn" onclick="copyRoomLink()" style="flex: 0 0 auto; min-width: 0; padding: 6px 7px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.76rem; line-height: 1.1; white-space: nowrap; box-sizing: border-box;">🔗 Share</button>
         </div>
@@ -1469,6 +1469,7 @@ footer {
         </div>
     </div>
 </div>
+
 
 <button type="button" id="yesterdayBlurtsBtn" class="rules-toggle-btn" style="display: none;">
     ⏮️ Yesterday's Daily Blurts!
