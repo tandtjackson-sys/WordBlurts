@@ -1568,6 +1568,7 @@ function setGameMode(mode) {
 
     if (mode === 'daily') {
         isDailyMode = true;
+        window.isDailyMode = true;
 
         // Hide Team 2 card in Daily mode for a clean solo layout
         if (team2Card) team2Card.style.display = 'none';
@@ -1576,6 +1577,7 @@ function setGameMode(mode) {
             const isAvailable = initDailyMode();
             if (!isAvailable) {
                 isDailyMode = false;
+                window.isDailyMode = false;
                 restoreClassicScoreboxes();
                 syncYesterdayBlurtsButton();
                 return;
@@ -1589,6 +1591,8 @@ function setGameMode(mode) {
         if (typeof playRound === 'function') playRound();
     } else {
         isDailyMode = false;
+        window.isDailyMode = false;
+
 
         // Restore Team 2 card and scoring boxes for Classic mode
         restoreClassicScoreboxes();
