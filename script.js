@@ -1610,9 +1610,10 @@ function syncYesterdayBlurtsButton() {
     if (!btn) return;
     const inDaily = Boolean(window.isDailyMode && (typeof isDailyMode === 'undefined' || isDailyMode));
     if (!inDaily || window.activeRoomCode) {
-        btn.style.display = 'none';
+        btn.style.setProperty('display', 'none', 'important');
         return;
     }
+
   
 
     const activeLang =
