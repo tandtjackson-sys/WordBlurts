@@ -1565,14 +1565,12 @@ function setGameMode(mode) {
 function syncYesterdayBlurtsButton() {
     const btn = document.getElementById('yesterdayBlurtsBtn');
     if (!btn) return;
-    if (!isDailyMode) {
+    const inDaily = Boolean(window.isDailyMode || (typeof isDailyMode !== 'undefined' && isDailyMode));
+    if (!inDaily || window.activeRoomCode) {
         btn.style.display = 'none';
         return;
     }
-    if (!isDailyMode) {
-        btn.style.display = 'none';
-        return;
-    }
+  
 
     const activeLang =
         (typeof window !== 'undefined' && window.currentLang) ||
