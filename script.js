@@ -586,7 +586,7 @@ function switchLanguage(langCode) {
     updateStaticUI();
     if (typeof applyFooterLanguage === 'function') applyFooterLanguage(activeLang);
     if (typeof applyRoomBarLanguage === 'function') applyRoomBarLanguage(activeLang);
-}
+
 
 function updateStaticUI() {
     const isEs = (currentLang === "es");
